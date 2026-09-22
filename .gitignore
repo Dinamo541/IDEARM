@@ -109,6 +109,9 @@ bin/
 obj/
 target/
 release/
+# Nothing inside a src/ folder is build output: Java packages named build/ or dist/
+# (io.github.dinamo541.idearm.domain.build, ...domain.dist, ...toolchain.dos.dist) belong in the repository.
+!**/src/**/
 *.o
 *.obj
 *.exe
