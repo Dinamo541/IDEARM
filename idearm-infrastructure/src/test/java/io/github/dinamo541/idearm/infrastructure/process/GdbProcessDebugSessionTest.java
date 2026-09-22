@@ -1,6 +1,7 @@
 package io.github.dinamo541.idearm.infrastructure.process;
 
 import io.github.dinamo541.idearm.domain.debug.DebugEvent;
+import io.github.dinamo541.idearm.domain.execution.ExitInfo;
 import io.github.dinamo541.idearm.domain.execution.SessionState;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -56,18 +58,19 @@ class GdbProcessDebugSessionTest {
     }
 
     @Test
-    void handlesExitedNormally() {
+    void handlesExitedNormally() throws Exception {
         var out = new ByteArrayOutputStream();
-        var in = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        // The record arrives through GDB's output, as it does in a real session. Handing it to the session by hand
+        // raced with the reader thread: the end of an empty stream also ends the session, and on the CI machine the
+        // reader got there first, so the session ended as "stopped" (-1) instead of with exit code 0.
+        var in = new ByteArrayInputStream("*stopped,reason=\"exited-normally\"\n".getBytes(StandardCharsets.UTF_8));
         List<DebugEvent> events = new ArrayList<>();
 
         try (var session = new GdbProcessDebugSession(out, in, null, null, events::add, System.nanoTime())) {
-            GdbMiRecord record = GdbMiParser.parse("*stopped,reason=\"exited-normally\"");
-            session.handleRecord(record);
+            ExitInfo exit = session.exit().get(5, TimeUnit.SECONDS);
 
+            assertEquals(0, exit.exitCode());
             assertEquals(SessionState.EXITED, session.state());
-            assertTrue(session.exit().isDone());
-            assertEquals(0, session.exit().join().exitCode());
         }
     }
 
