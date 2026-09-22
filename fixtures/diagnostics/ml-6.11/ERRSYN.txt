@@ -1,0 +1,3 @@
+ Assembling: C:\IDEARM-FIXTURE\S\ERRSYN.ASM
+C:\IDEARM-FIXTURE\S\ERRSYN.ASM(12): error A2008: syntax error : dx
+C:\IDEARM-FIXTURE\S\ERRSYN.ASM(13): error A2008: syntax error : ,

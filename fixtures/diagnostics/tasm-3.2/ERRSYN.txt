@@ -1,0 +1,9 @@
+Turbo Assembler  Version 3.2  Copyright (c) 1988, 1992 Borland International
+
+Assembling file:   S:\ERRSYN.ASM  to  C:\OBJ\ERRSYN.OBJ
+**Error** S:\ERRSYN.ASM(12) Illegal instruction
+**Error** S:\ERRSYN.ASM(13) Need address or register
+Error messages:    2
+Warning messages:  None
+Passes:            1
+Remaining memory:  465k

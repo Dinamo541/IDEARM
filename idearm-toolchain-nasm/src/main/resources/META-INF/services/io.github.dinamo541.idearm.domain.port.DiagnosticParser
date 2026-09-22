@@ -1,0 +1,2 @@
+io.github.dinamo541.idearm.toolchain.nasm.NasmDiagnosticParser
+io.github.dinamo541.idearm.toolchain.nasm.GnuLinkerDiagnosticParser

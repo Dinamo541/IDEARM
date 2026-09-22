@@ -1,0 +1,2 @@
+ Assembling: C:\IDEARM-FIXTURE\S\NOEND.ASM
+C:\IDEARM-FIXTURE\S\NOEND.ASM(17): error A2088: END directive required at end of file

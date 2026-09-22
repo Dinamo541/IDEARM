@@ -1,0 +1,8 @@
+Turbo Assembler  Version 3.2  Copyright (c) 1988, 1992 Borland International
+
+Assembling file:   S:\NOEND.ASM  to  C:\OBJ\NOEND.OBJ
+**Fatal** S:\NOEND.ASM(19) Unexpected end of file encountered
+Error messages:    1
+Warning messages:  None
+Passes:            1
+Remaining memory:  462k

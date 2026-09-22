@@ -1,0 +1,6 @@
+.instruction { -fx-fill: #0550ae; -fx-font-weight: bold; }
+.register    { -fx-fill: #8250df; }
+.directive   { -fx-fill: #cf222e; }
+.number      { -fx-fill: #0a3069; }
+.string      { -fx-fill: #116329; }
+.comment     { -fx-fill: #6e7781; -fx-font-style: italic; }

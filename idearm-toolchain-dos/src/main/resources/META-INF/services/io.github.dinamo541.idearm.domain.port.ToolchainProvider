@@ -1,0 +1,2 @@
+io.github.dinamo541.idearm.toolchain.dos.borland.BorlandToolchainProvider
+io.github.dinamo541.idearm.toolchain.dos.microsoft.Microsoft16ToolchainProvider

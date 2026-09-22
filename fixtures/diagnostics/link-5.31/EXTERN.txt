@@ -1,0 +1,9 @@
+
+Microsoft (R) Segmented Executable Linker  Version 5.31.009 Jul 13 1992
+Copyright (C) Microsoft Corp 1984-1992.  All rights reserved.
+
+
+C:\OBJ\EXTERN.OBJ(C:\IDEARM-FIXTURE\S\EXTERN.ASM) : error L2029: 'printNumber' : unresolved external
+
+
+There was 1 error detected

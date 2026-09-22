@@ -1,0 +1,58 @@
+Microsoft (R) Macro Assembler Version 6.11		    09/14/26 22:53:04
+C:\IDEARM-FIXTURE\S\CPU186.ASM  Page 1 - 1
+
+
+				; CPU186.ASM - 80186 instructions (lines 8 and 9) with an 8086 CPU baseline
+				.MODEL small
+				.8086
+				.STACK 100h
+
+ 0000				.CODE
+ 0000				main PROC
+				    push 5
+C:\IDEARM-FIXTURE\S\CPU186.ASM(8): error A2001: immediate operand not allowed
+				    shl ax, 3
+C:\IDEARM-FIXTURE\S\CPU186.ASM(9): error A2070: invalid instruction operands
+ 0000  B8 4C00			    mov ax, 4C00h
+ 0003  CD 21			    int 21h
+ 0005				main ENDP
+				END main
+Microsoft (R) Macro Assembler Version 6.11		    09/14/26 22:53:04
+C:\IDEARM-FIXTURE\S\CPU186.ASM  Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 0000	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0100	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 0005	  Word	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+main . . . . . . . . . . . . . .	P Near	 0000	  _TEXT	Length= 0005 Public
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+
+	   0 Warnings
+	   2 Errors

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Throwaway Phase 0 spike (S5, alternative). Deliberately outside the product reactor. -->
+    <groupId>io.github.dinamo541</groupId>
+    <artifactId>idearm-spike-editor-incubator</artifactId>
+    <version>0.0.0-SNAPSHOT</version>
+    <name>IDEARM spike S5b - JavaFX incubator CodeArea</name>
+    <description>JavaFX incubator CodeArea performance with a large real Assembly file, compared with RichTextFX.</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>25</maven.compiler.release>
+        <javafx.version>25.0.2</javafx.version>
+        <!-- Pass the file to open: mvn compile javafx:run -Dspike.file=<path to loadmap.asm> -->
+        <spike.file></spike.file>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>jfx-incubator-richtext</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>io.github.dinamo541.idearm.spikes.editorincubator.IncubatorEditorSpike</mainClass>
+                    <commandlineArgs>${spike.file}</commandlineArgs>
+                    <options>
+                        <option>--enable-native-access=javafx.graphics</option>
+                        <!-- Incubator modules are not resolved unless they are requested explicitly -->
+                        <option>--add-modules=jfx.incubator.richtext</option>
+                    </options>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

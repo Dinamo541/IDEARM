@@ -1,0 +1,3 @@
+ Assembling: C:\IDEARM-FIXTURE\S\CPU186.ASM
+C:\IDEARM-FIXTURE\S\CPU186.ASM(8): error A2001: immediate operand not allowed
+C:\IDEARM-FIXTURE\S\CPU186.ASM(9): error A2070: invalid instruction operands

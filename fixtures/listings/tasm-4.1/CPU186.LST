@@ -1,0 +1,52 @@
+Turbo Assembler	 Version 4.1	    09/14/26 22:51:55	    Page 1
+S:\CPU186.ASM
+
+
+
+      1				     ; CPU186.ASM - 80186 instructions (lines 8	and 9) with an 8086 CPU	baseline
+      2	0000			     .MODEL small
+      3				     .8086
+      4	0000			     .STACK 100h
+      5
+      6	0000			     .CODE
+      7	0000			     main PROC
+      8	0000  50 55 8B EC C7 46	02+	 push 5
+      9	      0005 5D
+     10	000A  D1 E0 D1 E0 D1 E0		 shl ax, 3
+     11	0010  B8 4C00			 mov ax, 4C00h
+     12	0013  CD 21			 int 21h
+     13	0015			     main ENDP
+     14				     END main
+Turbo Assembler	 Version 4.1	    09/14/26 22:51:55	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "09/14/26"
+??FILENAME			  Text	 "CPU186  "
+??TIME				  Text	 "22:51:55"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 _TEXT
+@CODESIZE			  Text	 0
+@CPU				  Text	 0101H
+@CURSEG				  Text	 _TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 CPU186
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 2
+@STACK				  Text	 DGROUP
+@WORDSIZE			  Text	 2
+MAIN				  Near	 _TEXT:0000
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0100 Para	  Stack	  STACK
+  _DATA				  16  0000 Word	  Public  DATA
+_TEXT				  16  0015 Word	  Public  CODE
+

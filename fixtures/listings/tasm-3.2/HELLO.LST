@@ -1,0 +1,58 @@
+Turbo Assembler	 Version 3.2	    09/14/26 22:52:57	    Page 1
+S:\HELLO.ASM
+
+
+
+      1				     ; HELLO.ASM - valid reference program
+      2	0000			     .MODEL small
+      3	0000			     .STACK 100h
+      4
+      5	0000			     .DATA
+      6	0000  48 65 6C 6C 6F 20	57+  message DB	'Hello World', 13, 10, '$'
+      7	      6F 72 6C 64 0D 0A	24
+      8
+      9	000E			     .CODE
+     10	0000			     main PROC
+     11	0000  B8 0000s			 mov ax, @DATA
+     12	0003  8E D8			 mov ds, ax
+     13	0005  BA 0000r			 mov dx, OFFSET	message
+     14	0008  B4 09			 mov ah, 09h
+     15	000A  CD 21			 int 21h
+     16	000C  B8 4C00			 mov ax, 4C00h
+     17	000F  CD 21			 int 21h
+     18	0011			     main ENDP
+     19				     END main
+Turbo Assembler	 Version 3.2	    09/14/26 22:52:57	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "09/14/26"
+??FILENAME			  Text	 "HELLO	  "
+??TIME				  Text	 "22:52:57"
+??VERSION			  Number 0314
+@32BIT				  Text	 0
+@CODE				  Text	 _TEXT
+@CODESIZE			  Text	 0
+@CPU				  Text	 0101H
+@CURSEG				  Text	 _TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 HELLO
+@INTERFACE			  Text	 00H
+@MODEL				  Text	 2
+@STACK				  Text	 DGROUP
+@WORDSIZE			  Text	 2
+MAIN				  Near	 _TEXT:0000
+MESSAGE				  Byte	 DGROUP:0000
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  STACK				  16  0100 Para	  Stack	  STACK
+  _DATA				  16  000E Word	  Public  DATA
+_TEXT				  16  0011 Word	  Public  CODE
+

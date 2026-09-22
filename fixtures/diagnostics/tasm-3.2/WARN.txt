@@ -1,0 +1,9 @@
+Turbo Assembler  Version 3.2  Copyright (c) 1988, 1992 Borland International
+
+Assembling file:   S:\WARN.ASM  to  C:\OBJ\WARN.OBJ
+*Warning* S:\WARN.ASM(7) Reserved word used as symbol: LENGTH
+*Warning* S:\WARN.ASM(13) Instruction can be compacted with override
+Error messages:    None
+Warning messages:  2
+Passes:            1
+Remaining memory:  465k

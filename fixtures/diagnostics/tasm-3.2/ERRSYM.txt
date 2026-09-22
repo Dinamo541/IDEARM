@@ -1,0 +1,8 @@
+Turbo Assembler  Version 3.2  Copyright (c) 1988, 1992 Borland International
+
+Assembling file:   S:\ERRSYM.ASM  to  C:\OBJ\ERRSYM.OBJ
+**Error** S:\ERRSYM.ASM(12) Undefined symbol: PRINTNUMBER
+Error messages:    1
+Warning messages:  None
+Passes:            1
+Remaining memory:  465k

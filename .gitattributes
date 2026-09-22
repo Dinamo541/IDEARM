@@ -1,0 +1,18 @@
+# Line endings: the repository stores text with LF, whatever the contributor's platform.
+* text=auto eol=lf
+
+# Windows batch files need CRLF to run correctly.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Real output captured from TASM, TLINK, ML and LINK (Phase 0): parser tests depend on the exact bytes.
+fixtures/** -text
+
+# Binary files
+*.png binary
+*.jpg binary
+*.ico binary
+*.exe binary
+*.com binary
+*.obj binary
+*.jar binary

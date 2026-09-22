@@ -1,0 +1,18 @@
+Error: HELPER defined in module S:\DUPA.ASM is duplicated in module S:\DUPB.ASM
+
+ Start  Stop   Length Name               Class
+
+ 00000H 0000BH 0000CH _TEXT              CODE
+ 00010H 00010H 00000H _DATA              DATA
+ 00010H 0020FH 00200H STACK              STACK
+
+  Address         Publics by Name
+
+ 0000:0000       HELPER
+
+  Address         Publics by Value
+
+ 0000:0000       HELPER
+
+Program entry point at 0000:0001
+

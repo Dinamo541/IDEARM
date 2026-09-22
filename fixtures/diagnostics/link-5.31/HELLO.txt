@@ -1,0 +1,14 @@
+
+Microsoft (R) Segmented Executable Linker  Version 5.31.009 Jul 13 1992
+Copyright (C) Microsoft Corp 1984-1992.  All rights reserved.
+
+Microsoft Debugging Information Compactor  Version 4.01.00
+Copyright(c) 1987-1992 Microsoft Corporation
+
+Line/Address size   =      152
+Public symbol size  =       16
+Initial symbol size =      191
+Final symbol size   =      208
+Global symbol size  =        0
+Initial type size   =       18
+Compacted type size =       36

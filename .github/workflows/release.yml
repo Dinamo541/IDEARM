@@ -1,0 +1,56 @@
+name: Build & Release IDEARM
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+# Publishing the release creates it in the repository.
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Verify & Build
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Maven Reactor Build & Tests
+        run: mvn clean verify
+
+      - name: Package Native Windows Application
+        shell: pwsh
+        run: |
+          ./scripts/package-native.ps1 -Type app-image
+
+      - name: Archive Native Package
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist/native/idearm -DestinationPath dist/idearm-windows-x64.zip
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: idearm-windows-x64
+          path: dist/idearm-windows-x64.zip
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/idearm-windows-x64.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

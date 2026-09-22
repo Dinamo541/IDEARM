@@ -1,0 +1,35 @@
+schema = 1
+
+[project]
+name = "HELLO64"
+version = "0.1.0"
+
+[target]
+profile = "win-pe64-console"
+cpu = "x86-64"
+
+[toolchain]
+id = "nasm"
+version = ">=2.14"
+
+[sources]
+entry = "src/main.asm"
+
+[build.release]
+debug-info = false
+listing = false
+map = false
+
+[build.debug]
+debug-info = true
+listing = false
+map = false
+
+[run]
+environment = "host"
+isolation = "native"
+keep-open = false
+
+[dist]
+launcher = false
+zip = false

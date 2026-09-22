@@ -1,0 +1,2 @@
+ Assembling: C:\IDEARM-FIXTURE\S\ERRSYM.ASM
+C:\IDEARM-FIXTURE\S\ERRSYM.ASM(12): error A2006: undefined symbol : printNumber

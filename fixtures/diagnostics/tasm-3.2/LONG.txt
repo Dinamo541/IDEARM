@@ -1,0 +1,7 @@
+Turbo Assembler  Version 3.2  Copyright (c) 1988, 1992 Borland International
+
+Assembling file:   S:\LONGFI~1.ASM  to  C:\OBJ\LONG.OBJ
+Error messages:    None
+Warning messages:  None
+Passes:            1
+Remaining memory:  471k

@@ -1,0 +1,86 @@
+/* IDEARM Assembly Editor Styling */
+
+.idearm-code-area {
+    -fx-font-family: "JetBrains Mono", "Cascadia Code", "Consolas", "Courier New", monospace;
+    -fx-font-size: 14px;
+    -fx-background-color: -color-bg-default;
+}
+
+/* Line Number Gutter */
+.idearm-code-area .lineno {
+    -fx-background-color: -color-bg-subtle;
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-family: "JetBrains Mono", "Cascadia Code", "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-padding: 0 10 0 5;
+    -fx-alignment: center-right;
+    -fx-border-color: transparent -color-border-muted transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+/* Plain text. RichTextFX paints text black unless told otherwise, which vanishes on the dark theme. */
+.idearm-code-area .text {
+    -fx-fill: -color-fg-default;
+}
+
+/* Token Syntax Highlighting. Theme colours, so both the light and the dark theme stay readable; the
+   .idearm-code-area prefix outranks the plain-text rule above and keeps .label away from JavaFX labels. */
+.idearm-code-area .instruction {
+    -fx-fill: -color-accent-fg;
+    -fx-font-weight: bold;
+}
+
+.idearm-code-area .register {
+    -fx-fill: -color-chart-6;
+}
+
+.idearm-code-area .directive {
+    -fx-fill: -color-danger-fg;
+    -fx-font-weight: bold;
+}
+
+.idearm-code-area .label {
+    -fx-fill: -color-warning-fg;
+}
+
+.idearm-code-area .number {
+    -fx-fill: -color-accent-fg;
+}
+
+.idearm-code-area .string {
+    -fx-fill: -color-success-fg;
+}
+
+.idearm-code-area .comment {
+    -fx-fill: -color-fg-muted;
+    -fx-font-style: italic;
+}
+
+/* Breakpoint Gutter Column */
+.idearm-compound-gutter {
+    -fx-background-color: -color-bg-subtle;
+    -fx-border-color: transparent -color-border-muted transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.idearm-gutter-breakpoint {
+    -fx-alignment: center;
+    -fx-cursor: hand;
+}
+
+.idearm-breakpoint-active {
+    -fx-text-fill: #f85149;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.idearm-breakpoint-ghost {
+    -fx-text-fill: rgba(248, 81, 73, 0.4);
+    -fx-font-size: 13px;
+}
+
+.idearm-execution-arrow {
+    -fx-text-fill: #e3b341;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
