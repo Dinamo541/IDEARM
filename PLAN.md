@@ -102,8 +102,9 @@ IDEARM/
 ├── README.md                    project overview for GitHub visitors
 ├── LICENSE                      MIT
 ├── .gitignore                   user's global template + IDEARM section
-├── .github/workflows/release.yml  tag-triggered build, tests and portable Windows package
-├── pom.xml                      parent pom (io.github.dinamo541:idearm-parent:0.1.0-SNAPSHOT)
+├── .github/workflows/ci.yml     tests on Windows and Linux (also called by release.yml)
+├── .github/workflows/release.yml  tag-triggered: tests, then the Windows and Linux packages of a GitHub release
+├── pom.xml                      parent pom (io.github.dinamo541:idearm-parent:1.0.0)
 ├── docs/
 │   ├── user-guide.md            student guide: DOS and 32/64-bit workflows, debugger, shortcuts, CLI
 │   ├── troubleshooting.md       every build/link/run/debug problem with its cause and fix
@@ -155,6 +156,19 @@ The repository implements the 4-layer N-tier architecture defined in ADR-007. Ev
 ---
 
 ## 7. Roadmap and status
+
+### GitHub documentation refresh — 2026-09-22 (Codex)
+
+- Rebuilt the README around installation, first use, real dark/light workbench screenshots, capabilities,
+  target-specific requirements, CLI examples, documentation, development and support. Kept English artifacts
+  and the distinction between DOSBox isolation and native execution permissions.
+- Added `CONTRIBUTING.md`, bug/feature issue forms and a pull request template. Added copies of the existing
+  sample-project screenshots in `docs/images/`; original captures remain in ignored scratch space.
+- GitHub's releases API returned no published releases during this session. Source installation remains the
+  primary path; release download instructions are conditional. Packaging instructions follow the current script.
+- Validation: 38 local links/anchors passed; both issue forms and their chooser configuration parsed as YAML;
+  screenshots matched their original captures; the rendered README loaded all eight images. Documentation-only
+  changes did not require running the Java test suite.
 
 ### Phase 1 of the action plan implemented — 2026-09-22 (Claude)
 
@@ -926,6 +940,11 @@ Details and numbers: [`spikes/REPORT.md`](spikes/REPORT.md).
 
 ## 9. Next steps: v1.0.0 release and student feedback
 
+**Release packaging (2026-09-22):** `scripts/package-native.ps1` (PowerShell 7, Windows and Linux) builds the
+release files from the poms' version: MSI and portable zip, or DEB and tar.gz, into `dist/release` with a
+`.sha256` beside each one. `release.yml` runs the tests, builds both systems (the DEB on Ubuntu 22.04) and
+publishes the GitHub release. Keep README, `docs/user-guide.md` §1 and `docs/release-notes/` in step with it.
+
 **Title dragging:** keep the header mouse event filters in `WindowChrome`; bubbling handlers miss events
 consumed by JavaFX toolbar skins. Only arm dragging on a noninteractive title-bar press.
 
@@ -941,9 +960,9 @@ to regenerate packaged icons. See ADR-009 for current limits, including native S
 [`docs/action-plan.md`](docs/action-plan.md) is implemented (2026-09-22, see §7); what remains of P1-08 is step 1
 below. Phases 2–4 follow the release. Each item lists its files, the fix and the tests that prove it.
 
-1. **Release:** set the project version to `1.0.0` in the poms (it is still `0.1.0-SNAPSHOT`), initialize git and
-   publish the repository, then tag `v1.0.0` so `.github/workflows/release.yml` builds `idearm-windows-x64.zip`.
-   Check the portable bundle on a machine without the development tools.
+1. **Release:** the version is `1.0.0` and the repository is published at github.com/Dinamo541/IDEARM. Push
+   `main`, make the repository public, tag `v1.0.0-rc.1` to check the published files, then tag `v1.0.0`.
+   Afterwards move `main` to `1.1.0-SNAPSHOT`.
 2. **Student feedback:** have a class build, run and debug the examples following `docs/user-guide.md`; turn every
    confusing step into a guide fix or an issue.
 3. **Known limits to consider next:** the built-in emulator has no DOS file services or graphics output; native

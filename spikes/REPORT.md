@@ -19,6 +19,7 @@
 | S6 | Can DOSBox be stopped, and never orphaned when the IDE dies? | Yes: `destroy()` in ≈ 120 ms; a Job Object created through FFM kills DOSBox when its owner dies. Without it DOSBox is orphaned. | technical-plan §11 |
 | R11 | Does a large real project build? | `loadmap.asm` builds with TASM 3.2 and 4.1 in a 3.5 s session; ML 6.11 rejects it with 15 errors. | technical-plan §8.1 |
 | S7 | Secure mode, invisible DOSBox 0.74-3 builds, memory limits, ML inside DOSBox (2026-09-21); Linux (2026-09-22) | `config -securemode` blocks `MOUNT` in all three dialects; 0.74-3 builds invisibly with `SDL_VIDEODRIVER=dummy`, Staging crashes with it; `memsize` 1–63 works everywhere; ML 6.11 runs inside DOSBox 0.74-3. On Ubuntu 24.04 the whole suite, apt's DOSBox 0.74-3, NASM/ld/GDB and the IDE's start are verified. | ADR-002 |
+| S8 | Release packaging with jlink and jpackage (2026-09-22) | A runtime of JDK modules only plus `--module-path`/`--module` packages an app whose libraries are automatic modules; installers are built from the same options, never from the finished image; the `.deb` is built on Ubuntu 22.04 and depends on libgtk-3-0. | scripts/package-native.ps1 |
 
 ---
 
@@ -172,6 +173,37 @@ Script: `spikes/scripts/s7-dosbox-platform.ps1`; raw results in `spikes/out/s7-s
 - Found on Linux and fixed: the explorer allowed `MAIN.asm` next to `main.asm` (one file on Windows and DOS);
   two view-model tests relied on Windows ignoring letter case; a program debugged with GDB inherited GDB's MI
   input and blocked the session when it read the keyboard (its input is now `/dev/null`).
+
+## S8 — Packaging the release with jlink and jpackage (2026-09-22, Windows 11 and Ubuntu 24.04 in Docker)
+Script: `scripts/package-native.ps1` (PowerShell 7, the same script on both systems).
+- **Automatic modules.** RichTextFX 0.11.7, Flowless, UndoFX, ReactFX and WellBehavedFX have no module descriptor,
+  so jlink (and `javafx:jlink`) refuse them. The way around it: jlink a runtime of **JDK modules only**, and give
+  jpackage `--runtime-image` plus `--module-path` and `--module`. jpackage then copies every jar into `app/mods`
+  and writes `--module-path $APPDIR/mods` into each launcher's `.cfg`. Service providers resolve from there: the
+  packaged CLI's Tool Doctor lists the machine's tools.
+- **Runtime modules:** `java.base, java.desktop, java.logging, java.xml, jdk.unsupported` (jdeps over the jars,
+  plus what the module descriptors require: `javafx.graphics` needs `java.xml`, Jackson needs `java.logging`),
+  plus `jdk.charsets` for Windows-1252 sources on Linux and `jdk.localedata` (`--include-locales=en,es`) for the
+  Spanish interface. 79 MB before compression; the packages are 35–43 MB.
+- `--about-url` is rejected with `--type app-image`; it belongs to the installer step.
+- **An app image only records the *name* of an extra launcher** (`app/.jpackage.xml`), so an installer built with
+  `--app-image` loses `linux-shortcut=false` and gave `idearm-cli` a menu entry of its own. The installer is
+  therefore built from the same options as the image, not from the image.
+- **Maven's incremental compile after a version change leaves `module-info` without a version**, so the app showed
+  "IDEARM vdev" (`IdearmInfo` reads `ModuleDescriptor.rawVersion`). `mvn clean package` fixes it; the script does
+  a clean build.
+- **Linux `.deb`:** jpackage computes the library dependencies from the build machine, which is why the release
+  workflow builds on Ubuntu 22.04: its `libasound2` resolves on 24.04 through `Provides`, while 24.04's
+  `libasound2t64` does not exist on 22.04. `libgtk-3-0` was added by hand to `--linux-package-deps`: without GTK
+  the app dies with "Unable to load glass GTK library" (on 24.04 `libgtk-3-0t64` provides `libgtk-3-0`).
+- jpackage's `postinst` calls `xdg-desktop-menu`, which fails with "No writable system menu directory found" on a
+  system with no XDG menu infrastructure (a bare container), leaving the package half-configured. On a desktop
+  system (`gnome-menus` present) install and uninstall are clean and the menu entry appears and disappears.
+- **Verified.** Windows: the packaged app passes the whole visual smoke (EN/ES, editor shortcuts, recent picker,
+  window controls, hover help), and the packaged `idearm-cli` builds and runs TASM and MASM projects in DOSBox
+  0.74-3 from a `José Pérez` user folder. Linux: the `.deb` installs on a clean Ubuntu 24.04, apt brings DOSBox,
+  NASM, binutils and GDB, the IDE starts under Xvfb (`SMOKE OK: IDEARM 1.0.0`), and removing it leaves nothing
+  behind. The `.tar.gz` runs from any folder once GTK 3 is installed.
 
 ---
 

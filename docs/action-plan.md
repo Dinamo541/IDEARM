@@ -276,9 +276,12 @@ a packaged Linux build.
       folder; NASM builds, runs and stops under GDB on Windows and Linux; the emulator reads a typed name. Clicking
       through Debug and typing in the IDE's own input field still need a person.
 - [x] Docs: user guide §6.1 (emulator input and limits), troubleshooting rows for every new diagnostic, PLAN.md §7.
-- [ ] Version `1.0.0` in every pom; git init, publish and tag `v1.0.0` (user approval).
-- [ ] The portable zip tested on a clean Windows account whose user name has a space and an accent (covers P1-01
-      and P1-02).
+- [x] Version `1.0.0` in every pom (2026-09-22); the repository is published at github.com/Dinamo541/IDEARM.
+      Still to do with your approval: make it public, then tag `v1.0.0-rc.1` and `v1.0.0` (`release.yml` builds
+      the Windows and Linux packages and publishes them; `scripts/package-native.ps1`, spike S8).
+- [ ] The packages tried on a machine without the development tools. Done so far (2026-09-22): the packaged app and
+      CLI on Windows from a `José Pérez` user folder (TASM and MASM builds and runs in DOSBox 0.74-3, whole visual
+      smoke), and the `.deb` installed on a clean Ubuntu 24.04 in Docker. A clean Windows account is still open.
 
 ---
 

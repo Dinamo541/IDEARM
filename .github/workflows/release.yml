@@ -1,5 +1,6 @@
-name: Build & Release IDEARM
+name: Release
 
+# A tag such as v1.0.0 publishes the release; v1.0.0-rc.1 publishes a pre-release.
 on:
   push:
     tags:
@@ -11,10 +12,18 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Verify & Build
-    runs-on: windows-latest
+  test:
+    uses: ./.github/workflows/ci.yml
 
+  package:
+    name: Package (${{ matrix.os }})
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # Ubuntu 22.04 builds the .deb: jpackage reads the library dependencies from the build machine, and names
+        # from 22.04 (libasound2) still resolve on 24.04, while the 24.04 names (libasound2t64) do not on 22.04.
+        os: [windows-latest, ubuntu-22.04]
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -26,31 +35,74 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Run Maven Reactor Build & Tests
-        run: mvn clean verify
-
-      - name: Package Native Windows Application
+      - name: Check that the tag matches the project version
         shell: pwsh
         run: |
-          ./scripts/package-native.ps1 -Type app-image
+          $version = ([xml](Get-Content pom.xml -Raw)).project.version
+          $tag = '${{ github.ref_name }}'
+          if ($tag -ne "v$version" -and -not $tag.StartsWith("v$version-")) {
+            throw "Tag $tag does not match the project version $version. Set the version in the poms first."
+          }
+          Write-Host "Packaging $version from $tag"
 
-      - name: Archive Native Package
-        shell: pwsh
+      # jpackage builds the MSI with WiX. WiX 5 installs as a .NET tool, so it needs no .NET Framework 3.5.
+      - name: Install WiX
+        if: runner.os == 'Windows'
         run: |
-          Compress-Archive -Path dist/native/idearm -DestinationPath dist/idearm-windows-x64.zip
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add -g WixToolset.Util.wixext/5.0.2
+          wix extension add -g WixToolset.UI.wixext/5.0.2
 
-      - name: Upload Artifact
+      # jpackage needs fakeroot for .deb packages; dpkg-deb is already there.
+      - name: Install fakeroot
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends fakeroot
+
+      - name: Build the packages
+        shell: pwsh
+        run: pwsh scripts/package-native.ps1 -Type all
+
+      - name: Upload the packages
         uses: actions/upload-artifact@v4
         with:
-          name: idearm-windows-x64
-          path: dist/idearm-windows-x64.zip
+          name: packages-${{ runner.os }}
+          path: dist/release/*
+          if-no-files-found: error
 
-      - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+  release:
+    name: Publish the release
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download the packages
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Collect the checksums
+        run: |
+          cd dist
+          cat *.sha256 > SHA256SUMS.txt
+          rm -f *.sha256
+          sha256sum --check SHA256SUMS.txt
+          ls -l
+
+      # A release candidate (v1.0.0-rc.1) shows the notes of the version it prepares.
+      - name: Find the release notes
+        id: notes
+        run: |
+          version=$(python3 -c "import xml.etree.ElementTree as ET; ns={'m':'http://maven.apache.org/POM/4.0.0'}; print(ET.parse('pom.xml').getroot().find('m:version', ns).text)")
+          echo "path=docs/release-notes/v$version.md" >> "$GITHUB_OUTPUT"
+
+      - name: Publish
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/idearm-windows-x64.zip
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: IDEARM ${{ github.ref_name }}
+          body_path: ${{ steps.notes.outputs.path }}
+          files: dist/*
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          fail_on_unmatched_files: true

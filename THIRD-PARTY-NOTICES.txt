@@ -1,0 +1,39 @@
+IDEARM third-party notices
+==========================
+
+IDEARM is released under the MIT License (see LICENSE). The release packages also contain the components below,
+each under its own license. Their jars are shipped unchanged in app/mods; the Java runtime keeps its own notices in
+runtime/legal (runtime/lib/legal on Linux).
+
+Java runtime (OpenJDK, Eclipse Temurin build)
+  License: GNU General Public License, version 2, with the Classpath Exception
+  https://openjdk.org/legal/gplv2+ce.html
+
+OpenJFX (javafx-base, javafx-graphics, javafx-controls) 25.0.2
+  License: GNU General Public License, version 2, with the Classpath Exception
+  https://openjdk.org/projects/openjfx/
+
+RichTextFX 0.11.7
+  License: BSD 2-Clause (dual-licensed with GPLv2 + Classpath Exception; used under BSD 2-Clause)
+  https://github.com/FXMisc/RichTextFX
+
+Flowless 0.7.4, UndoFX 2.1.1, WellBehavedFX 0.3.3
+  License: BSD 2-Clause
+  https://github.com/FXMisc
+
+ReactFX 2.0-M5
+  License: BSD 2-Clause
+  https://github.com/TomasMikula/ReactFX
+
+AtlantaFX 2.1.0
+  License: MIT
+  https://github.com/mkpaz/atlantafx
+
+Jackson (jackson-core, jackson-databind, jackson-annotations, jackson-dataformat-toml) 2.18.6
+  License: Apache License, version 2.0; each jar carries its LICENSE and NOTICE files in META-INF
+  https://github.com/FasterXML/jackson
+
+Tools IDEARM drives but does not include
+  TASM, TLINK, Turbo Debugger, MASM, LINK and CodeView are proprietary: bring your own copy.
+  DOSBox, NASM, GNU binutils and GDB are installed separately (on Debian/Ubuntu the IDEARM package asks apt for
+  dosbox, nasm, binutils and gdb).

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: User guide
+    url: https://github.com/Dinamo541/IDEARM/blob/main/docs/user-guide.md
+    about: Tool setup, project workflows, debugging and the command line.
+  - name: Troubleshooting
+    url: https://github.com/Dinamo541/IDEARM/blob/main/docs/troubleshooting.md
+    about: Common build, run and debug problems with their causes and fixes.

@@ -57,6 +57,18 @@ DOSBox Staging, for building, running and debugging. **Project → Properties...
 purpose; choose DOSBox-X when your program opens files with long names (§4.4). Builds run without a DOSBox window,
 except when a project chooses DOSBox Staging on purpose: Staging cannot run hidden, so its window flashes briefly.
 
+### Installing IDEARM
+
+Download the file for your system from the [latest release](https://github.com/Dinamo541/IDEARM/releases/latest).
+Every package carries its own Java runtime, and each one also contains `idearm-cli`, the command line (§8).
+
+| System | File | What to do |
+|---|---|---|
+| Windows 10/11 | `IDEARM-<version>-windows-x64.msi` | Double-click it. It installs for your user only (`%LOCALAPPDATA%\Programs\IDEARM`), so it needs no administrator rights. Windows shows "Windows protected your PC" for the unsigned installer: choose **More info → Run anyway**. |
+| Windows, no install | `IDEARM-<version>-windows-x64-portable.zip` | Unzip it and run `IDEARM\IDEARM.exe`. |
+| Ubuntu/Debian | `IDEARM-<version>-linux-x64.deb` | `sudo apt install ./IDEARM-<version>-linux-x64.deb`, which also installs DOSBox, NASM, binutils and GDB. IDEARM lands in `/opt/idearm` with a menu entry. |
+| Other Linux | `IDEARM-<version>-linux-x64.tar.gz` | Extract it and run `IDEARM/bin/IDEARM`. Needs GTK 3 (`libgtk-3-0`). |
+
 ### Starting IDEARM from source
 
 ```bash
@@ -67,8 +79,9 @@ mvn install -DskipTests
 mvn -f idearm-app/pom.xml javafx:run
 ```
 
-`scripts/package-native.ps1` builds a Windows installer (or a portable app image when WiX is not installed). On
-Linux, run IDEARM from source as above; a packaged Linux build is not provided yet.
+`pwsh scripts/package-native.ps1` builds the packages listed above for the system it runs on: `-Type app-image`
+for the portable archive only, `-Type installer` for the MSI or the DEB (the MSI needs the WiX Toolset, the DEB
+needs `dpkg-deb` and `fakeroot`). The files land in `dist/release`.
 
 ---
 
@@ -557,6 +570,7 @@ in the terminal and passes what you type to it.
 
 | Location (Windows) | Location (Linux) | Contents |
 |---|---|---|
+| `%LOCALAPPDATA%\Programs\IDEARM` | `/opt/idearm` | The installed program; a portable package lives where you extracted it. |
 | `<project>/idearm.toml` | same | The project description; commit it. |
 | `<project>/build/`, `<project>/dist/` | same | Generated; Clean deletes them. |
 | `<project>/.idearm/` | same | Breakpoints and a lock file for this machine; do not commit it. |

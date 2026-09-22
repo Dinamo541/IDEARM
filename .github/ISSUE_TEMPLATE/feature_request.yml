@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest an improvement to the Assembly learning or development workflow.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search existing issues first. Explain the problem and who would benefit from solving it.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the learning or development workflow that is difficult today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe how you would use the improvement in IDEARM.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or workarounds
+      description: What have you tried, and what is still missing?
+  - type: textarea
+    id: context
+    attributes:
+      label: Target and additional context
+      description: Include the operating system, assembler, target profile or a small example if relevant.

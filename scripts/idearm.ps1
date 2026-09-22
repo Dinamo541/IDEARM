@@ -1,9 +1,10 @@
 # Launch the modular CLI after "mvn package". Tool installations stay outside the project file.
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
-$cliJar = Join-Path $projectRoot 'idearm-cli/target/idearm-cli-0.1.0-SNAPSHOT.jar'
+$cliJar = Get-ChildItem -Path (Join-Path $projectRoot 'idearm-cli/target') -Filter 'idearm-cli-*.jar' -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -notmatch '-(sources|javadoc|tests)\.jar$' } | Select-Object -First 1 -ExpandProperty FullName
 $libraries = Join-Path $projectRoot 'idearm-cli/target/lib'
-if (-not (Test-Path -LiteralPath $cliJar) -or -not (Test-Path -LiteralPath $libraries)) {
+if (-not $cliJar -or -not (Test-Path -LiteralPath $libraries)) {
     Write-Error 'Build IDEARM first: mvn package'
     exit 2
 }

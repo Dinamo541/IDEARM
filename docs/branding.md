@@ -23,6 +23,17 @@ in sync with the SVG. Preserve the outer padding around the hexagon.
 | `#79EFD2` | Assembly monogram |
 | `#52C6FF` | Code brackets |
 
+## README screenshots
+
+`docs/images/workbench-dark.png` and `docs/images/workbench-light-es.png` are unedited copies of the real
+workbench captures from the 2026-09-17 visual smoke run. They show the repository's `hello` example in English
+and Spanish respectively. The README reuses the original SVG logo directly from the app's branding folder.
+
+When refreshing these screenshots, use the visual smoke workflow described in
+[workbench-shortcuts.md](workbench-shortcuts.md#maintenance-and-verification), inspect both images, and copy
+only the workbench captures into `docs/images/`. Keep recent-history captures and local machine paths out of
+the public README images.
+
 ## Regenerate raster assets
 
 Run with `IDEARM_VISUAL_SMOKE` naming an output directory and `IDEARM_USER_DATA_DIR` naming an isolated

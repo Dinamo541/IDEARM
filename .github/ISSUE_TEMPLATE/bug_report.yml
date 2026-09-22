@@ -1,0 +1,72 @@
+name: Bug report
+description: Report a reproducible problem with IDEARM.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check existing issues and the troubleshooting guide before reporting a bug.
+        Remove private paths or credentials from logs. Do not attach proprietary tool binaries.
+  - type: input
+    id: version
+    attributes:
+      label: IDEARM version or commit
+      description: Include the release version or the output of git rev-parse --short HEAD.
+      placeholder: "Release version or commit SHA"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Operating system and installation method
+      placeholder: "For example: Windows 11 x64, built from source, JDK 25"
+    validations:
+      required: true
+  - type: dropdown
+    id: target
+    attributes:
+      label: Project target
+      options:
+        - "Not project-specific / unsure"
+        - "16-bit DOS (TASM)"
+        - "16-bit DOS (MASM 6.11)"
+        - "32-bit Windows (NASM)"
+        - "64-bit Windows (NASM)"
+        - "64-bit Linux (NASM)"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include a minimal source example or idearm.toml when relevant.
+      placeholder: |
+        1. Open or create ...
+        2. Select ...
+        3. Run ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the exact error message, if any.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Tool Doctor and Build Log
+      description: Paste the relevant tool versions and log excerpt. Remove private information first.
+      render: text
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or additional context
+      description: For UI issues, include the interface language and theme.

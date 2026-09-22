@@ -3,7 +3,7 @@
 # Tool installations stay outside the project file.
 set -e
 project_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-cli_jar="$project_root/idearm-cli/target/idearm-cli-0.1.0-SNAPSHOT.jar"
+cli_jar=$(ls "$project_root"/idearm-cli/target/idearm-cli-*.jar 2>/dev/null | grep -v -e '-sources\.jar$' -e '-javadoc\.jar$' -e '-tests\.jar$' | head -n 1)
 libraries="$project_root/idearm-cli/target/lib"
 if [ ! -f "$cli_jar" ] || [ ! -d "$libraries" ]; then
     echo 'Build IDEARM first: mvn package' >&2
