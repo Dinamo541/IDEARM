@@ -1,14 +1,25 @@
 package io.github.dinamo541.idearm.language.lexer;
 
+import io.github.dinamo541.idearm.language.knowledge.Corpus;
+import io.github.dinamo541.idearm.language.knowledge.Dialect;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * High-speed tokenizer for x86 Assembly supporting Borland TASM and Microsoft MASM dialects.
  */
 public final class AssemblyLexer {
 
-    private static final Set<String> REGISTERS = Set.of(
+    private final Dialect dialect;
+
+    public AssemblyLexer() {
+        this(null);
+    }
+
+    public AssemblyLexer(Dialect dialect) {
+        this.dialect = dialect;
+    }
+
+    public static final Set<String> REGISTERS = Set.of(
             "AX", "BX", "CX", "DX", "AH", "AL", "BH", "BL", "CH", "CL", "DH", "DL",
             "SI", "DI", "SP", "BP", "CS", "DS", "ES", "SS", "IP", "FLAGS",
             "EAX", "EBX", "ECX", "EDX", "ESI", "EDI", "ESP", "EBP", "FS", "GS", "EIP", "EFLAGS",
@@ -20,7 +31,33 @@ public final class AssemblyLexer {
             "SIL", "DIL", "BPL", "SPL"
     );
 
-    private static final Set<String> DIRECTIVES = Set.of(
+    public static final Set<String> COMMON_DIRECTIVES = Set.of(
+            "DB", "DW", "DD", "DQ", "DT", "EQU", "ORG", "ALIGN", "EVEN",
+            "GLOBAL", "EXTERN", "EXTRN", "INCLUDE", "END"
+    );
+
+    public static final Set<String> MASM_TASM_DIRECTIVES = Set.of(
+            ".MODEL", ".STACK", ".DATA", ".CODE", ".STARTUP", ".EXIT",
+            ".8086", ".186", ".286", ".386", ".486", ".586",
+            "PROC", "ENDP", "SEGMENT", "ENDS", "ASSUME", "GROUP", "LABEL", "STRUC",
+            "DB", "DW", "DD", "DQ", "DT", "EQU", "ORG", "ALIGN", "EVEN",
+            "OFFSET", "PTR", "BYTE", "WORD", "DWORD", "QWORD", "TBYTE",
+            "NEAR", "FAR", "PUBLIC", "EXTRN", "EXTERN", "GLOBAL",
+            "INCLUDE", "INCLUDELIB", "MACRO", "ENDM", "LOCAL", "LOCALS",
+            "DUP", "SEG", "END",
+            "IDEAL", "P386", "P486", "P586", "QUIRKS", "OPTION", "INVOKE", "PROTO", "TITLE", "SUBTTL", "PAGE"
+    );
+
+    public static final Set<String> NASM_DIRECTIVES = Set.of(
+            "SECTION", "SEGMENT", "DEFAULT", "REL", "ABS", "GLOBAL", "EXTERN", "COMMON", "CPU", "BITS",
+            "USE16", "USE32", "USE64", "STRUC", "ENDSTRUC", "ISTROC", "IEND", "ALIGN", "EVEN",
+            "DB", "DW", "DD", "DQ", "DT", "RESB", "RESW", "RESD", "RESQ", "REST", "RESO", "RESY", "RESZ",
+            "EQU", "TIMES", "ORG", "END",
+            "%MACRO", "%ENDMACRO", "%DEFINE", "%UNDEF", "%INCLUDE", "%IF", "%ELIF", "%ELSE", "%ENDIF",
+            "%REP", "%ENDREP", "%STRLEN", "%SUBSTR"
+    );
+
+    public static final Set<String> DIRECTIVES = Set.of(
             ".MODEL", ".STACK", ".DATA", ".CODE", ".STARTUP", ".EXIT",
             ".8086", ".186", ".286", ".386", ".486", ".586",
             "PROC", "ENDP", "END", "SEGMENT", "ENDS", "ASSUME", "GROUP",
@@ -32,35 +69,50 @@ public final class AssemblyLexer {
             "QUIRKS", "OPTION", "INVOKE", "PROTO", "TITLE", "SUBTTL", "PAGE",
             "DEFAULT", "REL", "ABS", "SECTION", "RESB", "RESW", "RESD", "RESQ",
             "REST", "RESO", "RESY", "RESZ", "TIMES", "COMMON", "CPU", "BITS",
-            "USE16", "USE32", "USE64"
+            "USE16", "USE32", "USE64", "STRUC", "ENDSTRUC",
+            "%MACRO", "%ENDMACRO", "%DEFINE", "%UNDEF", "%INCLUDE", "%IF", "%ELIF", "%ELSE", "%ENDIF",
+            "%REP", "%ENDREP", "%STRLEN", "%SUBSTR"
     );
 
-    private static final Set<String> INSTRUCTIONS = Set.of(
-            "MOV", "PUSH", "POP", "XCHG", "XLAT", "XLATB", "LEA", "LDS", "LES", "LAHF", "SAHF",
-            "PUSHF", "POPF", "IN", "OUT",
-            "ADD", "ADC", "SUB", "SBB", "INC", "DEC", "NEG", "CMP",
-            "MUL", "IMUL", "DIV", "IDIV", "CBW", "CWD", "CWDE", "CDQ", "CQO", "CDQE",
-            "AAA", "AAS", "AAM", "AAD", "DAA", "DAS",
-            "AND", "OR", "XOR", "NOT", "TEST",
-            "SHL", "SHR", "SAL", "SAR", "ROL", "ROR", "RCL", "RCR",
-            "JMP", "CALL", "RET", "RETF", "RETN",
-            "JE", "JZ", "JNE", "JNZ", "JA", "JNBE", "JAE", "JNB", "JNC",
-            "JB", "JNAE", "JC", "JBE", "JNA", "JG", "JNLE", "JGE", "JNL",
-            "JL", "JNGE", "JLE", "JNG", "JS", "JNS", "JO", "JNO", "JP", "JPE", "JNP", "JPO",
-            "JCXZ", "JECXZ", "JRCXZ", "LOOP", "LOOPE", "LOOPZ", "LOOPNE", "LOOPNZ",
-            "INT", "INTO", "IRET", "SYSCALL", "SYSRET",
-            "MOVS", "MOVSB", "MOVSW", "CMPS", "CMPSB", "CMPSW",
-            "SCAS", "SCASB", "SCASW", "LODS", "LODSB", "LODSW", "STOS", "STOSB", "STOSW",
-            "REP", "REPE", "REPZ", "REPNE", "REPNZ",
-            "CLC", "STC", "CMC", "CLD", "STD", "CLI", "STI", "HLT", "WAIT", "NOP", "LOCK",
-            "ENTER", "LEAVE", "PUSHA", "POPA", "BOUND", "INS", "OUTS",
-            "MOVZX", "MOVSX", "MOVABS", "BSF", "BSR", "BT", "BTC", "BTR", "BTS", "SETCC", "SHLD", "SHRD"
-    );
+    /**
+     * Checks if a mnemonic is recognized under the active dialect (ADR-011, ADR-013).
+     */
+    private boolean isInstruction(String upper) {
+        return Corpus.get().analysisView().isRecognized(upper, dialect);
+    }
 
-    private static final Pattern HEX_PATTERN = Pattern.compile("^(?:0x[0-9a-fA-F]+|[0-9][0-9a-fA-F]*[hH])$");
-    private static final Pattern BIN_PATTERN = Pattern.compile("^[01]+[bB]$");
-    private static final Pattern OCT_PATTERN = Pattern.compile("^[0-7]+[oOqQ]$");
-    private static final Pattern DEC_PATTERN = Pattern.compile("^[0-9]+[dD]?$");
+    private boolean isDirective(String upper) {
+        return isDirective(upper, dialect);
+    }
+
+    public static boolean isDirective(String word, Dialect dialect) {
+        if (word == null || word.isBlank()) return false;
+        String upper = word.trim().toUpperCase(Locale.ROOT);
+        try {
+            Set<String> set = Corpus.get().analysisView().recognizedDirectives(dialect);
+            if (set != null && !set.isEmpty()) {
+                return set.contains(upper);
+            }
+        } catch (Exception ignored) {
+        }
+        if (dialect == Dialect.NASM) {
+            return NASM_DIRECTIVES.contains(upper);
+        } else if (dialect == Dialect.MASM || dialect == Dialect.TASM) {
+            return MASM_TASM_DIRECTIVES.contains(upper);
+        }
+        return DIRECTIVES.contains(upper);
+    }
+
+    public static boolean isRegister(String word) {
+        if (word == null || word.isBlank()) return false;
+        String upper = word.trim().toUpperCase(Locale.ROOT);
+        if (REGISTERS.contains(upper)) return true;
+        try {
+            return Corpus.get().getAllRegisterNames().contains(upper);
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
 
     public List<Token> tokenize(String source) {
         if (source == null || source.isEmpty()) {
@@ -143,6 +195,21 @@ public final class AssemblyLexer {
 
             // Number or Identifier or Directive (starts with . or letter or @ or _)
             int start = i;
+            if (ch == '%') {
+                i++;
+                while (i < length && isIdentifierPart(line.charAt(i))) {
+                    i++;
+                }
+                String word = line.substring(start, i);
+                String upper = word.toUpperCase(Locale.ROOT);
+                if (isDirective(upper)) {
+                    tokens.add(new Token(TokenType.DIRECTIVE, word, lineNumber, startCol, word.length()));
+                } else {
+                    tokens.add(new Token(TokenType.IDENTIFIER, word, lineNumber, startCol, word.length()));
+                }
+                continue;
+            }
+
             if (ch == '.') {
                 i++;
                 while (i < length && isIdentifierPart(line.charAt(i))) {
@@ -150,7 +217,7 @@ public final class AssemblyLexer {
                 }
                 String word = line.substring(start, i);
                 String upper = word.toUpperCase(Locale.ROOT);
-                if (DIRECTIVES.contains(upper)) {
+                if (isDirective(upper)) {
                     tokens.add(new Token(TokenType.DIRECTIVE, word, lineNumber, startCol, word.length()));
                 } else {
                     tokens.add(new Token(TokenType.DOT, ".", lineNumber, startCol, 1));
@@ -178,11 +245,11 @@ public final class AssemblyLexer {
             // Determine token type
             if (isNumber(word)) {
                 tokens.add(new Token(TokenType.NUMBER, word, lineNumber, startCol, word.length()));
-            } else if (REGISTERS.contains(upper)) {
+            } else if (isRegister(upper)) {
                 tokens.add(new Token(TokenType.REGISTER, word, lineNumber, startCol, word.length()));
-            } else if (INSTRUCTIONS.contains(upper)) {
+            } else if (isInstruction(upper)) {
                 tokens.add(new Token(TokenType.INSTRUCTION, word, lineNumber, startCol, word.length()));
-            } else if (DIRECTIVES.contains(upper)) {
+            } else if (isDirective(upper)) {
                 tokens.add(new Token(TokenType.DIRECTIVE, word, lineNumber, startCol, word.length()));
             } else {
                 tokens.add(new Token(TokenType.IDENTIFIER, word, lineNumber, startCol, word.length()));
@@ -199,22 +266,14 @@ public final class AssemblyLexer {
     }
 
     /**
-     * Whether a word is a numeric literal as MASM and TASM read it: it starts with a digit ({@code 0Ah}, {@code 21h},
-     * {@code 1010b}, {@code 0x1F}), so registers such as {@code AH} and labels such as {@code each} are not numbers.
+     * Whether a word is a numeric literal ({@code 0Ah}, {@code 21h}, {@code 1010b}, {@code 0x1F}, {@code 0b101}); it
+     * starts with a digit, so registers such as {@code AH} and labels such as {@code each} are not numbers.
      */
     public static boolean isNumberLiteral(String text) {
-        return text != null && isNumber(text.trim());
+        return NumericLiteral.isLiteral(text);
     }
 
     private static boolean isNumber(String text) {
-        if (text.isEmpty()) return false;
-        char first = text.charAt(0);
-        if (Character.isDigit(first)) {
-            return HEX_PATTERN.matcher(text).matches()
-                    || BIN_PATTERN.matcher(text).matches()
-                    || OCT_PATTERN.matcher(text).matches()
-                    || DEC_PATTERN.matcher(text).matches();
-        }
-        return false;
+        return NumericLiteral.isLiteral(text);
     }
 }

@@ -19,16 +19,26 @@ public final class AssemblyLinter {
     private final AssemblyParser parser;
 
     public AssemblyLinter() {
+        this((io.github.dinamo541.idearm.language.knowledge.Dialect) null);
+    }
+
+    public AssemblyLinter(io.github.dinamo541.idearm.language.knowledge.Dialect dialect) {
         this(List.of(
                 new MissingTerminationRule(),
                 new CpuBaselineRule(),
-                new UndefinedSymbolRule()
-        ));
+                new UndefinedSymbolRule(),
+                new UnknownInstructionRule(dialect),
+                new AddressingModeRule()
+        ), dialect);
     }
 
     public AssemblyLinter(List<LintRule> rules) {
+        this(rules, null);
+    }
+
+    public AssemblyLinter(List<LintRule> rules, io.github.dinamo541.idearm.language.knowledge.Dialect dialect) {
         this.rules = List.copyOf(Objects.requireNonNull(rules, "rules cannot be null"));
-        this.parser = new AssemblyParser();
+        this.parser = new AssemblyParser(new io.github.dinamo541.idearm.language.lexer.AssemblyLexer(dialect));
     }
 
     public List<Diagnostic> lint(String sourceText, String filePath, String targetCpu, ProjectSymbolIndex index) {
