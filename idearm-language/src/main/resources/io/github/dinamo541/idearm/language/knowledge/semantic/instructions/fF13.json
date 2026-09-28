@@ -1,0 +1,506 @@
+[
+  {
+    "id": "x86.instr.clc",
+    "mnemonic": "CLC",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CLC"
+    ],
+    "example": "clc",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "CLEARED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CLC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.clc#form.1",
+        "text": "CLC",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.stc",
+    "mnemonic": "STC",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "STC"
+    ],
+    "example": "stc",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "SET",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:STC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.stc#form.1",
+        "text": "STC",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmc",
+    "mnemonic": "CMC",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CMC"
+    ],
+    "example": "cmc",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmc#form.1",
+        "text": "CMC",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cld",
+    "mnemonic": "CLD",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CLD"
+    ],
+    "example": "cld",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "CLEARED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CLD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cld#form.1",
+        "text": "CLD",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.std",
+    "mnemonic": "STD",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "STD"
+    ],
+    "example": "std",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "SET",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:STD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.std#form.1",
+        "text": "STD",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cli",
+    "mnemonic": "CLI",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CLI"
+    ],
+    "example": "cli",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "CLEARED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CLI",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cli#form.1",
+        "text": "CLI",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sti",
+    "mnemonic": "STI",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "STI"
+    ],
+    "example": "sti",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "SET",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:STI",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sti#form.1",
+        "text": "STI",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lahf",
+    "mnemonic": "LAHF",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LAHF"
+    ],
+    "example": "lahf",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LAHF",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lahf#form.1",
+        "text": "LAHF",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sahf",
+    "mnemonic": "SAHF",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "SAHF"
+    ],
+    "example": "sahf",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SAHF",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sahf#form.1",
+        "text": "SAHF",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.nop",
+    "mnemonic": "NOP",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "NOP"
+    ],
+    "example": "nop",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:NOP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.nop#form.1",
+        "text": "NOP",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.hlt",
+    "mnemonic": "HLT",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "HLT"
+    ],
+    "example": "hlt",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:HLT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.hlt#form.1",
+        "text": "HLT",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.wait",
+    "mnemonic": "WAIT",
+    "kind": "INSTRUCTION",
+    "family": "F-13",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "WAIT",
+      "FWAIT"
+    ],
+    "example": "fwait",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "WAIT",
+        "dialect": "COMMON",
+        "name": "FWAIT"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:WAIT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.wait#form.1",
+        "text": "WAIT",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.wait#form.2",
+        "text": "FWAIT",
+        "minCpu": "8086"
+      }
+    ]
+  }
+]

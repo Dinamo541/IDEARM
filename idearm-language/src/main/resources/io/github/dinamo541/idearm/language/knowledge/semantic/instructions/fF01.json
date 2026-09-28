@@ -1,0 +1,1697 @@
+[
+  {
+    "id": "x86.instr.mov",
+    "mnemonic": "MOV",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "MOV reg, reg",
+      "MOV reg, mem",
+      "MOV mem, reg",
+      "MOV reg, imm",
+      "MOV mem, imm"
+    ],
+    "example": "mov ax, @data\nmov ds, ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:MOV",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.mov#form.1",
+        "text": "MOV reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.mov#form.2",
+        "text": "MOV reg, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.mov#form.3",
+        "text": "MOV mem, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.mov#form.4",
+        "text": "MOV reg, imm",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.mov#form.5",
+        "text": "MOV mem, imm",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.xchg",
+    "mnemonic": "XCHG",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "XCHG reg, reg",
+      "XCHG reg, mem"
+    ],
+    "example": "xchg ax, bx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:XCHG",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.xchg#form.1",
+        "text": "XCHG reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.xchg#form.2",
+        "text": "XCHG reg, mem",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lea",
+    "mnemonic": "LEA",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LEA reg16, mem",
+      "LEA reg32, mem",
+      "LEA reg64, mem"
+    ],
+    "example": "lea dx, [bx + si + 4]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LEA",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lea#form.1",
+        "text": "LEA reg16, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.lea#form.2",
+        "text": "LEA reg32, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.lea#form.3",
+        "text": "LEA reg64, mem",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.xlat",
+    "mnemonic": "XLAT",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "XLAT",
+      "XLATB"
+    ],
+    "example": "mov bx, offset tabla\nmov al, 5\nxlat",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "XLAT",
+        "dialect": "COMMON",
+        "name": "XLATB"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:XLAT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.xlat#form.1",
+        "text": "XLAT",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "READ", "note": "índice en la tabla" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.bx", "sizes": [16, 32, 64], "access": "READ", "note": "puntero base en DS" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "WRITE", "note": "byte traducido" }
+        ],
+        "requirement": { "minGeneration": "I8086" },
+        "sources": ["src.intel-sdm.093#vol2:XLAT", "src.irvine.5e-es"]
+      },
+      {
+        "id": "x86.instr.xlat#form.2",
+        "text": "XLATB",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "READ", "note": "índice en la tabla" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.bx", "sizes": [16, 32, 64], "access": "READ", "note": "puntero base en DS" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "WRITE", "note": "byte traducido" }
+        ],
+        "requirement": { "minGeneration": "I8086" },
+        "sources": ["src.intel-sdm.093#vol2:XLAT", "src.irvine.5e-es"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lds",
+    "mnemonic": "LDS",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LDS reg16, mem32"
+    ],
+    "example": "lds si, [far_ptr]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LDS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lds#form.1",
+        "text": "LDS reg16, mem32",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        },
+        "sources": ["src.intel-sdm.093#vol2:LDS", "src.irvine.5e-es"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.les",
+    "mnemonic": "LES",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LES reg16, mem32"
+    ],
+    "example": "les di, [buffer_ptr]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LES",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.les#form.1",
+        "text": "LES reg16, mem32",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        },
+        "sources": ["src.intel-sdm.093#vol2:LES", "src.irvine.5e-es"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lfs",
+    "mnemonic": "LFS",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "LFS reg16, mem32",
+      "LFS reg32, mem48"
+    ],
+    "example": "lfs si, [fs_ptr]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LFS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lfs#form.1",
+        "text": "LFS reg16, mem32",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.lfs#form.2",
+        "text": "LFS reg32, mem48",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lgs",
+    "mnemonic": "LGS",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "LGS reg16, mem32",
+      "LGS reg32, mem48"
+    ],
+    "example": "lgs di, [gs_ptr]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LGS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lgs#form.1",
+        "text": "LGS reg16, mem32",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.lgs#form.2",
+        "text": "LGS reg32, mem48",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lss",
+    "mnemonic": "LSS",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "LSS reg16, mem32",
+      "LSS reg32, mem48"
+    ],
+    "example": "lss sp, [nuevo_stack]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LSS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lss#form.1",
+        "text": "LSS reg16, mem32",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.lss#form.2",
+        "text": "LSS reg32, mem48",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.movsx",
+    "mnemonic": "MOVSX",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "MOVSX reg16, reg8",
+      "MOVSX reg16, mem8",
+      "MOVSX reg32, reg8",
+      "MOVSX reg32, reg16",
+      "MOVSX reg64, reg32"
+    ],
+    "example": "movsx eax, bx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:MOVSX",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.movsx#form.1",
+        "text": "MOVSX reg16, reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.movsx#form.2",
+        "text": "MOVSX reg16, mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.movsx#form.3",
+        "text": "MOVSX reg32, reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.movsx#form.4",
+        "text": "MOVSX reg32, reg16",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.movsx#form.5",
+        "text": "MOVSX reg64, reg32",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.movzx",
+    "mnemonic": "MOVZX",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "MOVZX reg16, reg8",
+      "MOVZX reg16, mem8",
+      "MOVZX reg32, reg8",
+      "MOVZX reg32, reg16"
+    ],
+    "example": "movzx eax, byte ptr [si]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:MOVZX",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.movzx#form.1",
+        "text": "MOVZX reg16, reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.movzx#form.2",
+        "text": "MOVZX reg16, mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.movzx#form.3",
+        "text": "MOVZX reg32, reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.movzx#form.4",
+        "text": "MOVZX reg32, reg16",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.movabs",
+    "mnemonic": "MOVABS",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "x86-64",
+    "syntaxVariants": [
+      "MOVABS reg64, imm64",
+      "MOVABS reg64, [mem64]"
+    ],
+    "example": "movabs rax, 0x1122334455667788",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:MOVABS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "GAS"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.movabs#form.1",
+        "text": "MOVABS reg64, imm64",
+        "minCpu": "x86-64"
+      },
+      {
+        "id": "x86.instr.movabs#form.2",
+        "text": "MOVABS reg64, [mem64]",
+        "minCpu": "x86-64"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.bswap",
+    "mnemonic": "BSWAP",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80486",
+    "syntaxVariants": [
+      "BSWAP reg32",
+      "BSWAP reg64"
+    ],
+    "example": "bswap eax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:BSWAP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.bswap#form.1",
+        "text": "BSWAP reg32",
+        "minCpu": "80486"
+      },
+      {
+        "id": "x86.instr.bswap#form.2",
+        "text": "BSWAP reg64",
+        "minCpu": "80486"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovz",
+    "mnemonic": "CMOVZ",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVZ reg, reg",
+      "CMOVZ reg, mem",
+      "CMOVE reg, reg"
+    ],
+    "example": "cmovz eax, edx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVZ",
+        "dialect": "COMMON",
+        "name": "CMOVE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVZ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovz#form.1",
+        "text": "CMOVZ reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovz#form.2",
+        "text": "CMOVZ reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovz#form.3",
+        "text": "CMOVE reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovnz",
+    "mnemonic": "CMOVNZ",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVNZ reg, reg",
+      "CMOVNZ reg, mem",
+      "CMOVNE reg, reg"
+    ],
+    "example": "cmovnz eax, ebx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVNZ",
+        "dialect": "COMMON",
+        "name": "CMOVNE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVNZ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovnz#form.1",
+        "text": "CMOVNZ reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovnz#form.2",
+        "text": "CMOVNZ reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovnz#form.3",
+        "text": "CMOVNE reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmova",
+    "mnemonic": "CMOVA",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVA reg, reg",
+      "CMOVA reg, mem",
+      "CMOVNBE reg, reg"
+    ],
+    "example": "cmp ax, bx\ncmova cx, ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVA",
+        "dialect": "COMMON",
+        "name": "CMOVNBE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVA",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmova#form.1",
+        "text": "CMOVA reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmova#form.2",
+        "text": "CMOVA reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmova#form.3",
+        "text": "CMOVNBE reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovae",
+    "mnemonic": "CMOVAE",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVAE reg, reg",
+      "CMOVAE reg, mem",
+      "CMOVNB reg, reg",
+      "CMOVNC reg, reg"
+    ],
+    "example": "cmp ax, bx\ncmovae cx, ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVAE",
+        "dialect": "COMMON",
+        "name": "CMOVNB"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVAE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovae#form.1",
+        "text": "CMOVAE reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovae#form.2",
+        "text": "CMOVAE reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovae#form.3",
+        "text": "CMOVNB reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovae#form.4",
+        "text": "CMOVNC reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovb",
+    "mnemonic": "CMOVB",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVB reg, reg",
+      "CMOVB reg, mem",
+      "CMOVC reg, reg",
+      "CMOVNAE reg, reg"
+    ],
+    "example": "cmp ax, bx\ncmovb cx, ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVB",
+        "dialect": "COMMON",
+        "name": "CMOVNAE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovb#form.1",
+        "text": "CMOVB reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovb#form.2",
+        "text": "CMOVB reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovb#form.3",
+        "text": "CMOVC reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovb#form.4",
+        "text": "CMOVNAE reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovbe",
+    "mnemonic": "CMOVBE",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVBE reg, reg",
+      "CMOVBE reg, mem",
+      "CMOVNA reg, reg"
+    ],
+    "example": "cmp ax, bx\ncmovbe cx, ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVBE",
+        "dialect": "COMMON",
+        "name": "CMOVNA"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVBE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovbe#form.1",
+        "text": "CMOVBE reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovbe#form.2",
+        "text": "CMOVBE reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovbe#form.3",
+        "text": "CMOVNA reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovc",
+    "mnemonic": "CMOVC",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVC reg, reg",
+      "CMOVC reg, mem",
+      "CMOVB reg, reg"
+    ],
+    "example": "add al, bl\ncmovc dx, si",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovc#form.1",
+        "text": "CMOVC reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovc#form.2",
+        "text": "CMOVC reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovc#form.3",
+        "text": "CMOVB reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovnc",
+    "mnemonic": "CMOVNC",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVNC reg, reg",
+      "CMOVNC reg, mem",
+      "CMOVAE reg, reg"
+    ],
+    "example": "add al, bl\ncmovnc dx, si",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVNC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovnc#form.1",
+        "text": "CMOVNC reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovnc#form.2",
+        "text": "CMOVNC reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovnc#form.3",
+        "text": "CMOVAE reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovg",
+    "mnemonic": "CMOVG",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVG reg, reg",
+      "CMOVG reg, mem",
+      "CMOVNLE reg, reg"
+    ],
+    "example": "cmp ax, bx\ncmovg cx, ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVG",
+        "dialect": "COMMON",
+        "name": "CMOVNLE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVG",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovg#form.1",
+        "text": "CMOVG reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovg#form.2",
+        "text": "CMOVG reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovg#form.3",
+        "text": "CMOVNLE reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovge",
+    "mnemonic": "CMOVGE",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVGE reg, reg",
+      "CMOVGE reg, mem",
+      "CMOVNL reg, reg"
+    ],
+    "example": "cmp ax, bx\ncmovge cx, ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVGE",
+        "dialect": "COMMON",
+        "name": "CMOVNL"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVGE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovge#form.1",
+        "text": "CMOVGE reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovge#form.2",
+        "text": "CMOVGE reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovge#form.3",
+        "text": "CMOVNL reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovl",
+    "mnemonic": "CMOVL",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVL reg, reg",
+      "CMOVL reg, mem",
+      "CMOVNGE reg, reg"
+    ],
+    "example": "cmp ax, bx\ncmovl cx, ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVL",
+        "dialect": "COMMON",
+        "name": "CMOVNGE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVL",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovl#form.1",
+        "text": "CMOVL reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovl#form.2",
+        "text": "CMOVL reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovl#form.3",
+        "text": "CMOVNGE reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovle",
+    "mnemonic": "CMOVLE",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVLE reg, reg",
+      "CMOVLE reg, mem",
+      "CMOVNG reg, reg"
+    ],
+    "example": "cmp ax, bx\ncmovle cx, ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVLE",
+        "dialect": "COMMON",
+        "name": "CMOVNG"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVLE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovle#form.1",
+        "text": "CMOVLE reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovle#form.2",
+        "text": "CMOVLE reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovle#form.3",
+        "text": "CMOVNG reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovs",
+    "mnemonic": "CMOVS",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVS reg, reg",
+      "CMOVS reg, mem"
+    ],
+    "example": "sub ax, bx\ncmovs cx, dx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovs#form.1",
+        "text": "CMOVS reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovs#form.2",
+        "text": "CMOVS reg, mem",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovns",
+    "mnemonic": "CMOVNS",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVNS reg, reg",
+      "CMOVNS reg, mem"
+    ],
+    "example": "sub ax, bx\ncmovns cx, dx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVNS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovns#form.1",
+        "text": "CMOVNS reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovns#form.2",
+        "text": "CMOVNS reg, mem",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovo",
+    "mnemonic": "CMOVO",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVO reg, reg",
+      "CMOVO reg, mem"
+    ],
+    "example": "add ax, bx\ncmovo cx, dx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVO",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovo#form.1",
+        "text": "CMOVO reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovo#form.2",
+        "text": "CMOVO reg, mem",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovno",
+    "mnemonic": "CMOVNO",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVNO reg, reg",
+      "CMOVNO reg, mem"
+    ],
+    "example": "add ax, bx\ncmovno cx, dx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVNO",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovno#form.1",
+        "text": "CMOVNO reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovno#form.2",
+        "text": "CMOVNO reg, mem",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovp",
+    "mnemonic": "CMOVP",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVP reg, reg",
+      "CMOVP reg, mem",
+      "CMOVPE reg, reg"
+    ],
+    "example": "test al, al\ncmovp bx, cx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVP",
+        "dialect": "COMMON",
+        "name": "CMOVPE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovp#form.1",
+        "text": "CMOVP reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovp#form.2",
+        "text": "CMOVP reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovp#form.3",
+        "text": "CMOVPE reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmovnp",
+    "mnemonic": "CMOVNP",
+    "kind": "INSTRUCTION",
+    "family": "F-01",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "CMOVNP reg, reg",
+      "CMOVNP reg, mem",
+      "CMOVPO reg, reg"
+    ],
+    "example": "test al, al\ncmovnp bx, cx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "CMOVNP",
+        "dialect": "COMMON",
+        "name": "CMOVPO"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMOVNP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmovnp#form.1",
+        "text": "CMOVNP reg, reg",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovnp#form.2",
+        "text": "CMOVNP reg, mem",
+        "minCpu": "P6"
+      },
+      {
+        "id": "x86.instr.cmovnp#form.3",
+        "text": "CMOVPO reg, reg",
+        "minCpu": "P6"
+      }
+    ]
+  }
+]

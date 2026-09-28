@@ -1,0 +1,571 @@
+[
+  {
+    "id": "dos.int21.01h",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "01h" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "01h", "meaning": "Selector de función: lectura de teclado con eco" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AL", "meaning": "Carácter ASCII leído de teclado" }
+    ],
+    "flagsAndRegisters": "Retorna con el carácter en AL y lo muestra en pantalla.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Read character from standard input with echo (returns ASCII in AL)",
+    "summaryEs": "Lectura de carácter de la entrada estándar con eco (retorna ASCII en AL)",
+    "descriptionEn": "Waits for a keystroke, echoes it to the console, and returns the ASCII character code in AL. Checks for Ctrl-C.",
+    "descriptionEs": "Espera una pulsación de tecla, la muestra por pantalla (eco) y devuelve su código ASCII en AL. Responde a Ctrl-C.",
+    "example": "mov ah, 01h\nint 21h\n; AL contiene el caracter leido",
+    "sources": ["src.irvine.5e-es#13.2.1:440"]
+  },
+  {
+    "id": "dos.int21.02h",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "02h" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "02h", "meaning": "Selector de función" },
+      { "register": "DL", "value": "", "meaning": "Carácter ASCII a escribir por pantalla" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AL", "meaning": "Último carácter escrito" }
+    ],
+    "flagsAndRegisters": "Escribe el carácter en DL en la consola estándar.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Write character to standard output (character in DL)",
+    "summaryEs": "Escribir carácter en la salida estándar (carácter en DL)",
+    "descriptionEn": "Outputs the single ASCII character in register DL to the standard output device.",
+    "descriptionEs": "Envía el carácter ASCII contenido en el registro DL a la pantalla (salida estándar).",
+    "example": "mov ah, 02h\nmov dl, 'A'\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2.2:441"]
+  },
+  {
+    "id": "dos.int21.06h",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "06h" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "06h", "meaning": "Direct Console I/O" },
+      { "register": "DL", "value": "0FFh para entrada, o carácter para salida", "meaning": "Si DL=0FFh lee tecla; en otro caso escribe el carácter DL" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AL", "meaning": "Carácter leído si ZF=0 (cuando DL era 0FFh)" },
+      { "target": "ZF", "meaning": "ZF=1 si no hay tecla disponible; ZF=0 si se leyó un carácter" }
+    ],
+    "flagsAndRegisters": "ZF se modifica según la disponibilidad de tecla en modo lectura (DL=0FFh).",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Direct console I/O (read key if DL=0FFh without waiting, or write char in DL)",
+    "summaryEs": "E/S directa de consola (lectura no bloqueante si DL=0FFh o escritura de DL)",
+    "descriptionEn": "Performs console input or output without DOS buffering or Ctrl-C checking. If DL=0FFh, checks if a key was pressed; if so, ZF=0 and AL=char. If no key, ZF=1. If DL!=0FFh, prints DL.",
+    "descriptionEs": "Permite lectura y escritura en consola sin filtrado de Ctrl-C ni buffers. Si DL=0FFh, comprueba sin bloquear si hay tecla (ZF=0 y AL=char, o ZF=1 si no). Si DL!=0FFh, imprime DL.",
+    "example": "mov ah, 06h\nmov dl, 0FFh\nint 21h\njz no_tecla",
+    "sources": ["src.irvine.5e-es#13.2:440"]
+  },
+  {
+    "id": "dos.int21.07h",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "07h" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "07h", "meaning": "Direct char input without echo (no Ctrl-C)" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AL", "meaning": "Carácter leído" }
+    ],
+    "flagsAndRegisters": "No toca banderas.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Character input without echo or Ctrl-C check",
+    "summaryEs": "Entrada de carácter sin eco ni comprobación de Ctrl-C",
+    "descriptionEn": "Waits for a keystroke and returns it in AL without echoing to screen and without checking for Ctrl-C.",
+    "descriptionEs": "Espera una pulsación de tecla y la devuelve en AL sin mostrarla en pantalla y sin interceptar Ctrl-C.",
+    "example": "mov ah, 07h\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2:440"]
+  },
+  {
+    "id": "dos.int21.08h",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "08h" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "08h", "meaning": "Char input without echo (checks Ctrl-C)" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AL", "meaning": "Carácter leído" }
+    ],
+    "flagsAndRegisters": "No toca banderas.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Character input without echo (checks Ctrl-C)",
+    "summaryEs": "Entrada de carácter sin eco (comprueba Ctrl-C)",
+    "descriptionEn": "Waits for a keystroke, checks for Ctrl-C, and returns ASCII code in AL without screen echo.",
+    "descriptionEs": "Espera una pulsación de tecla, comprueba Ctrl-C y devuelve el código en AL sin eco por pantalla.",
+    "example": "mov ah, 08h\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2:440"]
+  },
+  {
+    "id": "dos.int21.09h",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "09h" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "09h", "meaning": "Selector de función" },
+      { "register": "DS:DX", "value": "Puntero a cadena", "meaning": "Dirección de memoria de la cadena terminada en '$'" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AL", "meaning": "Vale '$' al retornar" }
+    ],
+    "flagsAndRegisters": "No altera banderas. Imprime caracteres hasta encontrar el byte '$' (24h).",
+    "errors": [
+      { "code": "emu.string.unterminated", "meaning": "La cadena no contiene el carácter '$' delimitador en 64 KiB" }
+    ],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Print '$'-terminated string at DS:DX to standard output",
+    "summaryEs": "Imprime en pantalla la cadena terminada en '$' apuntada por DS:DX",
+    "descriptionEn": "Outputs characters starting at DS:DX to standard output until the byte '$' (ASCII 24h) is encountered. If '$' is missing, prints unbounded memory until 64 KiB limit.",
+    "descriptionEs": "Envía a la salida estándar los caracteres a partir de la dirección DS:DX hasta encontrar el byte '$' (ASCII 24h). Si falta el terminador '$', imprime indefinidamente hasta el límite de 64 KiB.",
+    "example": "mov dx, OFFSET mensaje\nmov ah, 09h\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2.3:442"]
+  },
+  {
+    "id": "dos.int21.0ah",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "0Ah" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "0Ah", "meaning": "Selector de función: lectura de teclado con buffer" },
+      { "register": "DS:DX", "value": "Puntero a estructura de buffer", "meaning": "Dirección del buffer de entrada en memoria" }
+    ],
+    "bufferFormat": [
+      { "offset": 0, "size": "1 byte", "direction": "IN", "meaning": "Capacidad máxima M asignada al buffer (incluyendo el Intro final)" },
+      { "offset": 1, "size": "1 byte", "direction": "OUT", "meaning": "Número de caracteres N efectivamente leídos (sin contar el Intro)" },
+      { "offset": 2, "size": "N bytes", "direction": "OUT", "meaning": "Caracteres ASCII tecleados por el usuario" },
+      { "offset": 3, "size": "1 byte", "direction": "OUT", "meaning": "Carácter de retorno de carro 0Dh (Intro) al final de la entrada" }
+    ],
+    "outputs": [
+      { "target": "buffer", "meaning": "La estructura en DS:DX se rellena con la longitud real y los caracteres" }
+    ],
+    "flagsAndRegisters": "El contrato oficial de MS-DOS indica que un buffer con capacidad M acepta un máximo de M - 1 caracteres para garantizar espacio para el 0Dh final.",
+    "errors": [],
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": "El emulador integrado comprueba length < maxLen - 1 para garantizar estricta compatibilidad con el límite de reserva de MS-DOS."
+      },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Buffered keyboard input into structure at DS:DX",
+    "summaryEs": "Lectura de teclado con buffer en la estructura de memoria en DS:DX",
+    "descriptionEn": "Reads a line from standard input into a buffer. Byte 0 is the max capacity M (including terminating 0Dh). Byte 1 receives actual count N. Bytes 2..N+1 store characters. Byte N+2 stores 0Dh.",
+    "descriptionEs": "Lee una línea del teclado en una estructura de memoria en DS:DX. El byte 0 define la capacidad máxima M (incluyendo 0Dh). El byte 1 recibe el total N de caracteres escritos. Los bytes 2..N+1 almacenan el texto. El byte N+2 almacena el Intro (0Dh).",
+    "example": "; En segmento de datos:\n; buf DB 10, ?, 10 DUP(?)\nmov dx, OFFSET buf\nmov ah, 0Ah\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2.3:443", "src.research.dos0ah"]
+  },
+  {
+    "id": "dos.int21.0bh",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "0Bh" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "0Bh", "meaning": "Check standard input status" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AL", "meaning": "00h si no hay tecla esperando; 0FFh si hay al menos una tecla en el buffer" }
+    ],
+    "flagsAndRegisters": "Retorna estado en AL.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Get standard input status (AL=0FFh if character waiting, AL=00h if empty)",
+    "summaryEs": "Comprobar estado de entrada estándar (AL=0FFh si hay tecla esperando, AL=00h si vacío)",
+    "descriptionEn": "Checks whether a character is waiting in the keyboard buffer without consuming it.",
+    "descriptionEs": "Comprueba si hay alguna tecla pendiente en el buffer de entrada del teclado sin extraerla.",
+    "example": "mov ah, 0Bh\nint 21h\ncmp al, 0FFh\nje hay_tecla",
+    "sources": ["src.irvine.5e-es#13.2:440"]
+  },
+  {
+    "id": "dos.int21.25h",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "25h" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "25h", "meaning": "Set Interrupt Vector" },
+      { "register": "AL", "value": "", "meaning": "Número de interrupción (00h-FFh)" },
+      { "register": "DS:DX", "value": "", "meaning": "Puntero lejano a la nueva rutina manejadora" }
+    ],
+    "bufferFormat": [],
+    "outputs": [],
+    "flagsAndRegisters": "Modifica la IVT (Tabla de Vectores de Interrupción) en memoria física 0000:AL*4.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Set interrupt vector (AL = interrupt number, DS:DX = handler address)",
+    "summaryEs": "Establecer vector de interrupción (AL = vector, DS:DX = dirección del manejador)",
+    "descriptionEn": "Stores the handler address at DS:DX into the Interrupt Vector Table entry AL * 4.",
+    "descriptionEs": "Almacena la dirección del nuevo manejador en DS:DX en la entrada de la Tabla de Vectores de Interrupción correspondiente (AL * 4).",
+    "example": "push ds\nmov ax, SEG miManejador\nmov ds, ax\nmov dx, OFFSET miManejador\nmov al, 1Ch\nmov ah, 25h\nint 21h\npop ds",
+    "sources": ["src.irvine.5e-es#13.3:449"]
+  },
+  {
+    "id": "dos.int21.2ah",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "2Ah" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "2Ah", "meaning": "Get System Date" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "CX", "meaning": "Año (1980-2099)" },
+      { "target": "DH", "meaning": "Mes (1-12)" },
+      { "target": "DL", "meaning": "Día del mes (1-31)" },
+      { "target": "AL", "meaning": "Día de la semana (0=Domingo, 1=Lunes, ...)" }
+    ],
+    "flagsAndRegisters": "Retorna fecha en CX, DX, AL.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Get system date (CX=year, DH=month, DL=day, AL=day of week)",
+    "summaryEs": "Obtener fecha del sistema (CX=año, DH=mes, DL=día, AL=día de la semana)",
+    "descriptionEn": "Returns current calendar date from real-time clock.",
+    "descriptionEs": "Devuelve la fecha actual del sistema desde el reloj de tiempo real.",
+    "example": "mov ah, 2Ah\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2.4:444"]
+  },
+  {
+    "id": "dos.int21.2ch",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "2Ch" },
+    "sinceVersion": "1.0",
+    "inputs": [
+      { "register": "AH", "value": "2Ch", "meaning": "Get System Time" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "CH", "meaning": "Horas (0-23)" },
+      { "target": "CL", "meaning": "Minutos (0-59)" },
+      { "target": "DH", "meaning": "Segundos (0-59)" },
+      { "target": "DL", "meaning": "Centésimas de segundo (0-99)" }
+    ],
+    "flagsAndRegisters": "Retorna hora en CX y DX.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Get system time (CH=hours, CL=minutes, DH=seconds, DL=1/100s)",
+    "summaryEs": "Obtener hora del sistema (CH=horas, CL=minutos, DH=segundos, DL=centésimas)",
+    "descriptionEn": "Returns current clock time with hundredths of a second resolution.",
+    "descriptionEs": "Devuelve la hora actual del reloj del sistema con resolución de centésimas.",
+    "example": "mov ah, 2Ch\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2.4:444"]
+  },
+  {
+    "id": "dos.int21.30h",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "30h" },
+    "sinceVersion": "2.0",
+    "inputs": [
+      { "register": "AH", "value": "30h", "meaning": "Get DOS version" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AL", "meaning": "Versión mayor (ej. 5)" },
+      { "target": "AH", "meaning": "Versión menor (ej. 0)" },
+      { "target": "BH", "meaning": "Número de serie OEM (0FFh en MS-DOS)" },
+      { "target": "BL:CX", "meaning": "Número de serie de 24 bits" }
+    ],
+    "flagsAndRegisters": "Retorna versión en AX, BX, CX.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Get DOS version number (AL=major version, AH=minor version)",
+    "summaryEs": "Obtener versión de MS-DOS (AL=versión mayor, AH=versión menor)",
+    "descriptionEn": "Returns the MS-DOS version number. The built-in emulator reports DOS 5.0.",
+    "descriptionEs": "Informa de la versión de MS-DOS instalada. El emulador integrado responde DOS 5.0.",
+    "example": "mov ah, 30h\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2.4:445"]
+  },
+  {
+    "id": "dos.int21.35h",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "35h" },
+    "sinceVersion": "2.0",
+    "inputs": [
+      { "register": "AH", "value": "35h", "meaning": "Get Interrupt Vector" },
+      { "register": "AL", "value": "", "meaning": "Número de interrupción (00h-FFh)" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "ES:BX", "meaning": "Puntero lejano al manejador actual de la interrupción" }
+    ],
+    "flagsAndRegisters": "Retorna ES:BX desde la IVT física.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Get interrupt vector (AL = interrupt number, returns handler in ES:BX)",
+    "summaryEs": "Obtener vector de interrupción (AL = vector, devuelve manejador en ES:BX)",
+    "descriptionEn": "Reads the handler address of vector AL from the IVT and returns it in ES:BX.",
+    "descriptionEs": "Obtiene de la IVT la dirección del manejador actual del vector AL y la devuelve en ES:BX.",
+    "example": "mov al, 1Ch\nmov ah, 35h\nint 21h\n; ES:BX contiene el manejador anterior",
+    "sources": ["src.irvine.5e-es#13.3:449"]
+  },
+  {
+    "id": "dos.int21.3ch",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "3Ch" },
+    "sinceVersion": "2.0",
+    "inputs": [
+      { "register": "AH", "value": "3Ch", "meaning": "Create File" },
+      { "register": "CX", "value": "Atributos", "meaning": "0=normal, 1=sólo lectura, 2=oculto, 4=sistema" },
+      { "register": "DS:DX", "value": "Ruta", "meaning": "Cadena ASCIIZ terminada en cero con el nombre del archivo" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AX", "meaning": "Descriptor (handle) del archivo creado si CF=0; código de error si CF=1" },
+      { "target": "CF", "meaning": "CF=0 éxito; CF=1 error" }
+    ],
+    "flagsAndRegisters": "CF=0 indica éxito; CF=1 error con código en AX.",
+    "errors": [
+      { "code": "03h", "meaning": "Path not found" },
+      { "code": "04h", "meaning": "Too many open files" },
+      { "code": "05h", "meaning": "Access denied" }
+    ],
+    "availability": [
+      { "backend": "emu8086", "status": "UNAVAILABLE", "reason": "El emulador integrado no implementa el sistema de ficheros DOS; use depurador externo." },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Create or truncate file (DS:DX = ASCIIZ path, CX = attributes, returns handle in AX)",
+    "summaryEs": "Crear o truncar archivo (DS:DX = ruta ASCIIZ, CX = atributos, devuelve handle en AX)",
+    "descriptionEn": "Creates a new file or truncates an existing one to zero length. Returns a 16-bit file handle in AX.",
+    "descriptionEs": "Crea un nuevo archivo o trunca a cero uno existente. Devuelve el descriptor de archivo (handle) de 16 bits en AX.",
+    "example": "mov dx, OFFSET nombreArchivo\nxor cx, cx\nmov ah, 3Ch\nint 21h\njc error_crear\nmov handle, ax",
+    "sources": ["src.irvine.5e-es#13.2.5:446"]
+  },
+  {
+    "id": "dos.int21.3dh",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "3Dh" },
+    "sinceVersion": "2.0",
+    "inputs": [
+      { "register": "AH", "value": "3Dh", "meaning": "Open File" },
+      { "register": "AL", "value": "Modo de acceso", "meaning": "0=lectura, 1=escritura, 2=lectura/escritura" },
+      { "register": "DS:DX", "value": "Ruta", "meaning": "Cadena ASCIIZ terminada en cero con la ruta" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AX", "meaning": "Handle si CF=0; código de error si CF=1" },
+      { "target": "CF", "meaning": "CF=0 éxito, CF=1 error" }
+    ],
+    "flagsAndRegisters": "CF indica éxito o error.",
+    "errors": [
+      { "code": "02h", "meaning": "File not found" },
+      { "code": "03h", "meaning": "Path not found" },
+      { "code": "05h", "meaning": "Access denied" }
+    ],
+    "availability": [
+      { "backend": "emu8086", "status": "UNAVAILABLE", "reason": "El emulador integrado no implementa el sistema de ficheros DOS; use depurador externo." },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Open existing file (DS:DX = ASCIIZ path, AL = access mode, returns handle in AX)",
+    "summaryEs": "Abrir archivo existente (DS:DX = ruta ASCIIZ, AL = modo acceso, devuelve handle en AX)",
+    "descriptionEn": "Opens an existing file for reading, writing, or both. Returns file handle in AX.",
+    "descriptionEs": "Abre un archivo existente para lectura, escritura o ambas. Devuelve el descriptor del archivo en AX.",
+    "example": "mov dx, OFFSET nombreArchivo\nmov al, 0\nmov ah, 3Dh\nint 21h\njc error_abrir",
+    "sources": ["src.irvine.5e-es#13.2.5:446"]
+  },
+  {
+    "id": "dos.int21.3eh",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "3Eh" },
+    "sinceVersion": "2.0",
+    "inputs": [
+      { "register": "AH", "value": "3Eh", "meaning": "Close File" },
+      { "register": "BX", "value": "Handle", "meaning": "Descriptor del archivo a cerrar" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "CF", "meaning": "CF=0 éxito; CF=1 error en AX" }
+    ],
+    "flagsAndRegisters": "CF=0 éxito; CF=1 error.",
+    "errors": [
+      { "code": "06h", "meaning": "Invalid handle" }
+    ],
+    "availability": [
+      { "backend": "emu8086", "status": "UNAVAILABLE", "reason": "El emulador integrado no implementa el sistema de ficheros DOS; use depurador externo." },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Close file handle (BX = handle)",
+    "summaryEs": "Cerrar descriptor de archivo (BX = handle)",
+    "descriptionEn": "Flushes file buffers and releases the file handle.",
+    "descriptionEs": "Vuelca los buffers a disco y libera el descriptor del archivo.",
+    "example": "mov bx, handle\nmov ah, 3Eh\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2.5:446"]
+  },
+  {
+    "id": "dos.int21.3fh",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "3Fh" },
+    "sinceVersion": "2.0",
+    "inputs": [
+      { "register": "AH", "value": "3Fh", "meaning": "Read from File or Device" },
+      { "register": "BX", "value": "Handle", "meaning": "Descriptor de archivo o dispositivo (0=stdin)" },
+      { "register": "CX", "value": "Bytes a leer", "meaning": "Número máximo de bytes solicitados" },
+      { "register": "DS:DX", "value": "Buffer", "meaning": "Dirección en memoria donde guardar los datos" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AX", "meaning": "Número de bytes efectivamente leídos si CF=0" },
+      { "target": "CF", "meaning": "CF=0 éxito; CF=1 error" }
+    ],
+    "flagsAndRegisters": "Si AX < CX y CF=0 se alcanzó el fin de archivo (EOF).",
+    "errors": [
+      { "code": "05h", "meaning": "Access denied" },
+      { "code": "06h", "meaning": "Invalid handle" }
+    ],
+    "availability": [
+      { "backend": "emu8086", "status": "UNAVAILABLE", "reason": "El emulador integrado no implementa el sistema de ficheros DOS; use depurador externo." },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Read from file or device (BX=handle, CX=count, DS:DX=buffer, returns count in AX)",
+    "summaryEs": "Leer de archivo o dispositivo (BX=handle, CX=longitud, DS:DX=buffer, devuelve leídos en AX)",
+    "descriptionEn": "Reads bytes from an open file or device into a memory buffer. When reading from standard input (BX=0), reads from the console.",
+    "descriptionEs": "Lee datos de un archivo o dispositivo abierto en un buffer de memoria. Con BX=0 lee de la entrada estándar de consola.",
+    "example": "mov bx, handle\nmov cx, 512\nmov dx, OFFSET buffer\nmov ah, 3Fh\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2.5:447"]
+  },
+  {
+    "id": "dos.int21.40h",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "40h" },
+    "sinceVersion": "2.0",
+    "inputs": [
+      { "register": "AH", "value": "40h", "meaning": "Write to File or Device" },
+      { "register": "BX", "value": "Handle", "meaning": "Descriptor del archivo o dispositivo (1=stdout)" },
+      { "register": "CX", "value": "Bytes a escribir", "meaning": "Número de bytes a escribir" },
+      { "register": "DS:DX", "value": "Buffer", "meaning": "Dirección de los datos a escribir" }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      { "target": "AX", "meaning": "Número de bytes efectivamente escritos si CF=0" },
+      { "target": "CF", "meaning": "CF=0 éxito; CF=1 error" }
+    ],
+    "flagsAndRegisters": "Si AX < CX el disco está lleno.",
+    "errors": [
+      { "code": "05h", "meaning": "Access denied" },
+      { "code": "06h", "meaning": "Invalid handle" }
+    ],
+    "availability": [
+      { "backend": "emu8086", "status": "UNAVAILABLE", "reason": "El emulador integrado no implementa el sistema de ficheros DOS; use depurador externo." },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Write to file or device (BX=handle, CX=count, DS:DX=buffer)",
+    "summaryEs": "Escribir en archivo o dispositivo (BX=handle, CX=longitud, DS:DX=buffer)",
+    "descriptionEn": "Writes bytes from a buffer to an open file or device. With BX=1 writes to standard output without needing '$' termination.",
+    "descriptionEs": "Escribe bytes desde un buffer a un archivo o dispositivo. Con BX=1 escribe en la salida estándar de consola sin requerir terminador '$'.",
+    "example": "mov bx, 1 ; stdout\nmov cx, longitud\nmov dx, OFFSET mensaje\nmov ah, 40h\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2.5:448"]
+  },
+  {
+    "id": "dos.int21.4ch",
+    "environment": "DOS",
+    "vector": "21h",
+    "vectorStatus": "DOS_KERNEL",
+    "selector": { "register": "AH", "value": "4Ch" },
+    "sinceVersion": "2.0",
+    "inputs": [
+      { "register": "AH", "value": "4Ch", "meaning": "Selector de función: terminar proceso" },
+      { "register": "AL", "value": "Código de retorno", "meaning": "Código de salida para el proceso padre o ERRORLEVEL" }
+    ],
+    "bufferFormat": [],
+    "outputs": [],
+    "flagsAndRegisters": "El proceso finaliza y cede el control a DOS. No retorna al llamador.",
+    "errors": [],
+    "availability": [
+      { "backend": "emu8086", "status": "AVAILABLE" },
+      { "backend": "external", "status": "AVAILABLE" }
+    ],
+    "summaryEn": "Terminate process with return code in AL",
+    "summaryEs": "Finalizar proceso con código de salida en AL (retorno a DOS)",
+    "descriptionEn": "Terminates the current process, closes its files, frees its memory, and passes the return code in AL back to DOS.",
+    "descriptionEs": "Finaliza la ejecución del proceso actual, cierra sus archivos, libera su memoria y devuelve a DOS el código de retorno en AL.",
+    "example": "mov ax, 4C00h\nint 21h",
+    "sources": ["src.irvine.5e-es#13.2.1:440"]
+  }
+]

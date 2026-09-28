@@ -30,6 +30,9 @@ class HoverTextTest {
         assertEquals("Number 21h", info.title());
         assertTrue(info.description().startsWith("Decimal: 33\n"), info.description());
         assertTrue(info.description().contains("Binary: 10 0001b"), info.description());
+        org.junit.jupiter.api.Assertions.assertNotNull(info.secondary());
+        assertEquals(io.github.dinamo541.idearm.application.editor.HoverKind.INTERRUPT_SERVICE, info.secondary().kind());
+        assertTrue(info.secondary().title().contains("INT 21h"));
     }
 
     @Test

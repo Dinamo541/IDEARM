@@ -1,0 +1,1172 @@
+[
+  {
+    "id": "x86.instr.fld",
+    "mnemonic": "FLD",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "otherState": ["x87.status.TOP", "x87.status.C1"],
+    "syntaxVariants": [
+      "FLD ST(i)",
+      "FLD dword ptr [mem]",
+      "FLD qword ptr [mem]",
+      "FLD tbyte ptr [mem]"
+    ],
+    "example": "fld qword ptr [radio]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FLD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fld#form.1",
+        "text": "FLD ST(i)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fld#form.2",
+        "text": "FLD dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fld#form.3",
+        "text": "FLD qword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fld#form.4",
+        "text": "FLD tbyte ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fst",
+    "mnemonic": "FST",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FST ST(i)",
+      "FST dword ptr [mem]",
+      "FST qword ptr [mem]"
+    ],
+    "example": "fst qword ptr [parcial]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FST",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fst#form.1",
+        "text": "FST ST(i)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fst#form.2",
+        "text": "FST dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fst#form.3",
+        "text": "FST qword ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fstp",
+    "mnemonic": "FSTP",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FSTP ST(i)",
+      "FSTP dword ptr [mem]",
+      "FSTP qword ptr [mem]",
+      "FSTP tbyte ptr [mem]"
+    ],
+    "example": "fstp qword ptr [area]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FSTP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fstp#form.1",
+        "text": "FSTP ST(i)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fstp#form.2",
+        "text": "FSTP dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fstp#form.3",
+        "text": "FSTP qword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fstp#form.4",
+        "text": "FSTP tbyte ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fadd",
+    "mnemonic": "FADD",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "otherState": ["x87.status.C1"],
+    "syntaxVariants": [
+      "FADD ST(0), ST(i)",
+      "FADD ST(i), ST(0)",
+      "FADD dword ptr [mem]",
+      "FADD qword ptr [mem]"
+    ],
+    "example": "fld qword ptr [a]\nfadd qword ptr [b]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FADD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fadd#form.1",
+        "text": "FADD ST(0), ST(i)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fadd#form.2",
+        "text": "FADD ST(i), ST(0)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fadd#form.3",
+        "text": "FADD dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fadd#form.4",
+        "text": "FADD qword ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fsub",
+    "mnemonic": "FSUB",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FSUB ST(0), ST(i)",
+      "FSUB ST(i), ST(0)",
+      "FSUB dword ptr [mem]",
+      "FSUB qword ptr [mem]"
+    ],
+    "example": "fld qword ptr [total]\nfsub qword ptr [descuento]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FSUB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fsub#form.1",
+        "text": "FSUB ST(0), ST(i)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fsub#form.2",
+        "text": "FSUB ST(i), ST(0)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fsub#form.3",
+        "text": "FSUB dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fsub#form.4",
+        "text": "FSUB qword ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fmul",
+    "mnemonic": "FMUL",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FMUL ST(0), ST(i)",
+      "FMUL ST(i), ST(0)",
+      "FMUL dword ptr [mem]",
+      "FMUL qword ptr [mem]"
+    ],
+    "example": "fld qword ptr [radio]\nfmul st(0), st(0)",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FMUL",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fmul#form.1",
+        "text": "FMUL ST(0), ST(i)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fmul#form.2",
+        "text": "FMUL ST(i), ST(0)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fmul#form.3",
+        "text": "FMUL dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fmul#form.4",
+        "text": "FMUL qword ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fdiv",
+    "mnemonic": "FDIV",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FDIV ST(0), ST(i)",
+      "FDIV ST(i), ST(0)",
+      "FDIV dword ptr [mem]",
+      "FDIV qword ptr [mem]"
+    ],
+    "example": "fld qword ptr [suma]\nfdiv qword ptr [cantidad]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FDIV",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fdiv#form.1",
+        "text": "FDIV ST(0), ST(i)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fdiv#form.2",
+        "text": "FDIV ST(i), ST(0)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fdiv#form.3",
+        "text": "FDIV dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fdiv#form.4",
+        "text": "FDIV qword ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fcom",
+    "mnemonic": "FCOM",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "otherState": ["x87.status.C0", "x87.status.C2", "x87.status.C3"],
+    "syntaxVariants": [
+      "FCOM ST(i)",
+      "FCOM dword ptr [mem]",
+      "FCOM qword ptr [mem]"
+    ],
+    "example": "fld qword ptr [x]\nfcom qword ptr [limite]\nfstsw ax\nsahf\nja mayor",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FCOM",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fcom#form.1",
+        "text": "FCOM ST(i)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fcom#form.2",
+        "text": "FCOM dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fcom#form.3",
+        "text": "FCOM qword ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fcomp",
+    "mnemonic": "FCOMP",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FCOMP ST(i)",
+      "FCOMP dword ptr [mem]",
+      "FCOMP qword ptr [mem]"
+    ],
+    "example": "fld qword ptr [x]\nfcomp qword ptr [limite]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FCOMP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fcomp#form.1",
+        "text": "FCOMP ST(i)",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fcomp#form.2",
+        "text": "FCOMP dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fcomp#form.3",
+        "text": "FCOMP qword ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.ftst",
+    "mnemonic": "FTST",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FTST"
+    ],
+    "example": "fld qword ptr [saldo]\nftst\nfstsw ax\nsahf\njz en_cero",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FTST",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.ftst#form.1",
+        "text": "FTST",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fild",
+    "mnemonic": "FILD",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FILD word ptr [mem]",
+      "FILD dword ptr [mem]",
+      "FILD qword ptr [mem]"
+    ],
+    "example": "fild word ptr [contador]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FILD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fild#form.1",
+        "text": "FILD word ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fild#form.2",
+        "text": "FILD dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fild#form.3",
+        "text": "FILD qword ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fist",
+    "mnemonic": "FIST",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FIST word ptr [mem]",
+      "FIST dword ptr [mem]"
+    ],
+    "example": "fist word ptr [resultado]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FIST",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fist#form.1",
+        "text": "FIST word ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fist#form.2",
+        "text": "FIST dword ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fistp",
+    "mnemonic": "FISTP",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FISTP word ptr [mem]",
+      "FISTP dword ptr [mem]",
+      "FISTP qword ptr [mem]"
+    ],
+    "example": "fistp dword ptr [total]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FISTP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fistp#form.1",
+        "text": "FISTP word ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fistp#form.2",
+        "text": "FISTP dword ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fistp#form.3",
+        "text": "FISTP qword ptr [mem]",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fchs",
+    "mnemonic": "FCHS",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FCHS"
+    ],
+    "example": "fld qword ptr [delta]\nfchs",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FCHS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fchs#form.1",
+        "text": "FCHS",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fabs",
+    "mnemonic": "FABS",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FABS"
+    ],
+    "example": "fld qword ptr [error]\nfabs",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FABS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fabs#form.1",
+        "text": "FABS",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fsqrt",
+    "mnemonic": "FSQRT",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "otherState": ["x87.status.C1"],
+    "requirement": {
+      "minGeneration": "I8087",
+      "features": ["X87"]
+    },
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "UNAVAILABLE",
+        "reason": "x87 coprocessor instructions not supported by emu8086 8086 engine (causes invalid opcode)",
+        "caveat": "Use DOSBox or a native target profile (win-pe32/64, linux-elf64) with x87 or SSE2 support"
+      }
+    ],
+    "syntaxVariants": [
+      "FSQRT"
+    ],
+    "example": "fld qword ptr [suma_cuadrados]\nfsqrt",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FSQRT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fsqrt#form.1",
+        "text": "FSQRT",
+        "minCpu": "8087",
+        "requirement": {
+          "minGeneration": "I8087",
+          "features": ["X87"]
+        },
+        "availability": [
+          {
+            "backend": "emu8086",
+            "status": "UNAVAILABLE",
+            "reason": "x87 coprocessor instructions not supported by emu8086 8086 engine (causes invalid opcode)",
+            "caveat": "Use DOSBox or a native target profile (win-pe32/64, linux-elf64) with x87 or SSE2 support"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fldz",
+    "mnemonic": "FLDZ",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FLDZ"
+    ],
+    "example": "fldz\nfstp qword ptr [acumulador]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FLDZ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fldz#form.1",
+        "text": "FLDZ",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fld1",
+    "mnemonic": "FLD1",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FLD1"
+    ],
+    "example": "fld1\nfstp qword ptr [producto]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FLD1",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fld1#form.1",
+        "text": "FLD1",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fldpi",
+    "mnemonic": "FLDPI",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FLDPI"
+    ],
+    "example": "fldpi\nfmul qword ptr [radio]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FLDPI",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fldpi#form.1",
+        "text": "FLDPI",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fxch",
+    "mnemonic": "FXCH",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FXCH",
+      "FXCH ST(i)"
+    ],
+    "example": "fxch st(1)",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FXCH",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fxch#form.1",
+        "text": "FXCH",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fxch#form.2",
+        "text": "FXCH ST(i)",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.finit",
+    "mnemonic": "FINIT",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FINIT"
+    ],
+    "example": "finit",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FINIT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.finit#form.1",
+        "text": "FINIT",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fninit",
+    "mnemonic": "FNINIT",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "syntaxVariants": [
+      "FNINIT"
+    ],
+    "example": "fninit",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:FNINIT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fninit#form.1",
+        "text": "FNINIT",
+        "minCpu": "8087"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.fstsw",
+    "mnemonic": "FSTSW",
+    "kind": "INSTRUCTION",
+    "family": "F-15",
+    "category": "FLOATING_POINT",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8087",
+    "otherState": ["x87.status"],
+    "syntaxVariants": [
+      "FSTSW AX",
+      "FSTSW word ptr [mem]",
+      "FNSTSW AX"
+    ],
+    "example": "fcom qword ptr [limite]\nfstsw ax\nsahf\njb menor",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "FSTSW",
+        "dialect": "COMMON",
+        "name": "FNSTSW"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:FSTSW",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.fstsw#form.1",
+        "text": "FSTSW AX",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fstsw#form.2",
+        "text": "FSTSW word ptr [mem]",
+        "minCpu": "8087"
+      },
+      {
+        "id": "x86.instr.fstsw#form.3",
+        "text": "FNSTSW AX",
+        "minCpu": "8087"
+      }
+    ]
+  }
+]

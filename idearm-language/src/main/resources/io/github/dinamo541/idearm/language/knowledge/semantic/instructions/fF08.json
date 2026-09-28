@@ -1,0 +1,278 @@
+[
+  {
+    "id": "x86.instr.jmp",
+    "mnemonic": "JMP",
+    "kind": "INSTRUCTION",
+    "family": "F-08",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JMP label",
+      "JMP reg",
+      "JMP mem"
+    ],
+    "example": "jmp bucle",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JMP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jmp#form.1",
+        "text": "JMP label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jmp#form.2",
+        "text": "JMP reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jmp#form.3",
+        "text": "JMP mem",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.call",
+    "mnemonic": "CALL",
+    "kind": "INSTRUCTION",
+    "family": "F-08",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CALL proc_name",
+      "CALL reg",
+      "CALL mem"
+    ],
+    "example": "call imprimir_mensaje",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CALL",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.call#form.1",
+        "text": "CALL proc_name",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.call#form.2",
+        "text": "CALL reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.call#form.3",
+        "text": "CALL mem",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.ret",
+    "mnemonic": "RET",
+    "kind": "INSTRUCTION",
+    "family": "F-08",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "RET",
+      "RET imm16",
+      "RETN"
+    ],
+    "example": "ret",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "RET",
+        "dialect": "COMMON",
+        "name": "RETN"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:RET",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.ret#form.1",
+        "text": "RET",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.ret#form.2",
+        "text": "RET imm16",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.ret#form.3",
+        "text": "RETN",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.retf",
+    "mnemonic": "RETF",
+    "kind": "INSTRUCTION",
+    "family": "F-08",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "RETF",
+      "RETF imm16"
+    ],
+    "example": "retf",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:RETF",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.retf#form.1",
+        "text": "RETF",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.retf#form.2",
+        "text": "RETF imm16",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.iret",
+    "mnemonic": "IRET",
+    "kind": "INSTRUCTION",
+    "family": "F-08",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "IRET",
+      "IRETD",
+      "IRETQ"
+    ],
+    "example": "iret",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "MODIFIED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "MODIFIED",
+      "A": "MODIFIED",
+      "T": "MODIFIED",
+      "S": "MODIFIED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "IRET",
+        "dialect": "COMMON",
+        "name": "IRETD"
+      },
+      {
+        "targetMnemonic": "IRET",
+        "dialect": "COMMON",
+        "name": "IRETQ"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:IRET",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.iret#form.1",
+        "text": "IRET",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.iret#form.2",
+        "text": "IRETD",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.iret#form.3",
+        "text": "IRETQ",
+        "minCpu": "8086"
+      }
+    ]
+  }
+]

@@ -1,0 +1,1368 @@
+[
+  {
+    "id": "x86.instr.bound",
+    "mnemonic": "BOUND",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80186",
+    "invalidModes": [
+      "LONG"
+    ],
+    "syntaxVariants": [
+      "BOUND reg16, mem32"
+    ],
+    "example": "bound ax, [bx]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:BOUND",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.bound#form.1",
+        "text": "BOUND reg16, mem32",
+        "minCpu": "80186",
+        "requirement": {
+          "minGeneration": "80186",
+          "invalidModes": [
+            "LONG"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.arpl",
+    "mnemonic": "ARPL",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80286",
+    "invalidModes": [
+      "LONG"
+    ],
+    "syntaxVariants": [
+      "ARPL reg16, reg16",
+      "ARPL mem16, reg16"
+    ],
+    "example": "arpl ax, bx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:ARPL",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.arpl#form.1",
+        "text": "ARPL reg16, reg16",
+        "minCpu": "80286",
+        "requirement": {
+          "minGeneration": "80286",
+          "invalidModes": [
+            "LONG"
+          ]
+        }
+      },
+      {
+        "id": "x86.instr.arpl#form.2",
+        "text": "ARPL mem16, reg16",
+        "minCpu": "80286",
+        "requirement": {
+          "minGeneration": "80286",
+          "invalidModes": [
+            "LONG"
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lar",
+    "mnemonic": "LAR",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "LAR reg16, reg16",
+      "LAR reg16, mem16"
+    ],
+    "example": "lar ax, bx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LAR",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lar#form.1",
+        "text": "LAR reg16, reg16",
+        "minCpu": "80286"
+      },
+      {
+        "id": "x86.instr.lar#form.2",
+        "text": "LAR reg16, mem16",
+        "minCpu": "80286"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lsl",
+    "mnemonic": "LSL",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "LSL reg16, reg16",
+      "LSL reg16, mem16"
+    ],
+    "example": "lsl ax, bx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LSL",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lsl#form.1",
+        "text": "LSL reg16, reg16",
+        "minCpu": "80286"
+      },
+      {
+        "id": "x86.instr.lsl#form.2",
+        "text": "LSL reg16, mem16",
+        "minCpu": "80286"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.syscall",
+    "mnemonic": "SYSCALL",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "x86-64",
+    "syntaxVariants": [
+      "SYSCALL"
+    ],
+    "example": "mov rax, 60\nxor rdi, rdi\nsyscall",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SYSCALL",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.syscall#form.1",
+        "text": "SYSCALL",
+        "minCpu": "x86-64"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sysret",
+    "mnemonic": "SYSRET",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "x86-64",
+    "syntaxVariants": [
+      "SYSRET"
+    ],
+    "example": "sysret",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SYSRET",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sysret#form.1",
+        "text": "SYSRET",
+        "minCpu": "x86-64"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.salc",
+    "mnemonic": "SALC",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "PROCESSOR_CONTROL",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "SALC"
+    ],
+    "example": "clc\nsalc  ; AL = 00h\nstc\nsalc  ; AL = FFh",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:opcode-D6",
+      "src.undocumented-pc#ch3:SALC"
+    ],
+    "recognizedBy": [
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.salc#form.1",
+        "text": "SALC",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "8086"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.icebp",
+    "mnemonic": "ICEBP",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "ICEBP",
+      "INT1"
+    ],
+    "example": "icebp  ; Single-byte hardware breakpoint trap",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "name": "INT1",
+        "targetMnemonic": "ICEBP",
+        "dialect": "COMMON",
+        "note": "Single-byte breakpoint trap"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:opcode-F1",
+      "src.undocumented-pc#ch3:ICEBP"
+    ],
+    "recognizedBy": [
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.icebp#form.1",
+        "text": "ICEBP",
+        "minCpu": "80386",
+        "requirement": {
+          "minGeneration": "80386"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lgdt",
+    "mnemonic": "LGDT",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "LGDT m16&32",
+      "LGDT m16&64"
+    ],
+    "example": "lgdt [gdt_descriptor]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LGDT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lgdt#form.1",
+        "text": "LGDT mem",
+        "minCpu": "80286",
+        "requirement": {
+          "minGeneration": "80286",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lidt",
+    "mnemonic": "LIDT",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "LIDT m16&32",
+      "LIDT m16&64"
+    ],
+    "example": "lidt [idt_descriptor]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LIDT"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lidt#form.1",
+        "text": "LIDT mem",
+        "minCpu": "80286",
+        "requirement": {
+          "minGeneration": "80286",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lmsw",
+    "mnemonic": "LMSW",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "LMSW r/m16"
+    ],
+    "example": "lmsw ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LMSW"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lmsw#form.1",
+        "text": "LMSW r/m16",
+        "minCpu": "80286",
+        "requirement": {
+          "minGeneration": "80286",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.smsw",
+    "mnemonic": "SMSW",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "SMSW r/m16"
+    ],
+    "example": "smsw ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SMSW"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.smsw#form.1",
+        "text": "SMSW r/m16",
+        "minCpu": "80286"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sldt",
+    "mnemonic": "SLDT",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "SLDT r/m16"
+    ],
+    "example": "sldt ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SLDT"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sldt#form.1",
+        "text": "SLDT r/m16",
+        "minCpu": "80286"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.str",
+    "mnemonic": "STR",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "STR r/m16"
+    ],
+    "example": "str ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:STR"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.str#form.1",
+        "text": "STR r/m16",
+        "minCpu": "80286"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.verr",
+    "mnemonic": "VERR",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "VERR r/m16"
+    ],
+    "example": "verr ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:VERR"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.verr#form.1",
+        "text": "VERR r/m16",
+        "minCpu": "80286"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.verw",
+    "mnemonic": "VERW",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "VERW r/m16"
+    ],
+    "example": "verw ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:VERW"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.verw#form.1",
+        "text": "VERW r/m16",
+        "minCpu": "80286"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.clts",
+    "mnemonic": "CLTS",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "CLTS"
+    ],
+    "example": "clts",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CLTS"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.clts#form.1",
+        "text": "CLTS",
+        "minCpu": "80286",
+        "requirement": {
+          "minGeneration": "80286",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.invlpg",
+    "mnemonic": "INVLPG",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80486",
+    "syntaxVariants": [
+      "INVLPG m"
+    ],
+    "example": "invlpg [eax]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:INVLPG"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.invlpg#form.1",
+        "text": "INVLPG m",
+        "minCpu": "80486",
+        "requirement": {
+          "minGeneration": "80486",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.rdmsr",
+    "mnemonic": "RDMSR",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "PENTIUM",
+    "syntaxVariants": [
+      "RDMSR"
+    ],
+    "example": "mov ecx, 0xC0000080\nrdmsr",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:RDMSR"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.rdmsr#form.1",
+        "text": "RDMSR",
+        "minCpu": "PENTIUM",
+        "requirement": {
+          "minGeneration": "PENTIUM",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.wrmsr",
+    "mnemonic": "WRMSR",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "PENTIUM",
+    "syntaxVariants": [
+      "WRMSR"
+    ],
+    "example": "mov ecx, 0xC0000080\nwrmsr",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:WRMSR"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.wrmsr#form.1",
+        "text": "WRMSR",
+        "minCpu": "PENTIUM",
+        "requirement": {
+          "minGeneration": "PENTIUM",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.rsm",
+    "mnemonic": "RSM",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "PENTIUM",
+    "syntaxVariants": [
+      "RSM"
+    ],
+    "example": "rsm",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:RSM"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.rsm#form.1",
+        "text": "RSM",
+        "minCpu": "PENTIUM",
+        "requirement": {
+          "minGeneration": "PENTIUM"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sysenter",
+    "mnemonic": "SYSENTER",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "SYSENTER"
+    ],
+    "example": "sysenter",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SYSENTER"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sysenter#form.1",
+        "text": "SYSENTER",
+        "minCpu": "P6",
+        "requirement": {
+          "minGeneration": "P6"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sysexit",
+    "mnemonic": "SYSEXIT",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "P6",
+    "syntaxVariants": [
+      "SYSEXIT"
+    ],
+    "example": "sysexit",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SYSEXIT"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sysexit#form.1",
+        "text": "SYSEXIT",
+        "minCpu": "P6",
+        "requirement": {
+          "minGeneration": "P6",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.swapgs",
+    "mnemonic": "SWAPGS",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "x86-64",
+    "syntaxVariants": [
+      "SWAPGS"
+    ],
+    "example": "swapgs",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SWAPGS"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.swapgs#form.1",
+        "text": "SWAPGS",
+        "minCpu": "x86-64",
+        "requirement": {
+          "minGeneration": "x86-64",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.rdtscp",
+    "mnemonic": "RDTSCP",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "x86-64",
+    "syntaxVariants": [
+      "RDTSCP"
+    ],
+    "example": "rdtscp",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:RDTSCP"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.rdtscp#form.1",
+        "text": "RDTSCP",
+        "minCpu": "x86-64",
+        "requirement": {
+          "minGeneration": "x86-64"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lldt",
+    "mnemonic": "LLDT",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "LLDT r/m16"
+    ],
+    "example": "lldt ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LLDT"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lldt#form.1",
+        "text": "LLDT r/m16",
+        "minCpu": "80286",
+        "requirement": {
+          "minGeneration": "80286",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.ltr",
+    "mnemonic": "LTR",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "LTR r/m16"
+    ],
+    "example": "ltr ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LTR"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.ltr#form.1",
+        "text": "LTR r/m16",
+        "minCpu": "80286",
+        "requirement": {
+          "minGeneration": "80286",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sgdt",
+    "mnemonic": "SGDT",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "SGDT m16&32",
+      "SGDT m16&64"
+    ],
+    "example": "sgdt [gdt_buf]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SGDT"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sgdt#form.1",
+        "text": "SGDT mem",
+        "minCpu": "80286"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sidt",
+    "mnemonic": "SIDT",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80286",
+    "syntaxVariants": [
+      "SIDT m16&32",
+      "SIDT m16&64"
+    ],
+    "example": "sidt [idt_buf]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SIDT"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sidt#form.1",
+        "text": "SIDT mem",
+        "minCpu": "80286"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.invd",
+    "mnemonic": "INVD",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80486",
+    "syntaxVariants": [
+      "INVD"
+    ],
+    "example": "invd",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:INVD"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.invd#form.1",
+        "text": "INVD",
+        "minCpu": "80486",
+        "requirement": {
+          "minGeneration": "80486",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.wbinvd",
+    "mnemonic": "WBINVD",
+    "kind": "INSTRUCTION",
+    "family": "F-16",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80486",
+    "syntaxVariants": [
+      "WBINVD"
+    ],
+    "example": "wbinvd",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:WBINVD"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.wbinvd#form.1",
+        "text": "WBINVD",
+        "minCpu": "80486",
+        "requirement": {
+          "minGeneration": "80486",
+          "privilege": "RING0"
+        }
+      }
+    ]
+  }
+]

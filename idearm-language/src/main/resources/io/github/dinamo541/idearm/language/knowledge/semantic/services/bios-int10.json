@@ -1,0 +1,583 @@
+[
+  {
+    "id": "bios.int10.00h",
+    "environment": "BIOS",
+    "vector": "10h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "00h"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "00h",
+        "meaning": "Set Video Mode function selector"
+      },
+      {
+        "register": "AL",
+        "value": "Video Mode",
+        "meaning": "Desired video mode (e.g. 03h: 80x25 16-color text, 12h: 640x480 16-color graphics, 13h: 320x200 256-color graphics)"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      {
+        "target": "AL",
+        "meaning": "Video mode flags / controller status"
+      }
+    ],
+    "flagsAndRegisters": "Changes active video display mode, clears video buffer memory, and resets cursor position to (0,0).",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Set display video mode (clears screen and resets cursor).",
+    "summaryEs": "Establece el modo de video (limpia la pantalla y reinicia el cursor).",
+    "descriptionEn": "Initializes the video display controller to the specified mode in AL. Clears screen memory and positions cursor at row 0, column 0 of page 0.",
+    "descriptionEs": "Inicializa el controlador de pantalla en el modo especificado en AL. Limpia la memoria de video y coloca el cursor en la fila 0, columna 0 de la página 0.",
+    "example": "mov ah, 00h\nmov al, 03h   ; 80x25 text mode\nint 10h",
+    "sources": [
+      "IBM PC Technical Reference BIOS",
+      "Irvine Assembly Language §13.1"
+    ]
+  },
+  {
+    "id": "bios.int10.02h",
+    "environment": "BIOS",
+    "vector": "10h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "02h"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "02h",
+        "meaning": "Set Cursor Position function selector"
+      },
+      {
+        "register": "BH",
+        "value": "Page Number",
+        "meaning": "Video display page number (typically 0 in text mode)"
+      },
+      {
+        "register": "DH",
+        "value": "Row",
+        "meaning": "Screen row coordinate (0 to 24 for 80x25 screen)"
+      },
+      {
+        "register": "DL",
+        "value": "Column",
+        "meaning": "Screen column coordinate (0 to 79 for 80x25 screen)"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [],
+    "flagsAndRegisters": "Updates BIOS cursor position state in BDA (0040:0050h) and programs CRT controller.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Set text cursor position on specified display page.",
+    "summaryEs": "Establece la posición del cursor de texto en la página indicada.",
+    "descriptionEn": "Moves the hardware text cursor to row DH and column DL on the specified video page BH.",
+    "descriptionEs": "Mueve el cursor de texto a la fila DH y columna DL en la página de video especificada en BH.",
+    "example": "mov ah, 02h\nmov bh, 00h   ; Page 0\nmov dh, 12    ; Row 12\nmov dl, 40    ; Col 40\nint 10h",
+    "sources": [
+      "IBM PC Technical Reference BIOS",
+      "Irvine Assembly Language §13.1"
+    ]
+  },
+  {
+    "id": "bios.int10.06h",
+    "environment": "BIOS",
+    "vector": "10h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "06h"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "06h",
+        "meaning": "Scroll Window Up function selector"
+      },
+      {
+        "register": "AL",
+        "value": "Lines",
+        "meaning": "Number of lines to scroll up (0 = blank entire designated window)"
+      },
+      {
+        "register": "BH",
+        "value": "Attribute",
+        "meaning": "Display text attribute used for newly blanked lines (e.g. 07h for light gray on black)"
+      },
+      {
+        "register": "CH",
+        "value": "Upper Row",
+        "meaning": "Upper left row coordinate"
+      },
+      {
+        "register": "CL",
+        "value": "Upper Col",
+        "meaning": "Upper left column coordinate"
+      },
+      {
+        "register": "DH",
+        "value": "Lower Row",
+        "meaning": "Lower right row coordinate"
+      },
+      {
+        "register": "DL",
+        "value": "Lower Col",
+        "meaning": "Lower right column coordinate"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [],
+    "flagsAndRegisters": "Scrolls video display lines up within rectangle. Emptied lines at bottom are filled with attribute BH.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Scroll designated rectangular screen window upwards.",
+    "summaryEs": "Desplaza hacia arriba una ventana rectangular de la pantalla.",
+    "descriptionEn": "Scrolls the rectangular window bounded by (CH,CL) and (DH,DL) upward by AL lines. If AL is 0, blanks the entire rectangular window with attribute BH.",
+    "descriptionEs": "Desplaza hacia arriba AL líneas la ventana delimitada por (CH,CL) y (DH,DL). Si AL es 0, limpia toda la ventana rectangular rellenándola con el atributo BH.",
+    "example": "mov ah, 06h\nmov al, 0     ; Blank entire screen\nmov bh, 07h   ; Normal text attribute\nmov cx, 0000h ; Top-left (0,0)\nmov dx, 184Fh ; Bottom-right (24,79)\nint 10h",
+    "sources": [
+      "IBM PC Technical Reference BIOS",
+      "Irvine Assembly Language §13.1"
+    ]
+  },
+  {
+    "id": "bios.int10.07h",
+    "environment": "BIOS",
+    "vector": "10h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "07h"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "07h",
+        "meaning": "Scroll Window Down function selector"
+      },
+      {
+        "register": "AL",
+        "value": "Lines",
+        "meaning": "Number of lines to scroll down (0 = blank window)"
+      },
+      {
+        "register": "BH",
+        "value": "Attribute",
+        "meaning": "Display attribute for newly blanked lines"
+      },
+      {
+        "register": "CH",
+        "value": "Upper Row",
+        "meaning": "Upper left row"
+      },
+      {
+        "register": "CL",
+        "value": "Upper Col",
+        "meaning": "Upper left column"
+      },
+      {
+        "register": "DH",
+        "value": "Lower Row",
+        "meaning": "Lower right row"
+      },
+      {
+        "register": "DL",
+        "value": "Lower Col",
+        "meaning": "Lower right column"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [],
+    "flagsAndRegisters": "Scrolls lines down within rectangle; top lines filled with attribute BH.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Scroll designated rectangular screen window downwards.",
+    "summaryEs": "Desplaza hacia abajo una ventana rectangular de la pantalla.",
+    "descriptionEn": "Scrolls the rectangular window downwards by AL lines. Emptied lines at the top are filled with character space and attribute BH.",
+    "descriptionEs": "Desplaza hacia abajo AL líneas la ventana rectangular. Las líneas vaciadas arriba se rellenan con espacio y el atributo BH.",
+    "example": "mov ah, 07h\nmov al, 01h\nmov bh, 07h\nmov cx, 0500h\nmov dx, 144Fh\nint 10h",
+    "sources": [
+      "IBM PC Technical Reference BIOS"
+    ]
+  },
+  {
+    "id": "bios.int10.08h",
+    "environment": "BIOS",
+    "vector": "10h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "08h"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "08h",
+        "meaning": "Read Character and Attribute function selector"
+      },
+      {
+        "register": "BH",
+        "value": "Page",
+        "meaning": "Display page number"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      {
+        "target": "AH",
+        "meaning": "Character color/style display attribute"
+      },
+      {
+        "target": "AL",
+        "meaning": "ASCII character code"
+      }
+    ],
+    "flagsAndRegisters": "Returns character and attribute from current cursor location on video page BH.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Read character and display attribute at current cursor position.",
+    "summaryEs": "Lee el carácter y el atributo en la posición actual del cursor.",
+    "descriptionEn": "Returns the ASCII character code in AL and its color attribute byte in AH from the current cursor location on the specified page.",
+    "descriptionEs": "Devuelve el código ASCII del carácter en AL y su byte de atributo de color en AH desde la posición actual del cursor en la página especificada.",
+    "example": "mov ah, 08h\nmov bh, 00h\nint 10h        ; AL = char, AH = attribute",
+    "sources": [
+      "IBM PC Technical Reference BIOS"
+    ]
+  },
+  {
+    "id": "bios.int10.09h",
+    "environment": "BIOS",
+    "vector": "10h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "09h"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "09h",
+        "meaning": "Write Character and Attribute function selector"
+      },
+      {
+        "register": "AL",
+        "value": "Character",
+        "meaning": "ASCII character code to display"
+      },
+      {
+        "register": "BH",
+        "value": "Page",
+        "meaning": "Display page number"
+      },
+      {
+        "register": "BL",
+        "value": "Attribute",
+        "meaning": "Display attribute byte (color in graphics modes)"
+      },
+      {
+        "register": "CX",
+        "value": "Count",
+        "meaning": "Number of times to write the character"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [],
+    "flagsAndRegisters": "Writes character CX times without moving the cursor.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Write character and attribute at cursor position (does not move cursor).",
+    "summaryEs": "Escribe un carácter y su atributo en la posición del cursor (sin mover el cursor).",
+    "descriptionEn": "Displays character AL with attribute BL at the current cursor position on page BH, repeated CX times. Does not advance the cursor position.",
+    "descriptionEs": "Muestra el carácter AL con el atributo BL en la posición del cursor en la página BH, repetido CX veces. No avanza la posición del cursor.",
+    "example": "mov ah, 09h\nmov al, '*'\nmov bh, 00h\nmov bl, 0Ah   ; Light green text\nmov cx, 10    ; Repeat 10 times\nint 10h",
+    "sources": [
+      "IBM PC Technical Reference BIOS",
+      "Irvine Assembly Language §13.1"
+    ]
+  },
+  {
+    "id": "bios.int10.0eh",
+    "environment": "BIOS",
+    "vector": "10h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "0Eh"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "0Eh",
+        "meaning": "Teletype Output function selector"
+      },
+      {
+        "register": "AL",
+        "value": "Character",
+        "meaning": "ASCII character code to print"
+      },
+      {
+        "register": "BH",
+        "value": "Page",
+        "meaning": "Video display page number (text mode)"
+      },
+      {
+        "register": "BL",
+        "value": "Color",
+        "meaning": "Foreground color in graphics modes (ignored in text mode)"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [],
+    "flagsAndRegisters": "Prints character, advances cursor, and scrolls window up automatically when reaching line 24.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Write character in teletype mode (advances cursor and handles control characters).",
+    "summaryEs": "Escribe un carácter en modo teletipo (avanza el cursor e interpreta caracteres de control).",
+    "descriptionEn": "Outputs character AL to active display page. Advances the cursor, wraps text at screen margin, processes bell (07h), backspace (08h), line feed (0Ah), and carriage return (0Dh), and scrolls screen when needed.",
+    "descriptionEs": "Emite el carácter AL en la página activa. Avanza el cursor, ajusta líneas en el margen, interpreta campana (07h), retroceso (08h), salto de línea (0Ah) y retorno de carro (0Dh), y desplaza la pantalla al llegar al fondo.",
+    "example": "mov ah, 0Eh\nmov al, 'A'\nmov bh, 00h\nint 10h",
+    "sources": [
+      "IBM PC Technical Reference BIOS",
+      "Irvine Assembly Language §13.1"
+    ]
+  },
+  {
+    "id": "bios.int10.0fh",
+    "environment": "BIOS",
+    "vector": "10h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "0Fh"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "0Fh",
+        "meaning": "Get Current Video Mode function selector"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      {
+        "target": "AL",
+        "meaning": "Current video display mode (bit 7 set if video buffer was not cleared on mode set)"
+      },
+      {
+        "target": "AH",
+        "meaning": "Number of character columns on screen (e.g. 40, 80)"
+      },
+      {
+        "target": "BH",
+        "meaning": "Active display page number"
+      }
+    ],
+    "flagsAndRegisters": "Queries BDA to return current display controller mode and geometry.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Get current video mode, column width, and active page.",
+    "summaryEs": "Obtiene el modo de video actual, ancho de columnas y página activa.",
+    "descriptionEn": "Returns current video mode in AL, screen column width in AH, and the active video page index in BH.",
+    "descriptionEs": "Devuelve el modo de video actual en AL, el número de columnas de texto en AH y la página activa en BH.",
+    "example": "mov ah, 0Fh\nint 10h        ; AL = mode, AH = columns, BH = page",
+    "sources": [
+      "IBM PC Technical Reference BIOS"
+    ]
+  },
+  {
+    "id": "bios.int10.13h",
+    "environment": "BIOS",
+    "vector": "10h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "13h"
+    },
+    "sinceVersion": "IBM PC AT BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "13h",
+        "meaning": "Write Character String function selector"
+      },
+      {
+        "register": "AL",
+        "value": "Write Mode",
+        "meaning": "Write mode (0: string is chars only, cursor not updated; 1: chars only, cursor updated; 2: chars and attributes, cursor not updated; 3: chars and attributes, cursor updated)"
+      },
+      {
+        "register": "BH",
+        "value": "Page",
+        "meaning": "Display page number"
+      },
+      {
+        "register": "BL",
+        "value": "Attribute",
+        "meaning": "Display attribute byte (used when AL=0 or AL=1)"
+      },
+      {
+        "register": "CX",
+        "value": "Length",
+        "meaning": "String length in characters"
+      },
+      {
+        "register": "DH",
+        "value": "Row",
+        "meaning": "Screen starting row"
+      },
+      {
+        "register": "DL",
+        "value": "Column",
+        "meaning": "Screen starting column"
+      },
+      {
+        "register": "ES:BP",
+        "value": "Pointer",
+        "meaning": "Pointer to character string or char/attribute pairs in memory"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [],
+    "flagsAndRegisters": "Writes entire character string with hardware attributes.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "UNAVAILABLE",
+        "caveat": "diagnostic.emu.bios.unsupported",
+        "reason": "Built-in emulator does not implement BIOS INT 10h function 13h."
+      },
+      {
+        "backend": "dosbox",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Write character string with attributes (AT BIOS and later; not supported in emu8086).",
+    "summaryEs": "Escribe una cadena de caracteres con atributos (BIOS AT y posterior; no soportado en emu8086).",
+    "descriptionEn": "Outputs a string of CX characters located at ES:BP starting at row DH, column DL. Requires an AT BIOS or EGA/VGA adapter. The built-in emu8086 emulator flags this function as unsupported.",
+    "descriptionEs": "Imprime una cadena de CX caracteres situada en ES:BP comenzando en fila DH, columna DL. Requiere BIOS AT o adaptador EGA/VGA. El emulador emu8086 integrado marca esta función como no soportada.",
+    "example": "mov ax, seg mensaje\nmov es, ax\nlea bp, mensaje\nmov ah, 13h\nmov al, 01h   ; Chars only, update cursor\nmov bh, 00h\nmov bl, 0Fh   ; Bright white\nmov cx, 12    ; Length\nmov dh, 10    ; Row\nmov dl, 20    ; Col\nint 10h",
+    "sources": [
+      "IBM PC AT Technical Reference BIOS",
+      "Irvine Assembly Language §13.1"
+    ]
+  }
+]

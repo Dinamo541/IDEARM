@@ -1,0 +1,282 @@
+[
+  {
+    "id": "x86.instr.in",
+    "mnemonic": "IN",
+    "kind": "INSTRUCTION",
+    "family": "F-12",
+    "category": "IO_PORTS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "IN AL, imm8",
+      "IN AL, DX",
+      "IN AX, DX",
+      "IN EAX, DX"
+    ],
+    "example": "in al, 60h",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:IN",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.in#form.1",
+        "text": "IN AL, imm8",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.in#form.2",
+        "text": "IN AL, DX",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.in#form.3",
+        "text": "IN AX, DX",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.in#form.4",
+        "text": "IN EAX, DX",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.out",
+    "mnemonic": "OUT",
+    "kind": "INSTRUCTION",
+    "family": "F-12",
+    "category": "IO_PORTS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "OUT imm8, AL",
+      "OUT DX, AL",
+      "OUT DX, AX",
+      "OUT DX, EAX"
+    ],
+    "example": "out 61h, al",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:OUT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.out#form.1",
+        "text": "OUT imm8, AL",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.out#form.2",
+        "text": "OUT DX, AL",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.out#form.3",
+        "text": "OUT DX, AX",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.out#form.4",
+        "text": "OUT DX, EAX",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.ins",
+    "mnemonic": "INS",
+    "kind": "INSTRUCTION",
+    "family": "F-12",
+    "category": "IO_PORTS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80186",
+    "syntaxVariants": [
+      "INS mem8, DX",
+      "INS mem16, DX",
+      "INSB",
+      "INSW",
+      "INSD"
+    ],
+    "example": "insb",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "INS",
+        "dialect": "COMMON",
+        "name": "INSB"
+      },
+      {
+        "targetMnemonic": "INS",
+        "dialect": "COMMON",
+        "name": "INSD"
+      },
+      {
+        "targetMnemonic": "INS",
+        "dialect": "COMMON",
+        "name": "INSW"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:INS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.ins#form.1",
+        "text": "INS mem8, DX",
+        "minCpu": "80186"
+      },
+      {
+        "id": "x86.instr.ins#form.2",
+        "text": "INS mem16, DX",
+        "minCpu": "80186"
+      },
+      {
+        "id": "x86.instr.ins#form.3",
+        "text": "INSB",
+        "minCpu": "80186"
+      },
+      {
+        "id": "x86.instr.ins#form.4",
+        "text": "INSW",
+        "minCpu": "80186"
+      },
+      {
+        "id": "x86.instr.ins#form.5",
+        "text": "INSD",
+        "minCpu": "80186"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.outs",
+    "mnemonic": "OUTS",
+    "kind": "INSTRUCTION",
+    "family": "F-12",
+    "category": "IO_PORTS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80186",
+    "syntaxVariants": [
+      "OUTS DX, mem8",
+      "OUTS DX, mem16",
+      "OUTSB",
+      "OUTSW",
+      "OUTSD"
+    ],
+    "example": "outsb",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "OUTS",
+        "dialect": "COMMON",
+        "name": "OUTSB"
+      },
+      {
+        "targetMnemonic": "OUTS",
+        "dialect": "COMMON",
+        "name": "OUTSD"
+      },
+      {
+        "targetMnemonic": "OUTS",
+        "dialect": "COMMON",
+        "name": "OUTSW"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:OUTS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.outs#form.1",
+        "text": "OUTS DX, mem8",
+        "minCpu": "80186"
+      },
+      {
+        "id": "x86.instr.outs#form.2",
+        "text": "OUTS DX, mem16",
+        "minCpu": "80186"
+      },
+      {
+        "id": "x86.instr.outs#form.3",
+        "text": "OUTSB",
+        "minCpu": "80186"
+      },
+      {
+        "id": "x86.instr.outs#form.4",
+        "text": "OUTSW",
+        "minCpu": "80186"
+      },
+      {
+        "id": "x86.instr.outs#form.5",
+        "text": "OUTSD",
+        "minCpu": "80186"
+      }
+    ]
+  }
+]

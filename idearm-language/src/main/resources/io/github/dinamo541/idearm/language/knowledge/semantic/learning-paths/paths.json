@@ -1,0 +1,328 @@
+[
+  {
+    "id": "path.r1.read_instruction",
+    "sequenceNumber": 1,
+    "titleEn": "Reading an Instruction",
+    "titleEs": "Leer una instrucción",
+    "level": "BASIC",
+    "prerequisites": [],
+    "objectiveEn": "The student deconstructs `mov ax, [bx+si+4]` naming each component, size, default segment, and effective address computation.",
+    "objectiveEs": "El estudiante descompone `mov ax, [bx+si+4]` nombrando cada parte, el tamaño, el segmento por omisión y el cálculo de la dirección efectiva.",
+    "stepConceptIds": [
+      "concept.addr.effective_address",
+      "concept.mem.segmentation"
+    ],
+    "stepInstructionIds": [
+      "MOV",
+      "LEA"
+    ],
+    "exercises": [
+      {
+        "id": "ex.r1.1",
+        "promptEn": "Given the instruction `mov cx, [bx+di+8]`, identify the destination register, the transfer size in bytes, the default segment register used for physical address calculation, and the effective address formula.",
+        "promptEs": "Dada la instrucción `mov cx, [bx+di+8]`, identifique el registro destino, el tamaño de la transferencia en bytes, el registro de segmento por omisión utilizado para la dirección física y la fórmula de cálculo de la dirección efectiva.",
+        "starterCode": "; Identifique los componentes de:\nmov cx, [bx+di+8]",
+        "solutionCode": "; Destino: CX (16 bits, 2 bytes)\n; Origen: Memoria [BX + DI + 8]\n; Segmento por omisión: DS\n; Dirección Efectiva (EA): BX + DI + 8\n; Dirección Física: (DS * 16) + EA",
+        "solutionExplanationEn": "CX is a 16-bit register (2 bytes). The source operand is memory in base+index+displacement mode. Since BX is the base register, the default segment is DS.",
+        "solutionExplanationEs": "CX es un registro de 16 bits (2 bytes). El operando fuente es de memoria con modo base+índice+desplazamiento. Al usar BX como base, el segmento implícito es DS."
+      }
+    ],
+    "sources": [
+      "Intel SDM Vol. 1 §3.7.5: Operand Addressing",
+      "Irvine Assembly Language for x86 Processors §4.2"
+    ]
+  },
+  {
+    "id": "path.r2.data_and_registers",
+    "sequenceNumber": 2,
+    "titleEn": "Data and Registers",
+    "titleEs": "Datos y registros",
+    "level": "BASIC",
+    "prerequisites": [
+      "path.r1.read_instruction"
+    ],
+    "objectiveEn": "Declares data variables, chooses appropriate registers, and explains sub-register aliasing (AX/AH/AL, RAX/EAX).",
+    "objectiveEs": "Declara datos, elige el registro adecuado y explica el solapamiento de subregistros (AX/AH/AL, RAX/EAX).",
+    "stepConceptIds": [
+      "concept.reg.views",
+      "concept.fund.binary_numbers"
+    ],
+    "stepInstructionIds": [
+      "MOV",
+      "XCHG"
+    ],
+    "exercises": [
+      {
+        "id": "ex.r2.1",
+        "promptEn": "Write a code fragment that loads the value 0x1234 into AX, then modifies only AL by assigning 0x56, and explain the resulting final value in AX and AH.",
+        "promptEs": "Escriba un fragmento de código que cargue el valor 0x1234 en AX, luego modifique únicamente AL asignándole 0x56, y explique el valor final resultante en AX y AH.",
+        "starterCode": "mov ax, 1234h\n; modifique AL con 56h\n",
+        "solutionCode": "mov ax, 1234h\nmov al, 56h\n; AX = 1256h (AH = 12h, AL = 56h)",
+        "solutionExplanationEn": "AX consists of AH (bits 15-8) and AL (bits 7-0). Modifying AL leaves AH untouched, resulting in AX = 1256h.",
+        "solutionExplanationEs": "AX está compuesto por AH (bits 15-8) y AL (bits 7-0). Modificar AL deja inalterado AH, resultando en AX = 1256h."
+      }
+    ],
+    "sources": [
+      "Intel SDM Vol. 1 §3.4.1: General-Purpose Registers",
+      "Stallings Computer Organization and Architecture §12.3"
+    ]
+  },
+  {
+    "id": "path.r3.memory_and_segments",
+    "sequenceNumber": 3,
+    "titleEn": "Memory and Segments",
+    "titleEs": "Memoria y segmentos",
+    "level": "BASIC",
+    "prerequisites": [
+      "path.r2.data_and_registers"
+    ],
+    "objectiveEn": "Calculates physical addresses in real mode (Segment*16 + Offset), explains segment overlap, and distinguishes hardware segments, directives, and object sections.",
+    "objectiveEs": "Calcula una dirección física en modo real (Segmento*16 + Offset), explica el solapamiento de segmentos y distingue registros de segmento, directivas y secciones objeto.",
+    "stepConceptIds": [
+      "concept.mem.segmentation",
+      "concept.mem.segments_vs_sections"
+    ],
+    "stepInstructionIds": [
+      "MOV",
+      "LDS",
+      "LES"
+    ],
+    "exercises": [
+      {
+        "id": "ex.r3.1",
+        "promptEn": "Calculate the 20-bit physical address corresponding to the logical address 1234h:0100h in 16-bit real mode.",
+        "promptEs": "Calcule la dirección física de 20 bits correspondiente a la dirección lógica 1234h:0100h en modo real de 16 bits.",
+        "starterCode": "; Segmento = 1234h, Desplazamiento = 0100h\n; Direccion fisica = ?",
+        "solutionCode": "; Segmento * 16 (desplazar 1 nibble a la izquierda): 12340h\n; + Desplazamiento:                                   00100h\n; = Direccion Fisica:                                12440h",
+        "solutionExplanationEn": "In 8086 real mode, the 20-bit physical address is obtained by multiplying the segment by 16 (shifting left by 4 bits / adding a hex zero) and adding the offset: 12340h + 0100h = 12440h.",
+        "solutionExplanationEs": "En modo real 8086, la dirección física de 20 bits se obtiene multiplicando el segmento por 16 (añadir un cero hexadecimal al final) y sumando el offset: 12340h + 0100h = 12440h."
+      }
+    ],
+    "sources": [
+      "Intel SDM Vol. 1 §3.4.2: Segment Registers",
+      "Abel IBM PC Assembly Language and Programming §2.3"
+    ]
+  },
+  {
+    "id": "path.r4.conditions_and_loops",
+    "sequenceNumber": 4,
+    "titleEn": "Conditions and Loops",
+    "titleEs": "Condiciones y bucles",
+    "level": "BASIC",
+    "prerequisites": [
+      "path.r2.data_and_registers"
+    ],
+    "objectiveEn": "Chooses correctly between signed (JG/JL) and unsigned (JA/JB) conditional jumps with rationale, and implements loops using both LOOP and CMP+Jcc.",
+    "objectiveEs": "Elige correctamente entre saltos con signo (JG/JL) y sin signo (JA/JB) con su justificación, y escribe bucles tanto con LOOP como con CMP+Jcc.",
+    "stepConceptIds": [
+      "concept.fund.carry_vs_overflow",
+      "concept.pair.cmp_vs_test"
+    ],
+    "stepInstructionIds": [
+      "CMP",
+      "TEST",
+      "JG",
+      "JA",
+      "LOOP",
+      "JNE"
+    ],
+    "exercises": [
+      {
+        "id": "ex.r4.1",
+        "promptEn": "Write a loop that sums integers from 1 to 10 into AX using register CX as counter and the LOOP instruction.",
+        "promptEs": "Escriba un bucle que sume los enteros del 1 al 10 en AX utilizando el registro CX como contador y la instrucción LOOP.",
+        "starterCode": "mov ax, 0\nmov cx, 10\nbucle:\n  ; sume y decremente con LOOP\n",
+        "solutionCode": "mov ax, 0\nmov cx, 10\nbucle:\n  add ax, cx\n  loop bucle\n; Al finalizar, AX = 55 (10+9+...+1)",
+        "solutionExplanationEn": "LOOP implicitly subtracts 1 from CX (without modifying flags) and jumps to the target label if CX != 0.",
+        "solutionExplanationEs": "LOOP resta 1 a CX de forma implícita (sin modificar banderas) y salta a la etiqueta si CX != 0."
+      }
+    ],
+    "sources": [
+      "Intel SDM Vol. 2A: Jcc and LOOP",
+      "Irvine Assembly Language for x86 Processors §6.3"
+    ]
+  },
+  {
+    "id": "path.r5.stack_and_procedures",
+    "sequenceNumber": 5,
+    "titleEn": "Stack and Procedures",
+    "titleEs": "Pila y procedimientos",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "path.r4.conditions_and_loops"
+    ],
+    "objectiveEn": "Follows CALL/RET stack behavior, identifies return addresses, builds standard stack frames with BP/EBP, and manages parameter passing.",
+    "objectiveEs": "Sigue el comportamiento de la pila en CALL/RET, identifica la dirección de retorno, construye marcos de pila estándar con BP/EBP y gestiona el paso de parámetros.",
+    "stepConceptIds": [
+      "concept.proc.stack_frame",
+      "concept.proc.calling_conventions"
+    ],
+    "stepInstructionIds": [
+      "PUSH",
+      "POP",
+      "CALL",
+      "RET",
+      "ENTER",
+      "LEAVE"
+    ],
+    "exercises": [
+      {
+        "id": "ex.r5.1",
+        "promptEn": "Write the prologue and epilogue of a 16-bit procedure `sumar` that receives two parameters on the stack (pushed before CALL), reserves 2 bytes for a local variable, and returns cleaning up the 4 parameter bytes with `ret 4`.",
+        "promptEs": "Escriba el prólogo y epílogo de un procedimiento `sumar` en 16 bits que reciba dos parámetros en la pila (pasados antes del CALL), reserve 2 bytes para una variable local, y retorne limpiando los 4 bytes de parámetros con `ret 4`.",
+        "starterCode": "sumar PROC\n  ; prologo\n  ; epilogo\nsumar ENDP",
+        "solutionCode": "sumar PROC\n  push bp\n  mov bp, sp\n  sub sp, 2        ; variable local en [bp-2]\n  ; cuerpo: param1 en [bp+4], param2 en [bp+6]\n  mov sp, bp       ; desasigna locales\n  pop bp           ; restaura marco anterior\n  ret 4            ; retorna y limpia 4 bytes de parametros\nsumar ENDP",
+        "solutionExplanationEn": "The prologue saves BP and establishes the frame base; parameters reside at [bp+4] and [bp+6], and the local at [bp-2]. `ret 4` cleans the caller's pushed parameters.",
+        "solutionExplanationEs": "El prólogo preserva BP y fija la base del marco; los parámetros quedan en [bp+4] y [bp+6], y la variable local en [bp-2]. `ret 4` limpia los parámetros pasados por el llamador."
+      }
+    ],
+    "sources": [
+      "Intel SDM Vol. 1 §6.2: Stacks",
+      "Irvine Assembly Language for x86 Processors §5.4"
+    ]
+  },
+  {
+    "id": "path.r6.environment_services",
+    "sequenceNumber": 6,
+    "titleEn": "Environment Services",
+    "titleEs": "Servicios del entorno",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "path.r3.memory_and_segments"
+    ],
+    "objectiveEn": "Uses INT 21h functions 09h and 0Ah adhering to contracts (buffer structure), and contrasts real-mode DOS services with Windows API and Linux syscalls.",
+    "objectiveEs": "Usa los servicios 09h y 0Ah de INT 21h respetando el contrato de búfer, y contrasta los servicios DOS de modo real con la API de Windows y syscalls de Linux.",
+    "stepConceptIds": [
+      "concept.env.win32_api",
+      "concept.env.linux_syscalls"
+    ],
+    "stepInstructionIds": [
+      "INT",
+      "LEA",
+      "MOV"
+    ],
+    "exercises": [
+      {
+        "id": "ex.r6.1",
+        "promptEn": "Declare a structured buffer for INT 21h function 0Ah with maximum capacity for 20 characters and write the code to prompt user input.",
+        "promptEs": "Declare un búfer estructurado para la función 0Ah de INT 21h con capacidad máxima para 20 caracteres y escriba el código para solicitar la entrada del usuario.",
+        "starterCode": "; Estructura de buffer para 0Ah:\nbuf db ?\n; Codigo de llamada:\n",
+        "solutionCode": "; Declaracion del buffer:\nbuf db 21         ; Byte 0: tamano maximo (20 chars + CR)\n    db 0          ; Byte 1: caracteres leidos (retornado por DOS)\n    db 21 dup (?) ; Bytes 2..n: caracteres leidos + retorno de carro\n\n; Invocacion:\nmov ah, 0Ah\nlea dx, buf\nint 21h",
+        "solutionExplanationEn": "Function 0Ah requires the first byte to hold the maximum buffer size (including Enter). The second byte is populated by DOS with the actual number of characters typed.",
+        "solutionExplanationEs": "La función 0Ah exige que el primer byte contenga la longitud máxima admitida (incluyendo el Enter). El segundo byte es rellenado por DOS con el número real de caracteres leídos."
+      }
+    ],
+    "sources": [
+      "Ray Duncan Advanced MS-DOS Programming §4",
+      "Irvine Assembly Language for x86 Processors §13.2"
+    ]
+  },
+  {
+    "id": "path.r7.complete_program",
+    "sequenceNumber": 7,
+    "titleEn": "A Complete Program",
+    "titleEs": "Un programa completo",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "path.r5.stack_and_procedures",
+      "path.r6.environment_services"
+    ],
+    "objectiveEn": "Creates, assembles, links, executes, and packages an executable program that reads input and displays output, handling segment initialization.",
+    "objectiveEs": "Crea, ensambla, enlaza, ejecuta y empaqueta un programa ejecutable completo que lee entrada y muestra salida, gestionando la inicialización de segmentos.",
+    "stepConceptIds": [
+      "concept.mem.segments_vs_sections",
+      "concept.proc.calling_conventions"
+    ],
+    "stepInstructionIds": [
+      "MOV",
+      "INT"
+    ],
+    "exercises": [
+      {
+        "id": "ex.r7.1",
+        "promptEn": "Write a minimal complete DOS EXE program in MASM/TASM that initializes DS with `@data`, prints the message 'Hello, world!$', and returns to DOS with exit code 0 (function 4Ch).",
+        "promptEs": "Escriba un programa DOS EXE mínimo completo en MASM/TASM que inicialice DS con `@data`, imprima el mensaje 'Hola, mundo!$' y retorne al sistema operativo con el código 0 (función 4Ch).",
+        "starterCode": ".model small\n.stack 100h\n.data\n  ; datos\n.code\nmain proc\n  ; codigo\nmain endp\nend main",
+        "solutionCode": ".model small\n.stack 100h\n.data\n  msg db 'Hola, mundo!$'\n.code\nmain proc\n  mov ax, @data\n  mov ds, ax\n\n  mov ah, 09h\n  lea dx, msg\n  int 21h\n\n  mov ax, 4C00h\n  int 21h\nmain endp\nend main",
+        "solutionExplanationEn": "In DOS EXE executables, the OS loader initializes CS and SS, but DS must be explicitly pointed to data using `@data` in two steps (`mov ax, @data` / `mov ds, ax`). Function 4Ch terminates the process returning exit code to DOS.",
+        "solutionExplanationEs": "En ejecutables DOS EXE, el cargador inicializa CS y SS, pero DS debe ser apuntado explícitamente al segmento de datos usando `@data` en dos pasos (`mov ax, @data` / `mov ds, ax`). La función 4Ch retorna el control limpiamente a DOS."
+      }
+    ],
+    "sources": [
+      "Irvine Assembly Language for x86 Processors §3.4: Defining Segments",
+      "TASM 4.1 User's Guide"
+    ]
+  },
+  {
+    "id": "path.r8.debugging",
+    "sequenceNumber": 8,
+    "titleEn": "Debugging",
+    "titleEs": "Depurar",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "path.r7.complete_program"
+    ],
+    "objectiveEn": "Sets breakpoints, steps through execution instruction by instruction, inspects register values, flags, and memory dumps to diagnose bugs.",
+    "objectiveEs": "Pone puntos de interrupción, avanza instrucción a instrucción, inspecciona valores de registros, banderas y volcados de memoria para diagnosticar fallos.",
+    "stepConceptIds": [
+      "concept.fund.carry_vs_overflow",
+      "concept.reg.views"
+    ],
+    "stepInstructionIds": [
+      "NOP",
+      "INT"
+    ],
+    "exercises": [
+      {
+        "id": "ex.r8.1",
+        "promptEn": "A student writes a loop that decrements CX from 10 to 0 but notices it never terminates. Analyze why `sub cx, 1` followed by `ja bucle` causes an infinite loop when CX reaches 0.",
+        "promptEs": "Un estudiante escribe un bucle que decremente CX de 10 a 0 pero nota que la condición nunca termina. Analice por qué `sub cx, 1` seguido de `ja bucle` provoca un bucle infinito cuando CX alcanza 0.",
+        "starterCode": "mov cx, 10\nbucle:\n  ; trabajo...\n  sub cx, 1\n  ja bucle",
+        "solutionCode": "; Cuando CX llega a 1:\n;   sub cx, 1 -> CX = 0, ZF = 1, CF = 0\n;   JA comprueba CF=0 y ZF=0. Como ZF=1, JA no salta.\n; Pero si el estudiante uso `dec cx` y `ja`:\n;   Con CX = 0, `sub cx, 1` produce CX = FFFFh, CF = 1 (desbordamiento sin signo).\n; Solucion: Usar `jnz bucle` o `loop bucle`.",
+        "solutionExplanationEn": "JA jumps if CF=0 and ZF=0 (above unsigned). When CX reaches 0, ZF=1 so JA does not jump. To check for zero count termination, the idiomatic instruction is `jnz` or `loop`.",
+        "solutionExplanationEs": "JA salta si CF=0 y ZF=0 (superior sin signo). Cuando CX llega a 0, ZF=1, por lo que JA no salta. Sin embargo, si CX parte de 0 o salta por debajo, FFFFh es considerado mayor que 0 sin signo si no se verifica ZF adecuadamente. Para comprobar fin de cuenta a cero, la instrucción idiomática es `jnz` o `loop`."
+      }
+    ],
+    "sources": [
+      "Irvine Assembly Language for x86 Processors §5.7: Debugging Programs"
+    ]
+  },
+  {
+    "id": "path.r9.advanced_topics",
+    "sequenceNumber": 9,
+    "titleEn": "Advanced Topics",
+    "titleEs": "Temas avanzados",
+    "level": "ADVANCED",
+    "prerequisites": [
+      "path.r8.debugging"
+    ],
+    "objectiveEn": "Compares signed and unsigned arithmetic nuances, uses x87 FPU with status/control word bridge, and explains architectural availability constraints across CPU generations.",
+    "objectiveEs": "Compara sutilezas de aritmética con y sin signo, utiliza la FPU x87 con el puente de palabra de estado a FLAGS, y explica restricciones de disponibilidad por perfil de CPU.",
+    "stepConceptIds": [
+      "concept.pair.mul_vs_imul",
+      "concept.pair.div_vs_idiv"
+    ],
+    "stepInstructionIds": [
+      "FLD",
+      "FADD",
+      "FSTP",
+      "FSTSW",
+      "SAHF"
+    ],
+    "exercises": [
+      {
+        "id": "ex.r9.1",
+        "promptEn": "Write an x87 instruction sequence to compare two floating-point numbers in ST(0) and ST(1) using `FCOM`, bridging the result to FLAGS via `FSTSW AX` and `SAHF`, and branching if ST(0) is greater using `JA`.",
+        "promptEs": "Escriba una secuencia de instrucciones x87 para comparar dos números flotantes en ST(0) y ST(1) usando `FCOM`, transfiriendo el resultado a FLAGS mediante `FSTSW AX` y `SAHF`, y bifurcando si ST(0) es mayor con `JA`.",
+        "starterCode": "; ST(0) y ST(1) contienen valores flotantes\n; compare y bifurque si ST(0) > ST(1)\n",
+        "solutionCode": "fcom st(1)        ; Compara ST(0) con ST(1), fija bits C3, C2, C0 en Status Word\nfstsw ax          ; Copia palabra de estado x87 en AX\nsahf              ; Carga AH en el byte bajo de EFLAGS (SF, ZF, AF, PF, CF)\nja mayor          ; C3->ZF, C0->CF; JA salta si CF=0 y ZF=0 (ST(0) > ST(1))",
+        "solutionExplanationEn": "The x87 FPU has its own Status Word with condition codes C0-C3. FSTSW AX copies the status word into AX, where C3 aligns with ZF and C0 aligns with CF when transferring AH into FLAGS using SAHF. This enables standard unsigned conditional jumps (`JA`, `JB`, `JE`).",
+        "solutionExplanationEs": "La FPU x87 tiene su propia palabra de estado (Status Word) con bits C0-C3. FSTSW AX copia la palabra de estado en AX, donde C3 coincide con ZF y C0 coincide con CF al transferir AH a FLAGS mediante SAHF. Esto permite usar los saltos condicionales estándar sin signo (`JA`, `JB`, `JE`)."
+      }
+    ],
+    "sources": [
+      "Intel SDM Vol. 1 §8.1: x87 FPU",
+      "Irvine Assembly Language for x86 Processors §12.2"
+    ]
+  }
+]

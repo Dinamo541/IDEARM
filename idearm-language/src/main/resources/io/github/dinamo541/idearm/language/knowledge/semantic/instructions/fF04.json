@@ -1,0 +1,261 @@
+[
+  {
+    "id": "x86.instr.and",
+    "mnemonic": "AND",
+    "kind": "INSTRUCTION",
+    "family": "F-04",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "AND reg, reg",
+      "AND reg, mem",
+      "AND reg, imm"
+    ],
+    "example": "and al, 0Fh",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "CLEARED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "CLEARED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:AND",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.and#form.1",
+        "text": "AND reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.and#form.2",
+        "text": "AND reg, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.and#form.3",
+        "text": "AND reg, imm",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.or",
+    "mnemonic": "OR",
+    "kind": "INSTRUCTION",
+    "family": "F-04",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "OR reg, reg",
+      "OR reg, mem",
+      "OR reg, imm"
+    ],
+    "example": "or al, 20h",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "CLEARED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "CLEARED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:OR",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.or#form.1",
+        "text": "OR reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.or#form.2",
+        "text": "OR reg, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.or#form.3",
+        "text": "OR reg, imm",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.xor",
+    "mnemonic": "XOR",
+    "kind": "INSTRUCTION",
+    "family": "F-04",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "XOR reg, reg",
+      "XOR reg, mem",
+      "XOR reg, imm"
+    ],
+    "example": "xor ax, ax",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "CLEARED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "CLEARED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:XOR",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.xor#form.1",
+        "text": "XOR reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.xor#form.2",
+        "text": "XOR reg, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.xor#form.3",
+        "text": "XOR reg, imm",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.not",
+    "mnemonic": "NOT",
+    "kind": "INSTRUCTION",
+    "family": "F-04",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "NOT reg",
+      "NOT mem"
+    ],
+    "example": "not al",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:NOT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.not#form.1",
+        "text": "NOT reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.not#form.2",
+        "text": "NOT mem",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.test",
+    "mnemonic": "TEST",
+    "kind": "INSTRUCTION",
+    "family": "F-04",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "TEST reg, reg",
+      "TEST reg, imm",
+      "TEST mem, imm"
+    ],
+    "example": "test al, 1\njz es_par",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "CLEARED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "CLEARED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:TEST",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.test#form.1",
+        "text": "TEST reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.test#form.2",
+        "text": "TEST reg, imm",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.test#form.3",
+        "text": "TEST mem, imm",
+        "minCpu": "8086"
+      }
+    ]
+  }
+]

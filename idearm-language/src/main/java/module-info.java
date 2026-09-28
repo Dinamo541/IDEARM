@@ -6,5 +6,6 @@ module io.github.dinamo541.idearm.language {
     exports io.github.dinamo541.idearm.language.model;
     exports io.github.dinamo541.idearm.language.index;
     exports io.github.dinamo541.idearm.language.catalog;
+    exports io.github.dinamo541.idearm.language.knowledge;
     exports io.github.dinamo541.idearm.language.linter;
 }

@@ -1,0 +1,296 @@
+## Totals
+primary_entries=214
+known_mnemonics=266
+variant_aliases=52
+
+## By category
+DATA_TRANSFER=33
+ARITHMETIC=24
+LOGIC=14
+CONTROL_FLOW=50
+STRINGS=21
+FLAGS_CONTROL=13
+STACK_PROCEDURES=14
+SYSTEM_INTERRUPTS=12
+IO_PORTS=4
+BIT_MANIPULATION=6
+FLOATING_POINT=23
+
+## By minCpu
+CPU_8086=127
+CPU_80186=7
+CPU_80286=3
+CPU_80386=45
+CPU_80486=3
+CPU_PENTIUM=21
+CPU_X86_64=8
+
+## Syntax forms
+total_syntax_variant_strings=485
+entries_with_zero_variants=0
+entries_with_one_variant=68
+max_variants=6
+
+## Flag tables
+distinct_flag_tables=20
+  [- - - - - - - - -]=158
+  [- - - - - - - - 0]=1
+  [- - - - - - - - 1]=1
+  [- - - - - - - - M]=1
+  [- - - - M M M M M]=1
+  [- - 0 - - - - - -]=1
+  [- - 0 0 - - - - -]=1
+  [- - 1 - - - - - -]=1
+  [- 0 - - - - - - -]=1
+  [- 1 - - - - - - -]=1
+  [0 - - - M M U M 0]=4
+  [M - - - - - - - M]=4
+  [M - - - M M M M -]=2
+  [M - - - M M M M M]=24
+  [M - - - U U U U M]=2
+  [M M M M M M M M M]=3
+  [U - - - M M M M M]=2
+  [U - - - M M U M U]=2
+  [U - - - U U M U M]=2
+  [U - - - U U U U U]=2
+entries_with_no_flag_effect=158
+
+## Examples
+entries_with_empty_example=0
+entries_with_single_line_example=108
+entries_with_empty_descriptionEn=0
+entries_with_empty_descriptionEs=0
+
+## Alias mnemonics (known minus primary)
+count=52
+CMOVE CMOVNA CMOVNAE CMOVNB CMOVNBE CMOVNE CMOVNG CMOVNGE CMOVNL CMOVNLE CMOVPE CMOVPO FNSTSW FWAIT INSB INSD INSTRUCTION INSW IRETD IRETQ JNA JNAE JNB JNBE JNG JNGE JNL JNLE JPE JPO LOOPNZ LOOPZ OUTSB OUTSD OUTSW REPE REPNE REPNZ REPZ RETN SAL SETNA SETNAE SETNB SETNBE SETNG SETNGE SETNL SETNLE SETPE SETPO XLATB
+
+## Alias -> resolved primary
+  CMOVE -> CMOVZ
+  CMOVNA -> CMOVBE
+  CMOVNAE -> CMOVB
+  CMOVNB -> CMOVAE
+  CMOVNBE -> CMOVA
+  CMOVNE -> CMOVNZ
+  CMOVNG -> CMOVLE
+  CMOVNGE -> CMOVL
+  CMOVNL -> CMOVGE
+  CMOVNLE -> CMOVG
+  CMOVPE -> CMOVP
+  CMOVPO -> CMOVNP
+  FNSTSW -> FSTSW
+  FWAIT -> WAIT
+  INSB -> INS
+  INSD -> INS
+  INSTRUCTION -> LOCK
+  INSW -> INS
+  IRETD -> IRET
+  IRETQ -> IRET
+  JNA -> JBE
+  JNAE -> JB
+  JNB -> JAE
+  JNBE -> JA
+  JNG -> JLE
+  JNGE -> JL
+  JNL -> JGE
+  JNLE -> JG
+  JPE -> JP
+  JPO -> JNP
+  LOOPNZ -> LOOPNE
+  LOOPZ -> LOOPE
+  OUTSB -> OUTS
+  OUTSD -> OUTS
+  OUTSW -> OUTS
+  REPE -> REP
+  REPNE -> REP
+  REPNZ -> REP
+  REPZ -> REP
+  RETN -> RET
+  SAL -> SHL
+  SETNA -> SETBE
+  SETNAE -> SETB
+  SETNB -> SETAE
+  SETNBE -> SETA
+  SETNG -> SETLE
+  SETNGE -> SETL
+  SETNL -> SETGE
+  SETNLE -> SETG
+  SETPE -> SETP
+  SETPO -> SETNP
+  XLATB -> XLAT
+
+## Primary mnemonics (alphabetical)
+AAA AAD AAM AAS ADC ADD AND ARPL BOUND BSF BSR BSWAP BT BTC BTR BTS CALL CBW CDQ CDQE CLC CLD CLI CMC CMOVA CMOVAE CMOVB CMOVBE CMOVC CMOVG CMOVGE CMOVL CMOVLE CMOVNC CMOVNO CMOVNP CMOVNS CMOVNZ CMOVO CMOVP CMOVS CMOVZ CMP CMPS CMPSB CMPSD CMPSW CMPXCHG CPUID CQO CWD CWDE DAA DAS DEC DIV ENTER FABS FADD FCHS FCOM FCOMP FDIV FILD FINIT FIST FISTP FLD FLD1 FLDPI FLDZ FMUL FNINIT FSQRT FST FSTP FSTSW FSUB FTST FXCH HLT IDIV IMUL IN INC INS INT INTO IRET JA JAE JB JBE JC JCXZ JE JECXZ JG JGE JL JLE JMP JNC JNE JNO JNP JNS JNZ JO JP JRCXZ JS JZ LAHF LAR LDS LEA LEAVE LES LFS LGS LOCK LODS LODSB LODSD LODSW LOOP LOOPE LOOPNE LSL LSS MOV MOVABS MOVS MOVSB MOVSD MOVSW MOVSX MOVZX MUL NEG NOP NOT OR OUT OUTS POP POPA POPAD POPF POPFD POPFQ PUSH PUSHA PUSHAD PUSHF PUSHFD PUSHFQ RCL RCR RDTSC REP RET RETF ROL ROR SAHF SAR SBB SCAS SCASB SCASD SCASW SETA SETAE SETB SETBE SETC SETE SETG SETGE SETL SETLE SETNC SETNE SETNO SETNP SETNS SETNZ SETO SETP SETS SETZ SHL SHLD SHR SHRD STC STD STI STOS STOSB STOSD STOSW SUB SYSCALL SYSRET TEST UD2 WAIT XADD XCHG XLAT XOR
+
+## Spot checks requested by the audit
+  MOV       known=true  -> MOV       minCpu=8086     flags=[- - - - - - - - -]
+  LEA       known=true  -> LEA       minCpu=8086     flags=[- - - - - - - - -]
+  IMUL      known=true  -> IMUL      minCpu=8086     flags=[M - - - U U U U M]
+  MUL       known=true  -> MUL       minCpu=8086     flags=[M - - - U U U U M]
+  DIV       known=true  -> DIV       minCpu=8086     flags=[U - - - U U U U U]
+  IDIV      known=true  -> IDIV      minCpu=8086     flags=[U - - - U U U U U]
+  INC       known=true  -> INC       minCpu=8086     flags=[M - - - M M M M -]
+  DEC       known=true  -> DEC       minCpu=8086     flags=[M - - - M M M M -]
+  SHL       known=true  -> SHL       minCpu=8086     flags=[M - - - M M M M M]
+  SHR       known=true  -> SHR       minCpu=8086     flags=[M - - - M M M M M]
+  SAR       known=true  -> SAR       minCpu=8086     flags=[M - - - M M M M M]
+  ROL       known=true  -> ROL       minCpu=8086     flags=[M - - - - - - - M]
+  RCL       known=true  -> RCL       minCpu=8086     flags=[M - - - - - - - M]
+  MOVS      known=true  -> MOVS      minCpu=8086     flags=[- - - - - - - - -]
+  MOVSB     known=true  -> MOVSB     minCpu=8086     flags=[- - - - - - - - -]
+  LODSB     known=true  -> LODSB     minCpu=8086     flags=[- - - - - - - - -]
+  STOSB     known=true  -> STOSB     minCpu=8086     flags=[- - - - - - - - -]
+  CMPS      known=true  -> CMPS      minCpu=8086     flags=[M - - - M M M M M]
+  SCAS      known=true  -> SCAS      minCpu=8086     flags=[M - - - M M M M M]
+  INT       known=true  -> INT       minCpu=8086     flags=[- - 0 0 - - - - -]
+  IRET      known=true  -> IRET      minCpu=8086     flags=[M - - - M M M M M]
+  CALL      known=true  -> CALL      minCpu=8086     flags=[- - - - - - - - -]
+  RET       known=true  -> RET       minCpu=8086     flags=[- - - - - - - - -]
+  PUSH      known=true  -> PUSH      minCpu=8086     flags=[- - - - - - - - -]
+  POP       known=true  -> POP       minCpu=8086     flags=[- - - - - - - - -]
+  PUSHA     known=true  -> PUSHA     minCpu=80186    flags=[- - - - - - - - -]
+  PUSHAD    known=true  -> PUSHAD    minCpu=80386    flags=[- - - - - - - - -]
+  TEST      known=true  -> TEST      minCpu=8086     flags=[0 - - - M M U M 0]
+  CMP       known=true  -> CMP       minCpu=8086     flags=[M - - - M M M M M]
+  ADC       known=true  -> ADC       minCpu=8086     flags=[M - - - M M M M M]
+  SBB       known=true  -> SBB       minCpu=8086     flags=[M - - - M M M M M]
+  NEG       known=true  -> NEG       minCpu=8086     flags=[M - - - M M M M M]
+  NOT       known=true  -> NOT       minCpu=8086     flags=[- - - - - - - - -]
+  XCHG      known=true  -> XCHG      minCpu=8086     flags=[- - - - - - - - -]
+  CBW       known=true  -> CBW       minCpu=8086     flags=[- - - - - - - - -]
+  CWD       known=true  -> CWD       minCpu=8086     flags=[- - - - - - - - -]
+  CDQ       known=true  -> CDQ       minCpu=80386    flags=[- - - - - - - - -]
+  CQO       known=true  -> CQO       minCpu=x86-64   flags=[- - - - - - - - -]
+  AAA       known=true  -> AAA       minCpu=8086     flags=[U - - - U U M U M]
+  AAD       known=true  -> AAD       minCpu=8086     flags=[U - - - M M U M U]
+  AAM       known=true  -> AAM       minCpu=8086     flags=[U - - - M M U M U]
+  AAS       known=true  -> AAS       minCpu=8086     flags=[U - - - U U M U M]
+  DAA       known=true  -> DAA       minCpu=8086     flags=[U - - - M M M M M]
+  DAS       known=true  -> DAS       minCpu=8086     flags=[U - - - M M M M M]
+  XLAT      known=true  -> XLAT      minCpu=8086     flags=[- - - - - - - - -]
+  LOOP      known=true  -> LOOP      minCpu=8086     flags=[- - - - - - - - -]
+  JCXZ      known=true  -> JCXZ      minCpu=8086     flags=[- - - - - - - - -]
+  JECXZ     known=true  -> JECXZ     minCpu=80386    flags=[- - - - - - - - -]
+  JRCXZ     known=true  -> JRCXZ     minCpu=x86-64   flags=[- - - - - - - - -]
+  SETcc     known=false -> -         minCpu=-        flags=[-]
+  CMOVE     known=true  -> CMOVZ     minCpu=Pentium  flags=[- - - - - - - - -]
+  BT        known=true  -> BT        minCpu=80386    flags=[- - - - - - - - -]
+  BSF       known=true  -> BSF       minCpu=80386    flags=[M - - - M M M M M]
+  SHLD      known=true  -> SHLD      minCpu=80386    flags=[M - - - M M M M M]
+  ENTER     known=true  -> ENTER     minCpu=80186    flags=[- - - - - - - - -]
+  LEAVE     known=true  -> LEAVE     minCpu=80186    flags=[- - - - - - - - -]
+  BOUND     known=true  -> BOUND     minCpu=80186    flags=[- - - - - - - - -]
+  ARPL      known=true  -> ARPL      minCpu=80286    flags=[- - - - - - - - -]
+  SYSCALL   known=true  -> SYSCALL   minCpu=x86-64   flags=[- - - - - - - - -]
+  SYSENTER  known=false -> -         minCpu=-        flags=[-]
+  CPUID     known=true  -> CPUID     minCpu=Pentium  flags=[- - - - - - - - -]
+  RDTSC     known=true  -> RDTSC     minCpu=Pentium  flags=[- - - - - - - - -]
+  FLD       known=true  -> FLD       minCpu=8086     flags=[- - - - - - - - -]
+  FADD      known=true  -> FADD      minCpu=8086     flags=[- - - - - - - - -]
+  FSTSW     known=true  -> FSTSW     minCpu=8086     flags=[- - - - - - - - -]
+  FNSTSW    known=true  -> FSTSW     minCpu=8086     flags=[- - - - - - - - -]
+  WAIT      known=true  -> WAIT      minCpu=8086     flags=[- - - - - - - - -]
+  FWAIT     known=true  -> WAIT      minCpu=8086     flags=[- - - - - - - - -]
+  MOVSX     known=true  -> MOVSX     minCpu=80386    flags=[- - - - - - - - -]
+  MOVZX     known=true  -> MOVZX     minCpu=80386    flags=[- - - - - - - - -]
+  MOVABS    known=true  -> MOVABS    minCpu=x86-64   flags=[- - - - - - - - -]
+  CMPXCHG   known=true  -> CMPXCHG   minCpu=80486    flags=[M - - - M M M M M]
+  XADD      known=true  -> XADD      minCpu=80486    flags=[M - - - M M M M M]
+  PUSHF     known=true  -> PUSHF     minCpu=8086     flags=[- - - - - - - - -]
+  POPF      known=true  -> POPF      minCpu=8086     flags=[M M M M M M M M M]
+  LAHF      known=true  -> LAHF      minCpu=8086     flags=[- - - - - - - - -]
+  SAHF      known=true  -> SAHF      minCpu=8086     flags=[- - - - M M M M M]
+  STI       known=true  -> STI       minCpu=8086     flags=[- - 1 - - - - - -]
+  CLI       known=true  -> CLI       minCpu=8086     flags=[- - 0 - - - - - -]
+  STD       known=true  -> STD       minCpu=8086     flags=[- 1 - - - - - - -]
+  CLD       known=true  -> CLD       minCpu=8086     flags=[- 0 - - - - - - -]
+  STC       known=true  -> STC       minCpu=8086     flags=[- - - - - - - - 1]
+  CLC       known=true  -> CLC       minCpu=8086     flags=[- - - - - - - - 0]
+  CMC       known=true  -> CMC       minCpu=8086     flags=[- - - - - - - - M]
+  HLT       known=true  -> HLT       minCpu=8086     flags=[- - - - - - - - -]
+  NOP       known=true  -> NOP       minCpu=8086     flags=[- - - - - - - - -]
+  IN        known=true  -> IN        minCpu=8086     flags=[- - - - - - - - -]
+  OUT       known=true  -> OUT       minCpu=8086     flags=[- - - - - - - - -]
+  INSB      known=true  -> INS       minCpu=80186    flags=[- - - - - - - - -]
+  OUTSB     known=true  -> OUTS      minCpu=80186    flags=[- - - - - - - - -]
+  REP       known=true  -> REP       minCpu=8086     flags=[- - - - - - - - -]
+  REPE      known=true  -> REP       minCpu=8086     flags=[- - - - - - - - -]
+  REPNE     known=true  -> REP       minCpu=8086     flags=[- - - - - - - - -]
+  LOCK      known=true  -> LOCK      minCpu=8086     flags=[- - - - - - - - -]
+  MOVAPS    known=false -> -         minCpu=-        flags=[-]
+  ADDPS     known=false -> -         minCpu=-        flags=[-]
+  PADDB     known=false -> -         minCpu=-        flags=[-]
+  EMMS      known=false -> -         minCpu=-        flags=[-]
+  SAL       known=true  -> SHL       minCpu=8086     flags=[M - - - M M M M M]
+  JA        known=true  -> JA        minCpu=8086     flags=[- - - - - - - - -]
+  JNBE      known=true  -> JA        minCpu=8086     flags=[- - - - - - - - -]
+  JZ        known=true  -> JZ        minCpu=8086     flags=[- - - - - - - - -]
+  JE        known=true  -> JE        minCpu=8086     flags=[- - - - - - - - -]
+  JNE       known=true  -> JNE       minCpu=8086     flags=[- - - - - - - - -]
+  JNZ       known=true  -> JNZ       minCpu=8086     flags=[- - - - - - - - -]
+  RETF      known=true  -> RETF      minCpu=8086     flags=[- - - - - - - - -]
+  RETN      known=true  -> RET       minCpu=8086     flags=[- - - - - - - - -]
+  IRETD     known=true  -> IRET      minCpu=8086     flags=[M - - - M M M M M]
+  IRETQ     known=true  -> IRET      minCpu=8086     flags=[M - - - M M M M M]
+  LGDT      known=false -> -         minCpu=-        flags=[-]
+  LIDT      known=false -> -         minCpu=-        flags=[-]
+  MOVSD     known=true  -> MOVSD     minCpu=80386    flags=[- - - - - - - - -]
+  MOVSQ     known=false -> -         minCpu=-        flags=[-]
+  STOSD     known=true  -> STOSD     minCpu=80386    flags=[- - - - - - - - -]
+  LODSD     known=true  -> LODSD     minCpu=80386    flags=[- - - - - - - - -]
+  SCASD     known=true  -> SCASD     minCpu=80386    flags=[M - - - M M M M M]
+  CMPSD     known=true  -> CMPSD     minCpu=80386    flags=[M - - - M M M M M]
+
+## CpuLevel filtering behaviour
+  target=8086     parseLevel=0 getForCpu=127
+  target=80286    parseLevel=2 getForCpu=137
+  target=80386    parseLevel=3 getForCpu=182
+  target=i386     parseLevel=3 getForCpu=182
+  target=80486    parseLevel=4 getForCpu=185
+  target=pentium  parseLevel=5 getForCpu=206
+  target=x86-64   parseLevel=6 getForCpu=214
+  target=x64      parseLevel=6 getForCpu=214
+  target=amd64    parseLevel=6 getForCpu=214
+  target=x86      parseLevel=0 getForCpu=127
+  target=16       parseLevel=0 getForCpu=127
+  target=32       parseLevel=0 getForCpu=127
+  target=64       parseLevel=6 getForCpu=214
+  target=unknown  parseLevel=0 getForCpu=127
+  getForCpu(null)=214
+
+## Search behaviour on punctuation / concept queries
+  query="dos puntos"       hits=0    first=
+  query=":"                hits=46   first=XLAT,LDS,LES,LFS,LGS,LSS
+  query="["                hits=38   first=XLAT,MOVABS,MOVSB,MOVSW,MOVSD,LODSB
+  query="corchetes"        hits=0    first=
+  query="acarreo"          hits=20   first=CMOVC,CMOVNC,ADC,SBB,INC,DEC
+  query="carry"            hits=19   first=CMOVC,CMOVNC,ADC,SBB,INC,DEC
+  query="segmento extra"   hits=0    first=
+  query="interrupcion 21h" hits=0    first=
+  query="int 21h"          hits=2    first=INT,SYSCALL
+  query="stack"            hits=34   first=LSS,PUSH,POP,PUSHA,PUSHAD,PUSHF
+  query="pila"             hits=37   first=LSS,PUSH,POP,PUSHA,POPA,PUSHAD
+  query="JNBE"             hits=1    first=JA
+  query="sal"              hits=39   first=CMOVZ,CMP,SHL,SHR,JMP,RETF
+  query="overflow"         hits=8    first=CMOVO,CMOVNO,JO,JNO,SETO,SETNO
+  query="desbordamiento"   hits=10   first=CMOVO,CMOVNO,JG,JGE,JL,JO
+  query="@data"            hits=0    first=
+  query="offset"           hits=4    first=LEA,LDS,LES,RETF
+  query="ptr"              hits=13   first=FLD,FST,FSTP,FADD,FSUB,FMUL
+
+## suggest() samples
+  MVO -> [MOV]
+  MUV -> [MOV, MUL]
+  INTT -> [INT, INTO]
+  PUSHH -> [PUSH, PUSHA, PUSHF]
+  LEAA -> [LEA]
+  DATA -> [DAA]
+  SEGMENT -> []
+  PROC -> []
+  END -> [AND]
+  OFFSET -> []
+  AX -> []
+  DB -> [JB]
+  EQU -> []
+  mensaje -> []
+  main -> []

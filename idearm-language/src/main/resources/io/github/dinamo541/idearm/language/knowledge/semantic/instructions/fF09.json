@@ -1,0 +1,272 @@
+[
+  {
+    "id": "x86.instr.jcxz",
+    "mnemonic": "JCXZ",
+    "kind": "INSTRUCTION",
+    "family": "F-09",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JCXZ label"
+    ],
+    "example": "jcxz fin_bucle",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JCXZ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jcxz#form.1",
+        "text": "JCXZ label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jecxz",
+    "mnemonic": "JECXZ",
+    "kind": "INSTRUCTION",
+    "family": "F-09",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "JECXZ label"
+    ],
+    "example": "jecxz fin_bucle",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JECXZ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jecxz#form.1",
+        "text": "JECXZ label",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jrcxz",
+    "mnemonic": "JRCXZ",
+    "kind": "INSTRUCTION",
+    "family": "F-09",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "x86-64",
+    "syntaxVariants": [
+      "JRCXZ label"
+    ],
+    "example": "jrcxz fin_bucle",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JRCXZ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jrcxz#form.1",
+        "text": "JRCXZ label",
+        "minCpu": "x86-64"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.loop",
+    "mnemonic": "LOOP",
+    "kind": "INSTRUCTION",
+    "family": "F-09",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LOOP label"
+    ],
+    "example": "mov cx, 10\nbucle:\n  ; cuerpo\n  loop bucle",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LOOP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.loop#form.1",
+        "text": "LOOP label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.loope",
+    "mnemonic": "LOOPE",
+    "kind": "INSTRUCTION",
+    "family": "F-09",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LOOPE label",
+      "LOOPZ label"
+    ],
+    "example": "loope buscar_bucle",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "LOOPE",
+        "dialect": "COMMON",
+        "name": "LOOPZ"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:LOOPE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.loope#form.1",
+        "text": "LOOPE label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.loope#form.2",
+        "text": "LOOPZ label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.loopne",
+    "mnemonic": "LOOPNE",
+    "kind": "INSTRUCTION",
+    "family": "F-09",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LOOPNE label",
+      "LOOPNZ label"
+    ],
+    "example": "loopne buscar_distinto",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "LOOPNE",
+        "dialect": "COMMON",
+        "name": "LOOPNZ"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:LOOPNE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.loopne#form.1",
+        "text": "LOOPNE label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.loopne#form.2",
+        "text": "LOOPNZ label",
+        "minCpu": "8086"
+      }
+    ]
+  }
+]

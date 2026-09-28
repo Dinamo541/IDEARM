@@ -1,0 +1,1027 @@
+[
+  {
+    "id": "syntax.masm.op.offset",
+    "token": "OFFSET",
+    "syntaxClass": "OPERATOR",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.op.ptr", "syntax.common.bracket.memory"],
+    "summaryEn": "Offset operator (returns linear offset address of a label or variable)",
+    "summaryEs": "Operador de desplazamiento (devuelve la dirección de desplazamiento de una etiqueta o variable)",
+    "descriptionEn": "Returns the offset of a variable from the beginning of its segment. In MASM and TASM, 'mov dx, OFFSET msg' loads the memory address of msg into DX, whereas 'mov dl, msg' loads the data byte stored at msg. In legacy 16-bit MASM, LENGTH and SIZE operators were the legacy inspection forms, later modernized to LENGTHOF and SIZEOF in MASM 6.x.",
+    "descriptionEs": "Devuelve el desplazamiento de una variable respecto al inicio de su segmento. En MASM y TASM, 'mov dx, OFFSET msg' carga la dirección de memoria de msg en DX, mientras que 'mov dl, msg' carga el byte almacenado en msg. En versiones clásicas de MASM, los operadores LENGTH y SIZE eran las formas heredadas de inspección, sustituidas por LENGTHOF y SIZEOF en MASM 6.x.",
+    "example": "mov dx, OFFSET mensaje\nmov ah, 09h\nint 21h",
+    "sources": ["src.irvine.5e-es#4.3.1:94", "src.irvine.5e-es#4.3.4:98"]
+  },
+  {
+    "id": "syntax.masm.op.ptr",
+    "token": "PTR",
+    "syntaxClass": "OPERATOR",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.op.offset"],
+    "summaryEn": "Type pointer operator (overrides or clarifies operand size)",
+    "summaryEs": "Operador de tipo de puntero (fuerza o clarifica el tamaño del operando)",
+    "descriptionEn": "Clarifies ambiguous operand sizes in memory instructions, e.g. BYTE PTR [bx] vs WORD PTR [bx].",
+    "descriptionEs": "Determina el tamaño de acceso a memoria cuando no es deducible por el otro operando, p. ej. BYTE PTR [bx] frente a WORD PTR [bx].",
+    "example": "inc BYTE PTR [bx]",
+    "sources": ["src.irvine.5e-es#4.3.2:95"]
+  },
+  {
+    "id": "syntax.masm.dir.model",
+    "token": ".MODEL",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["DECLARATION", "CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.bits"],
+    "summaryEn": "Memory model directive (defines simplified segmentation model)",
+    "summaryEs": "Directiva de modelo de memoria (define la convención de segmentación simplificada)",
+    "descriptionEn": "Initializes simplified segmentation: TINY, SMALL, MEDIUM, COMPACT, LARGE, or FLAT.",
+    "descriptionEs": "Inicializa la convención de segmentación simplificada: TINY, SMALL, MEDIUM, COMPACT, LARGE o FLAT.",
+    "example": ".MODEL small, c",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.stack",
+    "token": ".STACK",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Stack segment allocation directive",
+    "summaryEs": "Directiva de reserva del segmento de pila",
+    "descriptionEn": "Reserves stack space for the application (default is typically 1024 bytes).",
+    "descriptionEs": "Reserva el tamaño en bytes para la pila del programa (por omisión normalmente 1024 bytes).",
+    "example": ".STACK 100h",
+    "sources": ["src.irvine.5e-es#3.4:66"]
+  },
+  {
+    "id": "syntax.masm.dir.data",
+    "token": ".DATA",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["SEGMENT_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.section"],
+    "summaryEn": "Initialized data segment directive",
+    "summaryEs": "Directiva de apertura del segmento de datos inicializados",
+    "descriptionEn": "Opens the simplified initialized data segment, addressed through the DS register.",
+    "descriptionEs": "Abre el segmento de datos inicializados simplificado, direccionado mediante el registro DS.",
+    "example": ".DATA\nmensaje DB 'Hola', 0",
+    "sources": ["src.irvine.5e-es#3.4:66"]
+  },
+  {
+    "id": "syntax.masm.dir.code",
+    "token": ".CODE",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["SEGMENT_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.section"],
+    "summaryEn": "Code segment directive",
+    "summaryEs": "Directiva de apertura del segmento de código",
+    "descriptionEn": "Opens the code segment, containing the instructions addressed by CS:IP.",
+    "descriptionEs": "Abre el segmento de código con las instrucciones ejecutables direccionadas por CS:IP.",
+    "example": ".CODE\nmain PROC\n    mov ax, @data\n    mov ds, ax",
+    "sources": ["src.irvine.5e-es#3.4:66"]
+  },
+  {
+    "id": "syntax.masm.dir.proc",
+    "token": "PROC",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["PROCEDURE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.endp"],
+    "summaryEn": "Procedure definition start",
+    "summaryEs": "Inicio de definición de procedimiento",
+    "descriptionEn": "Marks the beginning of a subroutine procedure, specifying NEAR or FAR distance.",
+    "descriptionEs": "Marca el inicio de una subrutina o procedimiento, con distancia NEAR o FAR.",
+    "example": "calculaSuma PROC NEAR\n    add ax, bx\n    ret\ncalculaSuma ENDP",
+    "sources": ["src.irvine.5e-es#5.3:136"]
+  },
+  {
+    "id": "syntax.masm.dir.endp",
+    "token": "ENDP",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["PROCEDURE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.proc"],
+    "summaryEn": "Procedure definition end",
+    "summaryEs": "Fin de definición de procedimiento",
+    "descriptionEn": "Marks the end of a procedure block initiated by PROC.",
+    "descriptionEs": "Marca el fin del bloque de procedimiento iniciado con PROC.",
+    "example": "calculaSuma ENDP",
+    "sources": ["src.irvine.5e-es#5.3:136"]
+  },
+  {
+    "id": "syntax.masm.dir.segment",
+    "token": "SEGMENT",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["SEGMENT_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.ends"],
+    "summaryEn": "Full segment definition start",
+    "summaryEs": "Inicio de declaración completa de segmento",
+    "descriptionEn": "Defines an explicit memory segment with attributes: align, combine, use, class.",
+    "descriptionEs": "Define un segmento explícito en memoria con atributos de alineación, combinación y clase.",
+    "example": "DATOS SEGMENT 'DATA'\n    val DW 0\nDATOS ENDS",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.ends",
+    "token": "ENDS",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["SEGMENT_DECLARATION", "STRUCTURE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.segment", "syntax.masm.dir.struc"],
+    "summaryEn": "End of segment or structure",
+    "summaryEs": "Fin de declaración de segmento o estructura",
+    "descriptionEn": "Closes a SEGMENT block or a STRUC structure definition in MASM/TASM.",
+    "descriptionEs": "Cierra un bloque de SEGMENT o una definición de estructura STRUC en MASM/TASM.",
+    "example": "DATOS ENDS",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.assume",
+    "token": "ASSUME",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Segment register association directive",
+    "summaryEs": "Directiva de asociación de registro de segmento",
+    "descriptionEn": "Instructs the assembler which segment register points to which declared segment.",
+    "descriptionEs": "Informa al ensamblador qué registro de segmento apunta a cada segmento lógico del código.",
+    "example": "ASSUME cs:CODIGO, ds:DATOS",
+    "sources": ["src.irvine.5e-es#3.4:66"]
+  },
+  {
+    "id": "syntax.masm.sym.atdata",
+    "token": "@DATA",
+    "syntaxClass": "PREDEFINED_SYMBOL",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Predefined symbol for data segment address in simplified models",
+    "summaryEs": "Símbolo predefinido para la dirección del segmento de datos en modelos simplificados",
+    "descriptionEn": "Evaluates to the segment base address of .DATA. Must be moved through an intermediate general register (MOV AX, @data / MOV DS, AX) because the x86 architecture has no instruction to move an immediate value directly into a segment register.",
+    "descriptionEs": "Evalúa a la dirección base del segmento .DATA. Debe cargarse mediante un registro general intermedio (MOV AX, @data / MOV DS, AX) debido a que la arquitectura x86 carece de una instrucción para mover un valor inmediato directamente a un registro de segmento.",
+    "example": "mov ax, @data\nmov ds, ax",
+    "sources": ["src.irvine.5e-es#3.4:66"]
+  },
+  {
+    "id": "syntax.masm.op.dup",
+    "token": "DUP",
+    "syntaxClass": "OPERATOR",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Duplicate allocation operator",
+    "summaryEs": "Operador de duplicación de reserva de memoria",
+    "descriptionEn": "Repeats a memory allocation a specified number of times.",
+    "descriptionEs": "Repite una asignación de datos en memoria un número determinado de veces.",
+    "example": "buffer DB 100 DUP(?)",
+    "sources": ["src.irvine.5e-es#3.4:68"]
+  },
+  {
+    "id": "syntax.masm.dir.struc",
+    "token": "STRUC",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["STRUCTURE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.struc"],
+    "summaryEn": "Structure definition start (closed with ENDS in MASM)",
+    "summaryEs": "Inicio de definición de estructura (cerrada con ENDS en MASM)",
+    "descriptionEn": "Declares a structured data type with field offsets. In MASM/TASM, the structure definition is terminated with ENDS.",
+    "descriptionEs": "Declara una plantilla de tipo de datos estructurado. En MASM y TASM se cierra con la directiva ENDS.",
+    "example": "Coord STRUC\n    x DW ?\n    y DW ?\nCoord ENDS",
+    "sources": ["src.irvine.5e-es#10.1:325"]
+  },
+  {
+    "id": "syntax.masm.dir.startup",
+    "token": ".STARTUP",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["INITIALIZATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.exit"],
+    "summaryEn": "Simplified program startup initialization",
+    "summaryEs": "Inicialización simplificada de inicio de programa",
+    "descriptionEn": "Generates program initialization code for simplified memory models: points DS to the data segment (via MOV AX, @data / MOV DS, AX) and sets up SS:SP if necessary.",
+    "descriptionEs": "Genera el código de inicialización para modelos de memoria simplificados: inicializa DS con la dirección de @data (MOV AX, @data / MOV DS, AX) y configura SS:SP.",
+    "example": ".CODE\n.STARTUP\n    ; El registro DS ya está inicializado\n    mov dx, OFFSET msg",
+    "sources": ["src.irvine.5e-es#3.4:66"]
+  },
+  {
+    "id": "syntax.masm.dir.exit",
+    "token": ".EXIT",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["TERMINATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.startup", "syntax.common.dir.end"],
+    "summaryEn": "Simplified program termination (DOS INT 21h AH=4Ch)",
+    "summaryEs": "Terminación simplificada de programa (DOS INT 21h AH=4Ch)",
+    "descriptionEn": "Generates standard DOS program termination code: loads AH with 4Ch and invokes INT 21h, optionally returning an errorlevel code: .EXIT 0.",
+    "descriptionEs": "Genera el código estándar de salida en DOS: carga AH con 4Ch e invoca INT 21h, retornando opcionalmente un código de errorlevel: .EXIT 0.",
+    "example": ".EXIT 0",
+    "sources": ["src.irvine.5e-es#3.4:67"]
+  },
+  {
+    "id": "syntax.masm.dir.cpu8086",
+    "token": ".8086",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.cpu386"],
+    "summaryEn": "Select 8086/8088 baseline processor instructions",
+    "summaryEs": "Selecciona el juego de instrucciones base del procesador 8086/8088",
+    "descriptionEn": "Instructs the assembler to only accept instructions available on the original Intel 8086 and 8088 microprocessors. Rejects 186/286/386 extensions.",
+    "descriptionEs": "Indica al ensamblador que únicamente admita instrucciones presentes en los microprocesadores originales 8086 y 8088. Rechaza extensiones de procesadores posteriores.",
+    "example": ".8086\n.MODEL small",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.cpu186",
+    "token": ".186",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.cpu8086"],
+    "summaryEn": "Enable 80186 processor instructions",
+    "summaryEs": "Habilita las instrucciones del procesador 80186",
+    "descriptionEn": "Enables 80186 instructions: ENTER, LEAVE, PUSHA, POPA, immediate shifts, IMUL with immediate, and BOUND.",
+    "descriptionEs": "Habilita instrucciones del 80186: ENTER, LEAVE, PUSHA, POPA, desplazamientos con inmediato, IMUL con inmediato y BOUND.",
+    "example": ".186\npusha\npopa",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.cpu286",
+    "token": ".286",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.cpu286p"],
+    "summaryEn": "Enable 80286 real-mode instructions",
+    "summaryEs": "Habilita las instrucciones del 80286 en modo real",
+    "descriptionEn": "Enables non-privileged 80286 processor instructions.",
+    "descriptionEs": "Habilita las instrucciones del procesador 80286 en modo real no privilegiado.",
+    "example": ".286",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.cpu286p",
+    "token": ".286P",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.cpu286"],
+    "summaryEn": "Enable 80286 protected-mode and privileged instructions",
+    "summaryEs": "Habilita instrucciones de modo protegido y privilegiadas del 80286",
+    "descriptionEn": "Enables all 80286 instructions including protected mode and system administration opcodes (LGDT, LIDT, LMSW, LAR, LSL, ARPL).",
+    "descriptionEs": "Habilita todas las instrucciones del 80286, incluyendo modo protegido y administración de sistema (LGDT, LIDT, LMSW, LAR, LSL, ARPL).",
+    "example": ".286P",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.cpu386",
+    "token": ".386",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.cpu386p"],
+    "summaryEn": "Enable 80386 32-bit registers and non-privileged instructions",
+    "summaryEs": "Habilita registros de 32 bits e instrucciones del 80386",
+    "descriptionEn": "Enables 80386 processor instructions, 32-bit general purpose registers (EAX..ESP), FS/GS segment registers, and 32-bit scaled-index addressing modes.",
+    "descriptionEs": "Habilita instrucciones del 80386, registros generales de 32 bits (EAX..ESP), registros de segmento FS y GS, y modos de direccionamiento escalado.",
+    "example": ".386\nmov eax, 12345678h",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.cpu386p",
+    "token": ".386P",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.cpu386"],
+    "summaryEn": "Enable 80386 protected-mode and privileged instructions",
+    "summaryEs": "Habilita instrucciones de modo protegido y control del 80386",
+    "descriptionEn": "Enables all 80386 instructions including control register access (MOV CR0, EAX) and privileged system instructions.",
+    "descriptionEs": "Habilita todas las instrucciones del 80386, incluyendo acceso a registros de control (MOV CR0, EAX) y operaciones privilegiadas.",
+    "example": ".386P",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.cpu486",
+    "token": ".486",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Enable 80486 processor instructions (BSWAP, CMPXCHG, XADD)",
+    "summaryEs": "Habilita instrucciones del procesador 80486 (BSWAP, CMPXCHG, XADD)",
+    "descriptionEn": "Enables 80486 instructions including byte swap (BSWAP), atomic compare and exchange (CMPXCHG), and exchange and add (XADD).",
+    "descriptionEs": "Habilita instrucciones del 80486 como inversión de orden de bytes (BSWAP), comparación atómica (CMPXCHG) e intercambio con suma (XADD).",
+    "example": ".486\nbswap eax",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.cpu586",
+    "token": ".586",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Enable Pentium (586) instructions (CPUID, RDTSC, CMPXCHG8B)",
+    "summaryEs": "Habilita instrucciones del procesador Pentium 586 (CPUID, RDTSC, CMPXCHG8B)",
+    "descriptionEn": "Enables Intel Pentium processor instructions including CPU identification (CPUID), read time-stamp counter (RDTSC), and 64-bit atomic compare-exchange.",
+    "descriptionEs": "Habilita instrucciones del Intel Pentium: identificación de CPU (CPUID), lectura de contador de ciclos (RDTSC) y comparación atómica de 64 bits.",
+    "example": ".586\ncpuid",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.type.byte",
+    "token": "BYTE",
+    "syntaxClass": "TYPE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["TYPE_SPECIFIER"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.type.word", "syntax.masm.type.dword"],
+    "summaryEn": "8-bit unsigned or signed byte type",
+    "summaryEs": "Tipo de dato byte de 8 bits",
+    "descriptionEn": "Specifies an 8-bit memory operand or variable type. In pointer casts: 'BYTE PTR [bx]'.",
+    "descriptionEs": "Especifica un operando de memoria o variable de 8 bits. En forzados de tipo: 'BYTE PTR [bx]'.",
+    "example": "inc BYTE PTR [bx]",
+    "sources": ["src.irvine.5e-es#4.3.2:95"]
+  },
+  {
+    "id": "syntax.masm.type.word",
+    "token": "WORD",
+    "syntaxClass": "TYPE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["TYPE_SPECIFIER"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.type.byte", "syntax.masm.type.dword"],
+    "summaryEn": "16-bit word type",
+    "summaryEs": "Tipo de dato palabra de 16 bits",
+    "descriptionEn": "Specifies a 16-bit (2-byte) memory operand or variable type, stored in little-endian order. In pointer casts: 'WORD PTR [bx]'.",
+    "descriptionEs": "Especifica un operando o variable de 16 bits (2 bytes), almacenado en little-endian. En forzados de tipo: 'WORD PTR [bx]'.",
+    "example": "mov WORD PTR [bx], 0",
+    "sources": ["src.irvine.5e-es#4.3.2:95"]
+  },
+  {
+    "id": "syntax.masm.type.dword",
+    "token": "DWORD",
+    "syntaxClass": "TYPE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["TYPE_SPECIFIER"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.type.word", "syntax.masm.type.qword"],
+    "summaryEn": "32-bit doubleword type",
+    "summaryEs": "Tipo de dato doble palabra de 32 bits",
+    "descriptionEn": "Specifies a 32-bit (4-byte) memory operand, integer, or single-precision float. In pointer casts: 'DWORD PTR [ebx]'.",
+    "descriptionEs": "Especifica un operando o variable de 32 bits (4 bytes), entero o flotante de precisión simple. En forzados: 'DWORD PTR [ebx]'.",
+    "example": "mov DWORD PTR [ebx], 100",
+    "sources": ["src.irvine.5e-es#4.3.2:95"]
+  },
+  {
+    "id": "syntax.masm.type.qword",
+    "token": "QWORD",
+    "syntaxClass": "TYPE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["TYPE_SPECIFIER"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.type.dword"],
+    "summaryEn": "64-bit quadword type",
+    "summaryEs": "Tipo de dato palabra cuádruple de 64 bits",
+    "descriptionEn": "Specifies a 64-bit (8-byte) integer or double-precision IEEE 754 float. Used in 64-bit operations or x87/MMX/SSE.",
+    "descriptionEs": "Especifica un operando o variable de 64 bits (8 bytes), entero o flotante de doble precisión. Empleado en x86-64 y x87/MMX.",
+    "example": "fld QWORD PTR [bx]",
+    "sources": ["src.irvine.5e-es#4.3.2:95"]
+  },
+  {
+    "id": "syntax.masm.type.tbyte",
+    "token": "TBYTE",
+    "syntaxClass": "TYPE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["TYPE_SPECIFIER"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "80-bit ten-byte type (x87 extended precision / packed BCD)",
+    "summaryEs": "Tipo de dato de diez bytes (80 bits, coma flotante extendida x87 o BCD)",
+    "descriptionEn": "Specifies an 80-bit (10-byte) memory operand, used for x87 extended precision floats and packed BCD numbers.",
+    "descriptionEs": "Especifica un operando de 80 bits (10 bytes), utilizado para valores en precisión extendida x87 o decimal empaquetado (BCD).",
+    "example": "fld TBYTE PTR [bx]",
+    "sources": ["src.irvine.5e-es#17.1:600"]
+  },
+  {
+    "id": "syntax.masm.dir.near",
+    "token": "NEAR",
+    "syntaxClass": "KEYWORD",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["PROCEDURE", "JUMP_DISTANCE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.far"],
+    "summaryEn": "Intra-segment distance specifier (same CS segment)",
+    "summaryEs": "Especificador de distancia intra-segmento (mismo segmento CS)",
+    "descriptionEn": "Indicates that a procedure or jump target resides within the same code segment. A NEAR CALL only pushes IP (2 or 4 bytes), and NEAR RET only pops IP.",
+    "descriptionEs": "Indica que un procedimiento o salto se encuentra dentro del mismo segmento de código. Un CALL NEAR solo apila el IP (2 o 4 bytes) y un RET NEAR solo desapila el IP.",
+    "example": "calculaSuma PROC NEAR\n    ret\ncalculaSuma ENDP",
+    "sources": ["src.irvine.5e-es#5.3:136"]
+  },
+  {
+    "id": "syntax.masm.dir.far",
+    "token": "FAR",
+    "syntaxClass": "KEYWORD",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["PROCEDURE", "JUMP_DISTANCE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.near"],
+    "summaryEn": "Inter-segment distance specifier (different CS segment)",
+    "summaryEs": "Especificador de distancia inter-segmento (segmento CS diferente)",
+    "descriptionEn": "Indicates that a procedure or jump target resides in a different code segment. A FAR CALL pushes both CS and IP, and a FAR RET (RETF) pops both CS and IP.",
+    "descriptionEs": "Indica que un procedimiento o destino de salto reside en otro segmento de código. Un CALL FAR apila tanto CS como IP, y un RET FAR (RETF) desapila ambos registros.",
+    "example": "rutinaGlobal PROC FAR\n    ret\nrutinaGlobal ENDP",
+    "sources": ["src.irvine.5e-es#5.3:136"]
+  },
+  {
+    "id": "syntax.masm.dir.short",
+    "token": "SHORT",
+    "syntaxClass": "KEYWORD",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["JUMP_DISTANCE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.near"],
+    "summaryEn": "Short conditional jump distance specifier (-128 to +127 bytes)",
+    "summaryEs": "Especificador de salto corto (-128 a +127 bytes de desplazamiento)",
+    "descriptionEn": "Instructs the assembler to encode a jump with a signed 8-bit relative displacement (-128 to +127 bytes from next instruction). Saves code space.",
+    "descriptionEs": "Indica al ensamblador que codifique el salto con un desplazamiento relativo de 8 bits con signo (-128 a +127 bytes). Optimiza el tamaño del código.",
+    "example": "jmp SHORT destino",
+    "sources": ["src.irvine.5e-es#6.2:168"]
+  },
+  {
+    "id": "syntax.masm.dir.public",
+    "token": "PUBLIC",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["DECLARATION", "LINKING"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.extrn", "syntax.common.dir.global"],
+    "summaryEn": "Export symbol for linking across multiple modules",
+    "summaryEs": "Exporta un símbolo para enlace entre múltiples módulos",
+    "descriptionEn": "Makes a label, variable, or procedure available to other modules linked into the same executable.",
+    "descriptionEs": "Hace visible una etiqueta, variable o procedimiento para que otros módulos enlazados puedan referenciarla.",
+    "example": "PUBLIC calculaSuma, totalAcumulado",
+    "sources": ["src.irvine.5e-es#8.4:250"]
+  },
+  {
+    "id": "syntax.masm.mac.macro",
+    "token": "MACRO",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["MACRO"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.mac.endm"],
+    "summaryEn": "Define start of macro block with parameters",
+    "summaryEs": "Inicio de bloque de definición de macro con parámetros",
+    "descriptionEn": "Defines a textual macro block that expands inline wherever invoked. Can accept formal parameters replaced at assembly time.",
+    "descriptionEs": "Define un bloque de macro textual que se expande en línea en cada invocación. Puede aceptar parámetros formales sustituidos durante el ensamblado.",
+    "example": "imprimeCad MACRO msg\n    mov dx, OFFSET msg\n    mov ah, 09h\n    int 21h\nENDM",
+    "sources": ["src.irvine.5e-es#10.2:332"]
+  },
+  {
+    "id": "syntax.masm.mac.endm",
+    "token": "ENDM",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["MACRO"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.mac.macro"],
+    "summaryEn": "End of macro or repeat block",
+    "summaryEs": "Fin de bloque de definición de macro o repetición",
+    "descriptionEn": "Terminates a MACRO, REPT, or IRP macro expansion block.",
+    "descriptionEs": "Cierra un bloque de definición de macro (MACRO), repetición (REPT) o iteración (IRP).",
+    "example": "ENDM",
+    "sources": ["src.irvine.5e-es#10.2:332"]
+  },
+  {
+    "id": "syntax.masm.mac.local",
+    "token": "LOCAL",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["MACRO", "PROCEDURE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Declare local labels in macros or stack variables in PROC",
+    "summaryEs": "Declara etiquetas locales en macros o variables de pila en PROC",
+    "descriptionEn": "In macros, creates unique assembly-generated labels (e.g. ??0001) each time the macro is expanded to prevent duplicate symbol collisions. In procedures, declares stack-allocated local variables.",
+    "descriptionEs": "En macros, genera etiquetas únicas (ej. ??0001) en cada expansión para evitar errores de símbolos duplicados. En procedimientos, reserva variables locales en el marco de pila.",
+    "example": "miMacro MACRO\n    LOCAL bucle, fin\nbucle:\n    loop bucle\nfin:\nENDM",
+    "sources": ["src.irvine.5e-es#10.2:336"]
+  },
+  {
+    "id": "syntax.masm.dir.group",
+    "token": "GROUP",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["SEGMENT_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.segment"],
+    "summaryEn": "Group multiple segments into a single 64KB physical segment",
+    "summaryEs": "Agrupa múltiples segmentos lógicos en un único segmento físico de 64KB",
+    "descriptionEn": "Combines multiple logical segments into a single physical 64KB segment addressable with one segment register (commonly DGROUP grouping data and stack).",
+    "descriptionEs": "Combina múltiples segmentos lógicos para que compartan la misma base de segmento de 64KB, direccionables con un único registro (típicamente DGROUP para datos y pila).",
+    "example": "DGROUP GROUP _DATA, STACK",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.label",
+    "token": "LABEL",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Create a typed label alias without allocating storage",
+    "summaryEs": "Crea un alias de etiqueta tipada sin reservar memoria adicional",
+    "descriptionEn": "Defines an identifier with a specific type attribute (BYTE, WORD, etc.) at the current memory location, without allocating new memory.",
+    "descriptionEs": "Asigna un nombre y tipo (BYTE, WORD, etc.) a la dirección de memoria actual sin consumir espacio de almacenamiento adicional.",
+    "example": "val16 LABEL WORD\nval8_1 DB 0\nval8_2 DB 0",
+    "sources": ["src.irvine.5e-es#4.3.3:97"]
+  },
+  {
+    "id": "syntax.masm.op.seg",
+    "token": "SEG",
+    "syntaxClass": "OPERATOR",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.op.offset"],
+    "summaryEn": "Segment address operator",
+    "summaryEs": "Operador de dirección de segmento",
+    "descriptionEn": "Returns the segment portion (base paragraph) of the address of a variable or label.",
+    "descriptionEs": "Devuelve la parte del segmento (párrafo base) de la dirección de una etiqueta o variable.",
+    "example": "mov ax, SEG buffer\nmov es, ax",
+    "sources": ["src.irvine.5e-es#4.3.1:94"]
+  },
+  {
+    "id": "syntax.masm.dir.includelib",
+    "token": "INCLUDELIB",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["LINKING"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Specify library file name for linker",
+    "summaryEs": "Especifica el nombre de biblioteca para el enlazador",
+    "descriptionEn": "Embeds a record in the object file directing the linker to automatically link against the specified library file.",
+    "descriptionEs": "Inserta una directiva en el fichero objeto para indicar al enlazador que incluya automáticamente la biblioteca especificada.",
+    "example": "INCLUDELIB kernel32.lib",
+    "sources": ["src.irvine.5e-es#8.4:251"]
+  },
+  {
+    "id": "syntax.masm.op.sizeof",
+    "token": "SIZEOF",
+    "syntaxClass": "OPERATOR",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.op.lengthof"],
+    "summaryEn": "Returns total size in bytes of a variable, array, or type",
+    "summaryEs": "Devuelve el tamaño total en bytes de una variable, arreglo o estructura",
+    "descriptionEn": "Evaluates to the total number of bytes occupied by an array or variable definition (equivalent to LENGTHOF * TYPE).",
+    "descriptionEs": "Evalúa al número total de bytes ocupados por un arreglo o variable (equivalente a LENGTHOF * TYPE).",
+    "example": "mov ecx, SIZEOF tabla",
+    "sources": ["src.irvine.5e-es#4.3.4:98"]
+  },
+  {
+    "id": "syntax.masm.op.lengthof",
+    "token": "LENGTHOF",
+    "syntaxClass": "OPERATOR",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.op.sizeof"],
+    "summaryEn": "Returns number of elements in an array",
+    "summaryEs": "Devuelve el número de elementos de un arreglo",
+    "descriptionEn": "Counts the number of elements in an array initialized on a single line or with DUP.",
+    "descriptionEs": "Cuenta el número de elementos de un arreglo inicializado en la misma línea o con DUP.",
+    "example": "mov ecx, LENGTHOF tabla",
+    "sources": ["src.irvine.5e-es#4.3.4:98"]
+  },
+  {
+    "id": "syntax.masm.op.size",
+    "token": "SIZE",
+    "syntaxClass": "OPERATOR",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.op.sizeof"],
+    "summaryEn": "Legacy size operator (returns LENGTH * TYPE)",
+    "summaryEs": "Operador de tamaño heredado (devuelve LENGTH * TYPE)",
+    "descriptionEn": "Legacy MASM operator returning total byte size of the first item line of an array.",
+    "descriptionEs": "Operador clásico de MASM que calcula el tamaño total multiplicando LENGTH por TYPE.",
+    "example": "mov ax, SIZE tabla",
+    "sources": ["src.irvine.5e-es#4.3.4:98"]
+  },
+  {
+    "id": "syntax.masm.op.length",
+    "token": "LENGTH",
+    "syntaxClass": "OPERATOR",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.op.lengthof"],
+    "summaryEn": "Legacy length operator (number of elements on first line)",
+    "summaryEs": "Operador de longitud heredado (número de elementos de la primera línea)",
+    "descriptionEn": "Legacy MASM operator returning the count of elements initialized in the first directive line.",
+    "descriptionEs": "Operador clásico de MASM que devuelve el número de elementos inicializados en la primera línea de la variable.",
+    "example": "mov ax, LENGTH tabla",
+    "sources": ["src.irvine.5e-es#4.3.4:98"]
+  },
+  {
+    "id": "syntax.masm.op.type",
+    "token": "TYPE",
+    "syntaxClass": "OPERATOR",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Returns size in bytes of a single element of a type",
+    "summaryEs": "Devuelve el tamaño en bytes de un único elemento de una variable o tipo",
+    "descriptionEn": "Returns 1 for BYTE, 2 for WORD, 4 for DWORD, 8 for QWORD.",
+    "descriptionEs": "Devuelve 1 para BYTE, 2 para WORD, 4 para DWORD y 8 para QWORD.",
+    "example": "add si, TYPE array",
+    "sources": ["src.irvine.5e-es#4.3.4:98"]
+  },
+  {
+    "id": "syntax.masm.sym.atcode",
+    "token": "@CODE",
+    "syntaxClass": "PREDEFINED_SYMBOL",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.sym.atdata"],
+    "summaryEn": "Predefined symbol for code segment name in simplified models",
+    "summaryEs": "Símbolo predefinido para el nombre del segmento de código",
+    "descriptionEn": "Evaluates to the segment identifier of .CODE in simplified segmentation models.",
+    "descriptionEs": "Evalúa al identificador de segmento correspondiente a .CODE en modelos simplificados.",
+    "example": "ASSUME cs:@code",
+    "sources": ["src.irvine.5e-es#3.4:66"]
+  },
+  {
+    "id": "syntax.masm.sym.atcurseg",
+    "token": "@CURSEG",
+    "syntaxClass": "PREDEFINED_SYMBOL",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Predefined symbol returning current segment name",
+    "summaryEs": "Símbolo predefinido que devuelve el nombre del segmento actual",
+    "descriptionEn": "Evaluates to the name of the segment currently being assembled.",
+    "descriptionEs": "Evalúa al nombre del segmento actualmente abierto en el código.",
+    "example": "mov ax, @curseg",
+    "sources": ["src.irvine.5e-es#3.4:66"]
+  },
+  {
+    "id": "syntax.masm.sym.atfilename",
+    "token": "@FILENAME",
+    "syntaxClass": "PREDEFINED_SYMBOL",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Predefined symbol returning base filename of module",
+    "summaryEs": "Símbolo predefinido con el nombre base del archivo fuente",
+    "descriptionEn": "Evaluates to the base name of the source file being assembled, without extension.",
+    "descriptionEs": "Evalúa al nombre base del archivo fuente en ensamblado, sin extensión.",
+    "example": "archivo DB @filename, 0",
+    "sources": ["src.irvine.5e-es#3.4:66"]
+  },
+  {
+    "id": "syntax.masm.dir.invoke",
+    "token": "INVOKE",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["PROCEDURE_CALL"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "High-level procedure call with argument pushing",
+    "summaryEs": "Llamada de alto nivel a procedimiento con paso automático de parámetros",
+    "descriptionEn": "Generates code to push arguments onto the stack in the convention required by the procedure (e.g. stdcall or cdecl) and then issues a CALL.",
+    "descriptionEs": "Genera código para apilar argumentos en la pila siguiendo la convención de la función (ej. stdcall o cdecl) y ejecuta la instrucción CALL.",
+    "example": "INVOKE ExitProcess, 0",
+    "sources": ["src.irvine.5e-es#5.5:150"]
+  },
+  {
+    "id": "syntax.masm.dir.proto",
+    "token": "PROTO",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.invoke"],
+    "summaryEn": "Procedure prototype declaration for INVOKE",
+    "summaryEs": "Declaración de prototipo de procedimiento para INVOKE",
+    "descriptionEn": "Declares the name, return type, and argument list of a procedure to enable type checking with INVOKE.",
+    "descriptionEs": "Declara el nombre, convención y lista de parámetros de un procedimiento para comprobación de tipos con INVOKE.",
+    "example": "ExitProcess PROTO, dwExitCode:DWORD",
+    "sources": ["src.irvine.5e-es#5.5:150"]
+  },
+  {
+    "id": "syntax.masm.dir.option",
+    "token": "OPTION",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Configure assembler options (e.g. case sensitivity)",
+    "summaryEs": "Configura opciones del ensamblador (ej. sensibilidad a mayúsculas)",
+    "descriptionEn": "Controls internal assembler settings, such as OPTION CASEMAP:NONE to preserve exact case of symbols.",
+    "descriptionEs": "Controla ajustes internos del ensamblador, como OPTION CASEMAP:NONE para preservar mayúsculas y minúsculas exactas.",
+    "example": "OPTION CASEMAP:NONE",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.title",
+    "token": "TITLE",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["LISTING"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Listing title header directive",
+    "summaryEs": "Directiva de título de encabezado en el listado",
+    "descriptionEn": "Defines a title string printed in the header of each page of the assembly listing (.LST) file.",
+    "descriptionEs": "Define el texto de título que se imprime en la cabecera de cada página del listado ensamblado (.LST).",
+    "example": "TITLE Mi Programa de Ensamblador",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.subttl",
+    "token": "SUBTTL",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["LISTING"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.title"],
+    "summaryEn": "Listing subtitle header directive",
+    "summaryEs": "Directiva de subtítulo en el listado de ensamblado",
+    "descriptionEn": "Defines a subtitle printed under the main title on each page of the assembly listing.",
+    "descriptionEs": "Define un subtítulo impreso debajo del título principal en cada página del listado ensamblador.",
+    "example": "SUBTTL Rutinas de Entrada y Salida",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  },
+  {
+    "id": "syntax.masm.dir.page",
+    "token": "PAGE",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["LISTING"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Listing page format and eject directive",
+    "summaryEs": "Directiva de salto de página y formato de listado",
+    "descriptionEn": "Sets listing page lines and columns (e.g. PAGE 60, 132), or causes a page break when used alone.",
+    "descriptionEs": "Configura líneas y columnas por página en el archivo de listado (ej. PAGE 60, 132), o fuerza un salto de página si se usa sin parámetros.",
+    "example": "PAGE 60, 132",
+    "sources": ["src.irvine.5e-es#3.4:65"]
+  }
+]
