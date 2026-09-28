@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -39,6 +40,14 @@ public final class GdbProcessDebugSession implements DebugSession {
     private volatile RegisterState currentRegisters = RegisterState.empty();
     private final AtomicLong instructionsExecuted = new AtomicLong(0);
     private volatile boolean closed = false;
+    /** Set by {@link #stop()}: the end of GDB's output that follows is expected. */
+    private volatile boolean stopping = false;
+    /** Set when GDB's output ended: no command can be answered any more. */
+    private volatile boolean gdbEnded = false;
+    /** Set while a pause is in flight, so the stop it causes is recognised and the program's thread selected. */
+    private final AtomicBoolean interruptRequested = new AtomicBoolean(false);
+    /** The numbers GDB gave the breakpoints this session inserted, so they can be replaced. */
+    private final Set<String> breakpointNumbers = ConcurrentHashMap.newKeySet();
 
     private final Thread readerThread;
     private final ExecutorService eventThread = Executors.newSingleThreadExecutor(runnable -> {
@@ -46,6 +55,15 @@ public final class GdbProcessDebugSession implements DebugSession {
         thread.setDaemon(true);
         return thread;
     });
+    /** Sends breakpoint changes, which wait for GDB's answers, off the caller's thread. */
+    private final ExecutorService breakpointThread = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "GdbMi-Breakpoints");
+        thread.setDaemon(true);
+        return thread;
+    });
+    /** The breakpoints the user wants and GDB has not been given yet; {@code null} when there are none. */
+    private final java.util.concurrent.atomic.AtomicReference<List<Breakpoint>> pendingBreakpoints =
+            new java.util.concurrent.atomic.AtomicReference<>();
     /** The general-purpose registers the panel shows, as "-data-list-register-values" register numbers. */
     private volatile String generalRegisterNumbers = "";
     private volatile boolean wide = true;
@@ -60,6 +78,8 @@ public final class GdbProcessDebugSession implements DebugSession {
     private static final Pattern NASM_HEX = Pattern.compile("\\b([0-9][0-9A-Fa-f]*)[hH]\\b");
     private static final String EXEC_ARGUMENTS = "-exec-arguments";
     static final String NO_INPUT = "< /dev/null";
+    /** The longest an x86 instruction can be, so a byte range is wide enough for the instructions asked for. */
+    private static final int MAX_INSTRUCTION_BYTES = 15;
 
     public GdbProcessDebugSession(Process process, WindowsJob job, Consumer<DebugEvent> events, long startNanos) {
         this(process.getOutputStream(), process.getInputStream(), process, job, events, startNanos);
@@ -83,6 +103,10 @@ public final class GdbProcessDebugSession implements DebugSession {
         try {
             // Set pagination off
             sendCommand("-gdb-set pagination off").get(2, TimeUnit.SECONDS);
+            // Asynchronous mode is what makes Pause possible: in GDB's default synchronous mode "-exec-interrupt"
+            // gets no reply at all while the program runs, because GDB waits for the target and never reads the
+            // command (spike S9, GDB 17.2 on Windows, with and without its own console).
+            sendCommand("-gdb-set mi-async on").get(2, TimeUnit.SECONDS);
             boolean windows = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("windows");
             if (windows) {
                 // The program gets its own console window, as in Run: GDB's pipes carry MI, not the program's text.
@@ -139,11 +163,7 @@ public final class GdbProcessDebugSession implements DebugSession {
                     }
                     // Quoted as one MI string: "src/my file.asm:12" (verified with GDB 17.2); unquoted, a space
                     // split the location and the breakpoint was never set.
-                    GdbMiRecord inserted = sendCommand("-break-insert " + miString(target)).get(2, TimeUnit.SECONDS);
-                    if (inserted == null || !inserted.isDone()) {
-                        emit(new DebugEvent.Output("Breakpoint " + target
-                                + " could not be set: the line has no code, or the program was built without debug information.\n"));
-                    }
+                    insertBreakpoint(target);
                 }
             }
 
@@ -157,8 +177,89 @@ public final class GdbProcessDebugSession implements DebugSession {
 
             // Start program execution
             sendCommand("-exec-run");
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            failToStart("interrupted");
         } catch (Exception e) {
-            emit(new DebugEvent.Output("Failed initializing GDB session: " + e.getMessage() + "\n"));
+            failToStart(e.getMessage());
+        }
+    }
+
+    /**
+     * Ends a session GDB could not start: without it the program never runs, the session never ends, and the IDE
+     * would wait on it until the user pressed Stop.
+     */
+    private void failToStart(String reason) {
+        emit(new DebugEvent.Output("Failed initializing GDB session: " + reason + "\n"));
+        state = SessionState.EXITED;
+        exitFuture.complete(ExitInfo.error(1, Duration.ofNanos(System.nanoTime() - startNanos),
+                "GDB could not start the program: " + reason));
+        close();
+    }
+
+    /**
+     * Inserts one breakpoint and remembers its number, so {@link #setBreakpoints(List)} can replace it later.
+     * Quoted as one MI string: "src/my file.asm:12" (verified with GDB 17.2); unquoted, a space split the
+     * location and the breakpoint was never set.
+     */
+    private void insertBreakpoint(String target) {
+        try {
+            GdbMiRecord inserted = sendCommand("-break-insert " + miString(target)).get(2, TimeUnit.SECONDS);
+            if (inserted == null || !inserted.isDone()) {
+                emit(new DebugEvent.Output("Breakpoint " + target
+                        + " could not be set: the line has no code, or the program was built without debug information.\n"));
+                return;
+            }
+            Map<String, Object> bkpt = inserted.getMap("bkpt");
+            Object number = (bkpt == null) ? null : bkpt.get("number");
+            if (number != null) {
+                breakpointNumbers.add(number.toString());
+            }
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException | TimeoutException failed) {
+            emit(new DebugEvent.Output("Breakpoint " + target + " could not be set: " + failed.getMessage() + "\n"));
+        }
+    }
+
+    /**
+     * Replaces the breakpoints of a running session. GDB only accepts this while the program is stopped, so a set
+     * changed while the program runs is kept and applied at the next stop. Each breakpoint waits for GDB's answer,
+     * which is why this happens on the session's own thread and never on the caller's (the JavaFX thread).
+     */
+    @Override
+    public void setBreakpoints(List<Breakpoint> updated) {
+        if (closed) return;
+        pendingBreakpoints.set(updated == null ? List.of() : List.copyOf(updated));
+        if (paused.get()) {
+            applyPendingBreakpoints();
+        }
+    }
+
+    private void applyPendingBreakpoints() {
+        try {
+            breakpointThread.execute(() -> {
+                if (closed || !paused.get()) {
+                    return; // Still pending; the next stop applies it.
+                }
+                List<Breakpoint> wanted = pendingBreakpoints.getAndSet(null);
+                if (wanted == null) {
+                    return;
+                }
+                if (!breakpointNumbers.isEmpty()) {
+                    sendCommand("-break-delete " + String.join(" ", breakpointNumbers));
+                    breakpointNumbers.clear();
+                }
+                for (Breakpoint bp : wanted) {
+                    if (!bp.enabled()) continue;
+                    String target = bp.path() + ":" + bp.line();
+                    if (!hasLineBreak(target)) {
+                        insertBreakpoint(target);
+                    }
+                }
+            });
+        } catch (RejectedExecutionException closedSession) {
+            // The session is closed; there is nothing to apply the breakpoints to.
         }
     }
 
@@ -183,6 +284,10 @@ public final class GdbProcessDebugSession implements DebugSession {
         } catch (IOException e) {
             pendingCommands.remove(token);
             future.completeExceptionally(e);
+        }
+        // Checked after the command is registered, so a command sent as GDB ends is failed here or by readLoop.
+        if (gdbEnded && pendingCommands.remove(token) != null) {
+            future.completeExceptionally(new IOException("GDB has ended"));
         }
         return future;
     }
@@ -216,8 +321,23 @@ public final class GdbProcessDebugSession implements DebugSession {
             }
         } catch (IOException ignored) {
         } finally {
-            if (!exitFuture.isDone()) {
-                exitFuture.complete(ExitInfo.stopped(Duration.ofNanos(System.nanoTime() - startNanos)));
+            // GDB's output ended. Commands still waiting for an answer will never get one.
+            gdbEnded = true;
+            var ended = new IOException("GDB ended before answering");
+            for (Long token : List.copyOf(pendingCommands.keySet())) {
+                CompletableFuture<GdbMiRecord> pending = pendingCommands.remove(token);
+                if (pending != null) {
+                    pending.completeExceptionally(ended);
+                }
+            }
+            Duration duration = Duration.ofNanos(System.nanoTime() - startNanos);
+            if (closed || stopping) {
+                exitFuture.complete(ExitInfo.stopped(duration));
+            } else if (!exitFuture.isDone()) {
+                // Nobody closed the session: GDB itself ended or crashed while the program was being debugged.
+                state = SessionState.EXITED;
+                paused.set(false);
+                exitFuture.complete(ExitInfo.error(1, duration, "GDB ended unexpectedly."));
             }
         }
     }
@@ -272,6 +392,9 @@ public final class GdbProcessDebugSession implements DebugSession {
                 } else {
                     paused.set(true);
                     instructionsExecuted.incrementAndGet();
+                    if (pendingBreakpoints.get() != null) {
+                        applyPendingBreakpoints();
+                    }
                     refreshRegistersAndNotify(record);
                 }
             } else if (record.isRunning()) {
@@ -299,8 +422,50 @@ public final class GdbProcessDebugSession implements DebugSession {
         generalRegisterNumbers = String.join(" ", numbers);
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * After a stop, reports where the program is and what its registers hold.
+     *
+     * <p>An interrupt is served on Windows by a thread the operating system injects, which stands in
+     * {@code ntdll!DbgBreakPoint} with no source line (spike S9). Reporting that frame would mark no editor line
+     * and show a foreign thread's registers, so the program's own thread is selected first.
+     */
     private void refreshRegistersAndNotify(GdbMiRecord stopRecord) {
+        if (interruptRequested.compareAndSet(true, false) && !hasSourceLine(stopRecord.getMap("frame"))) {
+            selectProgramThread().whenComplete((programFrame, failed) -> reportStop(stopRecord, programFrame));
+            return;
+        }
+        reportStop(stopRecord, null);
+    }
+
+    private static boolean hasSourceLine(Map<String, Object> frame) {
+        return frame != null && (frame.get("file") != null || frame.get("fullname") != null);
+    }
+
+    /**
+     * Selects the first thread that stands in the program's own code and answers with its frame, or with
+     * {@code null} when no such thread is listed.
+     */
+    @SuppressWarnings("unchecked")
+    private CompletableFuture<Map<String, Object>> selectProgramThread() {
+        return sendCommand("-thread-info").thenCompose(info -> {
+            List<Object> threads = (info == null || !info.isDone()) ? null : info.getList("threads");
+            if (threads != null) {
+                for (Object item : threads) {
+                    if (item instanceof Map<?, ?> thread
+                            && thread.get("id") != null
+                            && thread.get("frame") instanceof Map<?, ?> raw
+                            && hasSourceLine((Map<String, Object>) raw)) {
+                        return sendCommand("-thread-select " + thread.get("id"))
+                                .thenApply(selected -> (Map<String, Object>) raw);
+                    }
+                }
+            }
+            return CompletableFuture.completedFuture((Map<String, Object>) null);
+        }).exceptionally(error -> null);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void reportStop(GdbMiRecord stopRecord, Map<String, Object> overrideFrame) {
         String numbers = generalRegisterNumbers;
         sendCommand("-data-list-register-values x" + (numbers.isEmpty() ? "" : " " + numbers)).thenAccept(result -> {
             if (result != null && result.isDone()) {
@@ -339,7 +504,7 @@ public final class GdbProcessDebugSession implements DebugSession {
                 }
             }
 
-            Map<String, Object> frame = stopRecord.getMap("frame");
+            Map<String, Object> frame = (overrideFrame != null) ? overrideFrame : stopRecord.getMap("frame");
             // Without line information the registers still update, but no editor line is marked.
             String file = "";
             int line = 0;
@@ -369,13 +534,76 @@ public final class GdbProcessDebugSession implements DebugSession {
         return state;
     }
 
+    /**
+     * GDB drives the program itself, so the workbench panels all work. Pause is included because spike S9 proved
+     * {@code -exec-interrupt} works once {@code mi-async} is on. Keystrokes are not: on Windows the program owns
+     * its console and elsewhere its input is redirected away from GDB's pipes.
+     */
+    @Override
+    public Set<DebugCapability> capabilities() {
+        return EnumSet.of(DebugCapability.STEP, DebugCapability.PAUSE, DebugCapability.BREAKPOINTS,
+                DebugCapability.REGISTERS, DebugCapability.MEMORY, DebugCapability.WATCHES,
+                DebugCapability.CALL_STACK, DebugCapability.DISASSEMBLY);
+    }
+
+    /**
+     * The instructions from the program counter onwards. The range is asked for in bytes, so it is generous enough
+     * for {@code count} instructions of any length and then trimmed.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<DisasmLine> disassemble(int count) {
+        if (count <= 0 || !paused.get()) {
+            return List.of();
+        }
+        try {
+            GdbMiRecord result = sendCommand("-data-disassemble -s $pc -e $pc+" + (count * MAX_INSTRUCTION_BYTES)
+                    + " -- 0").get(500, TimeUnit.MILLISECONDS);
+            List<Object> instructions = (result == null || !result.isDone()) ? null : result.getList("asm_insns");
+            if (instructions == null) {
+                return List.of();
+            }
+            var lines = new ArrayList<DisasmLine>();
+            for (Object item : instructions) {
+                if (lines.size() >= count || !(item instanceof Map<?, ?> instruction)) {
+                    break;
+                }
+                Object address = instruction.get("address");
+                Object text = instruction.get("inst");
+                if (address == null || text == null) {
+                    continue;
+                }
+                Object opcodes = instruction.get("opcodes");
+                lines.add(new DisasmLine(address.toString(), opcodes == null ? "" : opcodes.toString(),
+                        text.toString(), lines.isEmpty()));
+            }
+            return lines;
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            return List.of();
+        } catch (ExecutionException | TimeoutException unavailable) {
+            return List.of();
+        }
+    }
+
     public boolean isPaused() {
         return paused.get();
+    }
+
+    /** Interrupts a running program so an endless loop can be inspected. */
+    @Override
+    public void pause() {
+        if (closed || paused.get()) return;
+        interruptRequested.set(true);
+        sendCommand("-exec-interrupt");
     }
 
     @Override
     public void stop() {
         if (closed) return;
+        // Set first: GDB may end its output after -gdb-exit before close() runs, and that end is not a crash.
+        stopping = true;
+        state = SessionState.STOPPED;
         try {
             if (!paused.get()) {
                 sendCommand("-exec-interrupt");
@@ -607,11 +835,9 @@ public final class GdbProcessDebugSession implements DebugSession {
     public synchronized void close() {
         if (closed) return;
         closed = true;
+        breakpointThread.shutdownNow();
         try {
             writer.close();
-        } catch (IOException ignored) {}
-        try {
-            reader.close();
         } catch (IOException ignored) {}
         if (job != null) {
             job.close();
@@ -627,6 +853,13 @@ public final class GdbProcessDebugSession implements DebugSession {
                 Thread.currentThread().interrupt();
             }
         }
+        // The reader thread holds the reader's lock inside readLine() until GDB's output ends, so closing the reader
+        // here could wait for it; it is closed on a thread of its own and close() never blocks.
+        Thread.ofPlatform().daemon().name("GdbMi-Close").start(() -> {
+            try {
+                reader.close();
+            } catch (IOException ignored) {}
+        });
         if (!exitFuture.isDone()) {
             exitFuture.complete(ExitInfo.stopped(Duration.ofNanos(System.nanoTime() - startNanos)));
         }

@@ -41,6 +41,8 @@ class DosInterruptHandlerTest {
         cpu.triggerInterrupt(0x21);
 
         assertEquals("X", handler.capturedOutput());
+        assertEquals("", lastOutput.get(), "output reaches the listener in chunks, on flush");
+        handler.flushOutput();
         assertEquals("X", lastOutput.get());
 
         // AH = 09h: Print "$"-terminated string at DS:DX
@@ -53,7 +55,27 @@ class DosInterruptHandlerTest {
         cpu.triggerInterrupt(0x21);
 
         assertEquals("XHello World!", handler.capturedOutput());
+        handler.flushOutput();
         assertEquals("Hello World!", lastOutput.get());
+    }
+
+    /** A program printing in an endless loop sent one event per character and kept every character forever. */
+    @Test
+    void endlessOutputIsChunkedAndTheCaptureIsBounded() {
+        var chunks = new java.util.ArrayList<String>();
+        handler.setOutputListener(chunks::add);
+
+        int printed = 10 * DosInterruptHandler.CAPTURED_OUTPUT_LIMIT;
+        for (int i = 0; i < printed; i++) {
+            regs.setAh(0x02);
+            regs.setDl('A' + i % 26);
+            cpu.triggerInterrupt(0x21);
+        }
+        handler.flushOutput();
+
+        assertTrue(handler.capturedOutput().length() <= 2 * DosInterruptHandler.CAPTURED_OUTPUT_LIMIT);
+        assertTrue(chunks.size() <= printed / DosInterruptHandler.OUTPUT_CHUNK + 1, "chunks: " + chunks.size());
+        assertEquals(printed, chunks.stream().mapToInt(String::length).sum(), "no character is lost");
     }
 
     @Test

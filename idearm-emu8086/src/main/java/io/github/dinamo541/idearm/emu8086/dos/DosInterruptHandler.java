@@ -23,7 +23,14 @@ public final class DosInterruptHandler implements Cpu8086.InterruptHandler {
         void report(String code, String message, List<String> arguments);
     }
 
+    /** How much of the printed text {@link #capturedOutput()} keeps: a program printing forever must not fill the heap. */
+    public static final int CAPTURED_OUTPUT_LIMIT = 64 * 1024;
+    /** Printed characters are handed to the listener in chunks of at most this size, not one call per character. */
+    public static final int OUTPUT_CHUNK = 4096;
+
     private final StringBuilder outputBuffer = new StringBuilder();
+    /** Printed and not yet given to the listener; only the emulator thread touches it. */
+    private final StringBuilder pendingOutput = new StringBuilder();
     /** Keys typed and not read yet: the IDE thread adds them, the emulator thread takes them. */
     private final java.util.concurrent.BlockingQueue<Character> inputQueue = new java.util.concurrent.LinkedBlockingQueue<>();
     /** Called when the program waits for a key; {@code null} means reads never wait (tests, batch runs). */
@@ -64,8 +71,23 @@ public final class DosInterruptHandler implements Cpu8086.InterruptHandler {
         }
     }
 
+    /** The last {@link #CAPTURED_OUTPUT_LIMIT} characters the program printed. */
     public String capturedOutput() {
         return outputBuffer.toString();
+    }
+
+    /**
+     * Gives the listener what the program printed since the last flush. The emulator calls it before it pauses,
+     * waits for a key or ends, and regularly while it runs, so output appears promptly without one event per
+     * character.
+     */
+    public void flushOutput() {
+        if (pendingOutput.isEmpty()) {
+            return;
+        }
+        String text = pendingOutput.toString();
+        pendingOutput.setLength(0);
+        outputListener.accept(text);
     }
 
     @Override
@@ -159,9 +181,7 @@ public final class DosInterruptHandler implements Cpu8086.InterruptHandler {
                     sb.append((char) b);
                     off = (off + 1) & 0xFFFF;
                 }
-                String str = sb.toString();
-                outputBuffer.append(str);
-                outputListener.accept(str);
+                emit(sb.toString());
                 regs.setAl('$');
                 return true;
             }
@@ -170,7 +190,8 @@ public final class DosInterruptHandler implements Cpu8086.InterruptHandler {
                 int off = regs.dx;
                 int maxLen = memory.read8(seg, off);
                 StringBuilder sb = new StringBuilder();
-                while (sb.length() < maxLen) {
+                int maxChars = Math.max(0, maxLen - 1);
+                while (sb.length() < maxChars) {
                     char c = nextChar();
                     if (c == '\r' || c == '\n') {
                         // DOS echoes Enter as a carriage return only; the program prints its own line feed.
@@ -251,6 +272,11 @@ public final class DosInterruptHandler implements Cpu8086.InterruptHandler {
                 return true;
             }
             default -> {
+                if (reportedFunctions.add(0x1000 | ah)) {
+                    problem("emu.bios.unsupported", String.format(
+                            "The built-in emulator does not provide INT 10h function %02Xh; it returned without doing anything.", ah),
+                            String.format("10h:%02X", ah));
+                }
                 return true;
             }
         }
@@ -277,6 +303,11 @@ public final class DosInterruptHandler implements Cpu8086.InterruptHandler {
                 return true;
             }
             default -> {
+                if (reportedFunctions.add(0x1600 | ah)) {
+                    problem("emu.bios.unsupported", String.format(
+                            "The built-in emulator does not provide INT 16h function %02Xh; it returned without doing anything.", ah),
+                            String.format("16h:%02X", ah));
+                }
                 return true;
             }
         }
@@ -295,6 +326,8 @@ public final class DosInterruptHandler implements Cpu8086.InterruptHandler {
         if (onWaiting == null) {
             return ENTER;
         }
+        // The prompt the program printed must be visible before the user is asked to type.
+        flushOutput();
         onWaiting.run();
         try {
             return inputQueue.take();
@@ -305,7 +338,17 @@ public final class DosInterruptHandler implements Cpu8086.InterruptHandler {
     }
 
     private void emitChar(char c) {
-        outputBuffer.append(c);
-        outputListener.accept(String.valueOf(c));
+        emit(String.valueOf(c));
+    }
+
+    private void emit(String text) {
+        outputBuffer.append(text);
+        if (outputBuffer.length() > 2 * CAPTURED_OUTPUT_LIMIT) {
+            outputBuffer.delete(0, outputBuffer.length() - CAPTURED_OUTPUT_LIMIT);
+        }
+        pendingOutput.append(text);
+        if (pendingOutput.length() >= OUTPUT_CHUNK) {
+            flushOutput();
+        }
     }
 }

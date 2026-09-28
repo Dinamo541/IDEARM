@@ -1,7 +1,10 @@
 package io.github.dinamo541.idearm.app.viewmodel;
 
+import io.github.dinamo541.idearm.application.editor.QueryHover;
 import io.github.dinamo541.idearm.domain.debug.Breakpoint;
 import io.github.dinamo541.idearm.domain.debug.CallFrame;
+import io.github.dinamo541.idearm.domain.debug.DebugCapability;
+import io.github.dinamo541.idearm.domain.debug.DisasmLine;
 import io.github.dinamo541.idearm.domain.debug.MemoryView;
 import io.github.dinamo541.idearm.domain.debug.RegisterState;
 import io.github.dinamo541.idearm.domain.debug.StackFrame;
@@ -20,8 +23,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 
 /**
  * ViewModel managing the visual debugger state (registers, memory dump, stack, breakpoints).
@@ -37,9 +43,12 @@ public final class DebugViewModel {
     private static final List<String> DOS_REGISTERS = List.of(
             "AX", "BX", "CX", "DX", "SI", "DI", "BP", "SP", "CS", "DS", "ES", "SS", "IP", "FLAGS");
     private static final List<String> SEGMENT_REGISTERS = List.of("CS", "DS", "ES", "SS", "FS", "GS");
+    private static final System.Logger LOG = System.getLogger(DebugViewModel.class.getName());
     private static final String DOS_SEGMENT = "0710";
     private static final String DOS_OFFSET = "0000";
     private static final int MEMORY_BYTES = 64;
+    /** Enough instructions to see what the current source line became, and its neighbours. */
+    private static final int DISASSEMBLY_LINES = 24;
 
     private final BooleanProperty active = new SimpleBooleanProperty(false);
     private final BooleanProperty paused = new SimpleBooleanProperty(false);
@@ -80,10 +89,40 @@ public final class DebugViewModel {
     private final StringProperty memoryOffset = new SimpleStringProperty(DOS_OFFSET);
     private final StringProperty memoryDumpText = new SimpleStringProperty("");
 
-    private final ObservableList<String> stackLines = FXCollections.observableArrayList();
+    private final ObservableList<CallFrameItemViewModel> stackLines = FXCollections.observableArrayList();
+    private final ObservableList<DisasmLine> disassembly = FXCollections.observableArrayList();
     private final ObservableList<WatchItemViewModel> watches = FXCollections.observableArrayList();
 
+    // Copies of the memory address and the watch list for the background refresh: JavaFX properties and lists may
+    // only be read on the JavaFX thread, where they are changed, and copying the list elsewhere could fail mid-edit.
+    private volatile String memorySegmentValue = DOS_SEGMENT;
+    private volatile String memoryOffsetValue = DOS_OFFSET;
+    private volatile List<WatchItemViewModel> watchSnapshot = List.of();
+    /** Counts memory refreshes, so a slow one that finishes after a newer one does not overwrite it. */
+    private final java.util.concurrent.atomic.AtomicLong memoryRefreshes = new java.util.concurrent.atomic.AtomicLong();
+    private final Map<String, Optional<String>> registerHelp = new java.util.concurrent.ConcurrentHashMap<>();
+
+    {
+        memorySegment.addListener((observable, before, now) -> memorySegmentValue = now);
+        memoryOffset.addListener((observable, before, now) -> memoryOffsetValue = now);
+        watches.addListener((javafx.collections.ListChangeListener<WatchItemViewModel>) change ->
+                watchSnapshot = List.copyOf(watches));
+    }
+
+    // What the attached session can do. Everything a launch-only debugger cannot do stays switched off, so the
+    // workbench hides those controls instead of offering buttons that would silently do nothing.
+    private final BooleanProperty canStep = new SimpleBooleanProperty(false);
+    private final BooleanProperty canPause = new SimpleBooleanProperty(false);
+    private final BooleanProperty canInspect = new SimpleBooleanProperty(false);
+    private final BooleanProperty canReadMemory = new SimpleBooleanProperty(false);
+    private final BooleanProperty canWatch = new SimpleBooleanProperty(false);
+    private final BooleanProperty canShowCallStack = new SimpleBooleanProperty(false);
+    private final BooleanProperty canSendInput = new SimpleBooleanProperty(false);
+    /** True while the attached session drives the program itself, which is what the panels need. */
+    private final BooleanProperty integrated = new SimpleBooleanProperty(false);
+
     private volatile DebugSession activeSession;
+    private volatile BiConsumer<Breakpoint, Boolean> onBreakpointEnabledChanged = (breakpoint, enabled) -> {};
 
     public DebugViewModel() {
         showRegisters(DOS_REGISTERS);
@@ -191,11 +230,24 @@ public final class DebugViewModel {
             var rows = new ArrayList<BreakpointItemViewModel>();
             if (list != null) {
                 for (Breakpoint bp : list) {
-                    rows.add(new BreakpointItemViewModel(bp));
+                    var row = new BreakpointItemViewModel(bp);
+                    // Ticking the box in the panel is a real change, not only a mark: it is carried on so the
+                    // breakpoint is stored and a running session is told about it.
+                    row.enabledProperty().addListener((observable, was, now) -> {
+                        if (!Objects.equals(was, now)) {
+                            onBreakpointEnabledChanged.accept(bp, Boolean.TRUE.equals(now));
+                        }
+                    });
+                    rows.add(row);
                 }
             }
             breakpoints.setAll(rows);
         });
+    }
+
+    /** Receives a breakpoint the user enabled or disabled in the panel. */
+    public void setOnBreakpointEnabledChanged(BiConsumer<Breakpoint, Boolean> handler) {
+        this.onBreakpointEnabledChanged = (handler != null) ? handler : (breakpoint, enabled) -> {};
     }
 
     public void reset() {
@@ -232,6 +284,7 @@ public final class DebugViewModel {
             dfChanged.set(false);
             memoryDumpText.set("");
             stackLines.clear();
+            disassembly.clear();
             for (var w : watches) {
                 w.setValue("");
             }
@@ -276,21 +329,60 @@ public final class DebugViewModel {
     public StringProperty memorySegmentProperty() { return memorySegment; }
     public StringProperty memoryOffsetProperty() { return memoryOffset; }
     public StringProperty memoryDumpTextProperty() { return memoryDumpText; }
-    public ObservableList<String> getStackLines() { return stackLines; }
+    public ObservableList<CallFrameItemViewModel> getStackLines() { return stackLines; }
+    public ObservableList<DisasmLine> getDisassembly() { return disassembly; }
     public ObservableList<WatchItemViewModel> getWatches() { return watches; }
+
+    public BooleanProperty canStepProperty() { return canStep; }
+    public BooleanProperty canPauseProperty() { return canPause; }
+    public BooleanProperty canInspectProperty() { return canInspect; }
+    public BooleanProperty canReadMemoryProperty() { return canReadMemory; }
+    public BooleanProperty canWatchProperty() { return canWatch; }
+    public BooleanProperty canShowCallStackProperty() { return canShowCallStack; }
+    public BooleanProperty canSendInputProperty() { return canSendInput; }
+
+    /**
+     * True while the IDE itself drives the program. False for a launch-only debugger such as Turbo Debugger in a
+     * DOSBox window, where the panels have nothing to show and say so instead.
+     */
+    public BooleanProperty integratedProperty() { return integrated; }
 
     public void addWatch(String expression) {
         if (expression == null || expression.isBlank()) return;
         String trimmed = expression.trim();
         for (var w : watches) {
             if (w.getExpression().equalsIgnoreCase(trimmed)) {
-                evaluateWatch(w);
+                evaluateWatchInBackground(w);
                 return;
             }
         }
         var item = new WatchItemViewModel(trimmed, "");
         watches.add(item);
-        evaluateWatch(item);
+        evaluateWatchInBackground(item);
+    }
+
+    /** A debugger may take a while to answer (GDB waits up to half a second), which must not freeze the window. */
+    private void evaluateWatchInBackground(WatchItemViewModel item) {
+        if (javafx.application.Platform.isFxApplicationThread()) {
+            CompletableFuture.runAsync(() -> evaluateWatch(item));
+        } else {
+            evaluateWatch(item);
+        }
+    }
+
+    /**
+     * What a register is for, shown when the pointer rests on its name: the hover card's title and syntax. The
+     * table repaints its cells often, so each answer is looked up once per register and language.
+     */
+    public Optional<String> registerHelp(String register, String language) {
+        if (register == null || register.isBlank()) {
+            return Optional.empty();
+        }
+        String key = language + ':' + register.toUpperCase(Locale.ROOT);
+        return registerHelp.computeIfAbsent(key, ignored -> new QueryHover().execute(register, language, null)
+                .map(hover -> hover.syntax() == null || hover.syntax().isBlank()
+                        ? hover.title()
+                        : hover.title() + "\n" + hover.syntax()));
     }
 
     public void removeWatch(WatchItemViewModel item) {
@@ -299,7 +391,7 @@ public final class DebugViewModel {
 
     public void refreshWatches() {
         if (activeSession == null) return;
-        for (var w : List.copyOf(watches)) {
+        for (var w : watchSnapshot) {
             evaluateWatch(w);
         }
     }
@@ -307,8 +399,8 @@ public final class DebugViewModel {
     private void evaluateWatch(WatchItemViewModel item) {
         DebugSession session = activeSession;
         if (session == null) return;
-        String value = session.evaluateExpression(item.getExpression()).orElse("<error>");
-        FxDispatch.run(() -> item.setValue(value));
+        Optional<String> value = session.evaluateExpression(item.getExpression());
+        FxDispatch.run(() -> value.ifPresentOrElse(item::setValue, item::setUnevaluated));
     }
 
     /** Keys the user typed for the debugged program; sessions whose program has its own window ignore them. */
@@ -322,10 +414,28 @@ public final class DebugViewModel {
     public void attachSession(DebugSession session) {
         this.activeSession = session;
         setActive(true);
+        applyCapabilities(session == null ? Set.of() : session.capabilities());
         if (latestState != null) {
             // The emulator stops at the entry point before the session is handed over; fill the panels now.
             requestMemoryRefresh();
         }
+    }
+
+    /**
+     * Switches the debugger controls to what this session actually supports. Turbo Debugger and CodeView run the
+     * program in their own DOSBox window and report nothing back, so they declare nothing and the panels say so.
+     */
+    private void applyCapabilities(Set<DebugCapability> capabilities) {
+        FxDispatch.run(() -> {
+            canStep.set(capabilities.contains(DebugCapability.STEP));
+            canPause.set(capabilities.contains(DebugCapability.PAUSE));
+            canInspect.set(capabilities.contains(DebugCapability.REGISTERS));
+            canReadMemory.set(capabilities.contains(DebugCapability.MEMORY));
+            canWatch.set(capabilities.contains(DebugCapability.WATCHES));
+            canShowCallStack.set(capabilities.contains(DebugCapability.CALL_STACK));
+            canSendInput.set(capabilities.contains(DebugCapability.PROGRAM_INPUT));
+            integrated.set(!capabilities.isEmpty());
+        });
     }
 
     public void detachSession() {
@@ -334,6 +444,7 @@ public final class DebugViewModel {
             active.set(false);
             paused.set(false);
         });
+        applyCapabilities(Set.of());
     }
 
     public void stepInto() {
@@ -364,6 +475,25 @@ public final class DebugViewModel {
         }
     }
 
+    /** Interrupts a running program, so an endless loop can be inspected instead of only killed. */
+    public void pause() {
+        DebugSession session = activeSession;
+        if (session != null) {
+            session.pause();
+        }
+    }
+
+    /**
+     * Hands the current breakpoints to a live session, so one set or cleared during a pause takes effect on the
+     * next resume instead of only on the next launch.
+     */
+    public void pushBreakpoints(List<Breakpoint> current) {
+        DebugSession session = activeSession;
+        if (session != null && current != null) {
+            session.setBreakpoints(current);
+        }
+    }
+
     public Optional<Long> evaluateVariable(String filePath, int line, int byteSize) {
         DebugSession session = activeSession;
         if (session != null) {
@@ -391,42 +521,56 @@ public final class DebugViewModel {
     public void refreshMemoryDump() {
         DebugSession session = activeSession;
         if (session == null) return;
+        long refresh = memoryRefreshes.incrementAndGet();
         try {
             RegisterState registers = latestState;
             boolean flat = registers != null && !registers.extended().isEmpty();
-            String address = memoryOffset.get();
+            String address = memoryOffsetValue;
             if (flat && (address == null || address.isBlank() || DOS_OFFSET.equals(address))) {
                 // The first stop of a native program arrives before the field switches to the stack pointer.
                 address = registers.extended().containsKey("RSP") ? "RSP" : "ESP";
             }
-            String segmentText = memorySegment.get();
+            String segmentText = memorySegmentValue;
             if (!flat && registers != null && DOS_SEGMENT.equals(segmentText)) {
                 segmentText = String.format("%04X", registers.ds());
             }
             MemoryView view = flat
                     ? session.readMemory(flatAddress(address, registers), MEMORY_BYTES)
-                    : session.readMemory(segment(segmentText), segmentOffset(memoryOffset.get()), MEMORY_BYTES);
+                    : session.readMemory(segment(segmentText), segmentOffset(memoryOffsetValue), MEMORY_BYTES);
             String dump = view.length() == 0 ? "" : view.toHexDump();
 
-            List<String> stack = new ArrayList<>();
+            List<CallFrameItemViewModel> stack = new ArrayList<>();
             List<CallFrame> callFrames = session.callStack(16);
             if (!callFrames.isEmpty()) {
                 for (var frame : callFrames) {
-                    stack.add(frame.toDisplayString());
+                    stack.add(CallFrameItemViewModel.of(frame));
                 }
             } else {
-                for (StackFrame f : session.stack(8)) {
-                    stack.add(String.format("[SP+%02X] %04X:%04X = %04X", f.offsetFromSp(), f.segment(), f.offset(), f.value()));
+                for (StackFrame word : session.stack(8)) {
+                    stack.add(CallFrameItemViewModel.of(word));
                 }
             }
 
+            // What the source line actually became: one line of assembly is often several instructions.
+            List<DisasmLine> instructions = session.disassemble(DISASSEMBLY_LINES);
+
             FxDispatch.run(() -> {
+                if (refresh != memoryRefreshes.get()) {
+                    return; // A newer refresh started after this one; its result is the current one.
+                }
                 memoryDumpText.set(dump);
                 stackLines.setAll(stack);
+                disassembly.setAll(instructions);
             });
             refreshWatches();
         } catch (RuntimeException unreadable) {
-            FxDispatch.run(() -> memoryDumpText.set(""));
+            // An address the user typed that does not parse, or memory the debugger cannot read, shows as empty.
+            LOG.log(System.Logger.Level.DEBUG, "Memory refresh failed", unreadable);
+            FxDispatch.run(() -> {
+                if (refresh == memoryRefreshes.get()) {
+                    memoryDumpText.set("");
+                }
+            });
         }
     }
 

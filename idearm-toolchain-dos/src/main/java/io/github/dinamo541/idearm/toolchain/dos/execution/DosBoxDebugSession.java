@@ -1,5 +1,6 @@
 package io.github.dinamo541.idearm.toolchain.dos.execution;
 
+import io.github.dinamo541.idearm.domain.debug.DebugCapability;
 import io.github.dinamo541.idearm.domain.execution.ExitInfo;
 import io.github.dinamo541.idearm.domain.execution.SessionState;
 import io.github.dinamo541.idearm.domain.port.DebugSession;
@@ -12,6 +13,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -45,6 +47,16 @@ public final class DosBoxDebugSession implements DebugSession {
             int exitCode = readExitSentinel(code);
             exit.complete(new ExitInfo(exitCode, duration, false, "Debug session terminated with exit code " + exitCode));
         });
+    }
+
+    /**
+     * None. Turbo Debugger and CodeView drive the program inside the DOSBox window and report nothing back, so
+     * the IDE cannot step, read registers or honour its own breakpoints here. Declaring this lets the workbench
+     * say so and hide those controls instead of showing buttons that would do nothing.
+     */
+    @Override
+    public Set<DebugCapability> capabilities() {
+        return Set.of();
     }
 
     @Override

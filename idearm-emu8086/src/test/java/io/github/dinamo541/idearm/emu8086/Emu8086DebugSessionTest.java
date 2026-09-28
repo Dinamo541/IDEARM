@@ -1,6 +1,7 @@
 package io.github.dinamo541.idearm.emu8086;
 
 import io.github.dinamo541.idearm.domain.debug.Breakpoint;
+import io.github.dinamo541.idearm.domain.debug.DebugCapability;
 import io.github.dinamo541.idearm.domain.debug.DebugEvent;
 import io.github.dinamo541.idearm.domain.debug.MemoryView;
 import io.github.dinamo541.idearm.domain.execution.ExitInfo;
@@ -183,6 +184,106 @@ class Emu8086DebugSessionTest {
     }
 
     @Test
+    void aPausedEndlessLoopReportsWhereItIs() throws Exception {
+        // 0000: NOP (90)
+        // 0001: JMP 0000 (EB FD) — the endless loop a student writes by accident
+        writeCode(0x90, 0xEB, 0xFD);
+        sourceMap.addMapping("MAIN.ASM", 7, 0x0000);
+        sourceMap.addMapping("MAIN.ASM", 8, 0x0001);
+
+        LoadedProgram prog = new LoadedProgram(0x1000, 0x1000, 0x1000, 0x0000, 0x3000, 0xFFFE, 0x2000, 0x2000, true);
+        try (var session = new Emu8086DebugSession(cpu, memory, prog, sourceMap, List.of(), dos, events::add)) {
+            session.resume();
+            // The loop is running; ask it to stop where it is.
+            Thread.sleep(50);
+            long start = System.nanoTime();
+            session.pause();
+
+            DebugEvent.Paused paused = null;
+            while (System.nanoTime() - start < 1_000_000_000L) {
+                if (events.getLast() instanceof DebugEvent.Paused last) {
+                    paused = last;
+                    break;
+                }
+                Thread.sleep(5);
+            }
+            long millis = (System.nanoTime() - start) / 1_000_000;
+
+            assertNotNull(paused, "Pause did not report a stop");
+            assertTrue(millis < 100, "Pause took " + millis + " ms");
+            assertEquals(SessionState.RUNNING, session.state(), "The program is paused, not finished");
+            // It stopped inside the loop, on one of its two lines, and the registers came with it.
+            assertTrue(paused.line() == 7 || paused.line() == 8, "Paused on line " + paused.line());
+            assertEquals(0x1000, paused.registers().cs());
+        }
+    }
+
+    @Test
+    void aBreakpointSetWhilePausedStopsOnTheNextResume() throws Exception {
+        // 0000: MOV AX, 1 · 0003: MOV BX, 2 · 0006: HLT
+        writeCode(0xB8, 0x01, 0x00, 0xBB, 0x02, 0x00, 0xF4);
+        sourceMap.addMapping("MAIN.ASM", 1, 0x0000);
+        sourceMap.addMapping("MAIN.ASM", 2, 0x0003);
+
+        LoadedProgram prog = new LoadedProgram(0x1000, 0x1000, 0x1000, 0x0000, 0x3000, 0xFFFE, 0x2000, 0x2000, true);
+        try (var session = new Emu8086DebugSession(cpu, memory, prog, sourceMap, List.of(), dos, events::add)) {
+            // Launched with no breakpoints at all, as a student pressing F5 straight away does.
+            session.setBreakpoints(List.of(new Breakpoint("MAIN.ASM", 2, true)));
+            session.resume();
+            Thread.sleep(150);
+
+            var paused = (DebugEvent.Paused) events.getLast();
+            assertEquals(2, paused.line());
+            assertEquals(0x0003, paused.registers().ip());
+            assertEquals(0x0001, paused.registers().ax(), "The first instruction ran, the second did not");
+        }
+    }
+
+    @Test
+    void aDisabledBreakpointDoesNotStopTheProgram() throws Exception {
+        writeCode(0xB8, 0x01, 0x00, 0xBB, 0x02, 0x00, 0xF4);
+        sourceMap.addMapping("MAIN.ASM", 2, 0x0003);
+
+        LoadedProgram prog = new LoadedProgram(0x1000, 0x1000, 0x1000, 0x0000, 0x3000, 0xFFFE, 0x2000, 0x2000, true);
+        var off = List.of(new Breakpoint("MAIN.ASM", 2, false));
+        try (var session = new Emu8086DebugSession(cpu, memory, prog, sourceMap, off, dos, events::add)) {
+            session.resume();
+            Thread.sleep(150);
+            assertTrue(session.exit().isDone(), "The program ran to its end");
+        }
+    }
+
+    @Test
+    void aBreakpointBelongsToTheProgramsCodeSegment() throws Exception {
+        // The program jumps to the same offset in another segment; its breakpoint must not trigger there.
+        writeCode(0xEA, 0x03, 0x00, 0x00, 0x20); // JMP 2000:0003
+        memory.write8(0x2000, 0x0003, 0xF4);     // HLT, where the program would wrongly stop
+        sourceMap.addMapping("MAIN.ASM", 4, 0x0003);
+
+        LoadedProgram prog = new LoadedProgram(0x1000, 0x1000, 0x1000, 0x0000, 0x3000, 0xFFFE, 0x2000, 0x2000, true);
+        var here = List.of(new Breakpoint("MAIN.ASM", 4, true));
+        try (var session = new Emu8086DebugSession(cpu, memory, prog, sourceMap, here, dos, events::add)) {
+            session.resume();
+            Thread.sleep(150);
+            assertTrue(session.exit().isDone(),
+                    "Offset 0x0003 in segment 2000 is not the breakpoint's line in segment 1000");
+        }
+    }
+
+    @Test
+    void theEmulatorDeclaresWhatTheWorkbenchMayOffer() {
+        LoadedProgram prog = new LoadedProgram(0x1000, 0x1000, 0x1000, 0x0000, 0x3000, 0xFFFE, 0x2000, 0x2000, true);
+        try (var session = new Emu8086DebugSession(cpu, memory, prog, sourceMap, List.of(), dos, events::add)) {
+            var capabilities = session.capabilities();
+            assertTrue(capabilities.contains(DebugCapability.STEP));
+            assertTrue(capabilities.contains(DebugCapability.PAUSE));
+            assertTrue(capabilities.contains(DebugCapability.REGISTERS));
+            assertTrue(capabilities.contains(DebugCapability.BREAKPOINTS));
+            assertTrue(capabilities.contains(DebugCapability.PROGRAM_INPUT));
+        }
+    }
+
+    @Test
     void testStopCompletesExitFuture() throws Exception {
         LoadedProgram prog = new LoadedProgram(0x1000, 0x1000, 0x1000, 0x0000, 0x3000, 0xFFFE, 0x2000, 0x2000, true);
         try (var session = new Emu8086DebugSession(cpu, memory, prog, sourceMap, List.of(), dos, events::add)) {
@@ -190,6 +291,49 @@ class Emu8086DebugSessionTest {
             ExitInfo info = session.exit().get(1, TimeUnit.SECONDS);
             assertTrue(info.wasStopped());
             assertEquals(SessionState.STOPPED, session.state());
+        }
+    }
+
+    /** Stop set the CPU to TERMINATED, and the run loop then reported a false "exit code 0" after Stopped. */
+    @Test
+    void stoppingARunningProgramDoesNotReportAnExit() throws Exception {
+        writeCode(0x90, 0xEB, 0xFD); // NOP; JMP 0000
+        var seen = new java.util.concurrent.CopyOnWriteArrayList<DebugEvent>();
+        LoadedProgram prog = new LoadedProgram(0x1000, 0x1000, 0x1000, 0x0000, 0x3000, 0xFFFE, 0x2000, 0x2000, true);
+        try (var session = new Emu8086DebugSession(cpu, memory, prog, sourceMap, List.of(), dos, seen::add)) {
+            session.resume();
+            Thread.sleep(50);
+            session.stop();
+            Thread.sleep(100);
+
+            assertTrue(seen.stream().anyMatch(DebugEvent.Stopped.class::isInstance));
+            assertTrue(seen.stream().noneMatch(DebugEvent.Exited.class::isInstance), "events: " + seen);
+            assertTrue(session.exit().get(1, TimeUnit.SECONDS).wasStopped());
+        }
+    }
+
+    /** A program printing in an endless loop sent one event per character, which flooded the IDE. */
+    @Test
+    void anEndlessPrintingLoopSendsChunksAndStillPauses() throws Exception {
+        // 0000: MOV AH, 02h; MOV DL, 'A'; INT 21h; JMP 0000
+        writeCode(0xB4, 0x02, 0xB2, 0x41, 0xCD, 0x21, 0xEB, 0xF8);
+        var seen = new java.util.concurrent.CopyOnWriteArrayList<DebugEvent>();
+        LoadedProgram prog = new LoadedProgram(0x1000, 0x1000, 0x1000, 0x0000, 0x3000, 0xFFFE, 0x2000, 0x2000, true);
+        try (var session = new Emu8086DebugSession(cpu, memory, prog, sourceMap, List.of(), dos, seen::add)) {
+            session.resume();
+            Thread.sleep(200);
+            long start = System.nanoTime();
+            session.pause();
+            while (!(seen.getLast() instanceof DebugEvent.Paused) && System.nanoTime() - start < 1_000_000_000L) {
+                Thread.sleep(5);
+            }
+            assertInstanceOf(DebugEvent.Paused.class, seen.getLast(), "Pause did not stop the printing loop");
+
+            var outputs = seen.stream().filter(DebugEvent.Output.class::isInstance)
+                    .map(e -> ((DebugEvent.Output) e).text()).toList();
+            int printed = outputs.stream().mapToInt(String::length).sum();
+            assertTrue(printed > 1000, "printed " + printed);
+            assertTrue(outputs.size() * 100 < printed, outputs.size() + " events for " + printed + " characters");
         }
     }
 }

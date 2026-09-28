@@ -205,6 +205,31 @@ Script: `scripts/package-native.ps1` (PowerShell 7, the same script on both syst
   NASM, binutils and GDB, the IDE starts under Xvfb (`SMOKE OK: IDEARM 1.0.0`), and removing it leaves nothing
   behind. The `.tar.gz` runs from any folder once GTK 3 is installed.
 
+## S9 — Pausing a running program under GDB/MI (2026-09-23, Windows 11)
+Spike: `spikes/java/GdbInterruptSpike.java` against GDB 17.2 (MSYS2 UCRT64) and a C program with an endless loop,
+driving the same MI sequence `GdbProcessDebugSession` uses. Question from P2-03: can the IDE offer **Pause**?
+
+- **`-exec-interrupt` alone does nothing.** With GDB's default synchronous mode the command produces *no reply at
+  all* and the program keeps running: GDB is blocked waiting for the target and never reads it. This happens with
+  `new-console on` **and** without it, so the program's own console is not the cause.
+- **`-gdb-set mi-async on` is what makes Pause possible.** With it, `-exec-interrupt` stopped the program in
+  **12–17 ms** over repeated runs, `-data-list-register-values` answered, and `-exec-continue` resumed it.
+- **The stop lands on a thread Windows injects, not on the program's code.** The `*stopped` record reports
+  `reason="signal-received", signal-name="SIGTRAP"` in `ntdll!DbgBreakPoint` on a new thread, with no `file` or
+  `line`. Reporting that frame would leave the editor with no line marked and show a foreign thread's registers.
+- **Selecting the program's thread recovers the real position.** `-thread-info` lists the program's thread with a
+  full frame (`func="main"`, `file`, `fullname`, `line`), and `-thread-select 1` returns that frame, after which
+  registers and the call stack belong to the program. A pause must therefore select the first thread whose frame
+  has a source file before reporting `Paused`.
+- Noise on teardown: `-gdb-exit` right after a continue can print
+  `Failed to resume program execution - ContinueDebugEvent failed (error 87)`. It is a teardown message; the
+  session ends and the Job Object reaps the process.
+
+**Consequence.** `GdbProcessDebugSession` sets `mi-async on` during `initialize`, implements `pause()` as
+`-exec-interrupt`, and on an interrupt-induced stop selects the program's thread before reading registers and the
+frame. GDB therefore declares the `PAUSE` capability. DOSBox/TD declares no capabilities at all, and the built-in
+emulator honours a pause flag in its own run loop.
+
 ---
 
 ## Consequences for F1
@@ -220,7 +245,18 @@ Script: `scripts/package-native.ps1` (PowerShell 7, the same script on both syst
 5. **Lint (F6):** CPU-baseline checks come from the IDE, because TASM does not report them.
 6. **Project model:** a project is bound to one toolchain; MASM-mode TASM sources are not guaranteed to build with ML.
 
+## S10 — x87 coprocessor in TASM/MASM and MS-DOS INT 21h/0Ah contract (2026-09-25)
+- **x87 directives in TASM 4.1 & MASM 6.11:** TASM 4.1 in default MASM mode targeting 8086 fails with
+  `Coprocessor instruction requires .8087 or .287 or .387` when encountering x87 opcodes (`FLD`, `FADD`, `FSQRT`).
+  Adding `.8087` (or `.387`) succeeds with exit code 0. MASM 6.11 exhibits equivalent behavior.
+  *Conclusion:* x87 is assemblable under DOS toolchains provided the coprocessor directive is specified.
+- **INT 21h Function 0Ah buffer length:** MS-DOS stores user input up to `M - 1` characters and reserves the final
+  byte for carriage return `0Dh`, keeping total buffer footprint <= `M`. In `idearm-emu8086`, loop bounds checked
+  `length < maxInput` instead of `maxInput - 1`, allowing `M` characters before appending `0Dh` (total `M + 1`).
+  *Conclusion:* Emulator divergence documented in knowledge base; compatibility matrix cell closed.
+
 ## Open items (non-blocking)
+
 | Item | Phase |
 |---|---|
 | jpackage installer: WiX Toolset is not installed (installing it needs the user's approval) | F4 |
@@ -244,6 +280,7 @@ pwsh -NoProfile -File spikes/scripts/export-fixtures.ps1
 pwsh -NoProfile -File spikes/scripts/s7-dosbox-platform.ps1
 java spikes/java/DosBoxBuildSpike.java <dosbox-x.exe> <TASM 4.1 bin> spikes\asm spikes\out\java-hello HELLO
 java --enable-native-access=ALL-UNNAMED spikes/java/ProcessTreeSpike.java crash <dosbox-x.exe> spikes/java/ProcessTreeSpike.java
+java spikes/java/GdbInterruptSpike.java <gdb.exe> <a program with an endless loop> true true
 mvn -f spikes/editor/pom.xml compile javafx:run "-Dspike.file=<loadmap.asm>"
 mvn -f spikes/editor-incubator/pom.xml compile dependency:build-classpath "-Dmdep.outputFile=<cp.txt>"
 java --module-path <contents of cp.txt> --add-modules javafx.controls,jfx.incubator.richtext -cp spikes/editor-incubator/target/classes io.github.dinamo541.idearm.spikes.editorincubator.IncubatorEditorSpike <loadmap.asm>

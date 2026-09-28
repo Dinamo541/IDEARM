@@ -93,7 +93,6 @@ public final class DebugProject {
             Path executable = build.executable();
 
             // Resolve execution environment (gdb, emu8086, or DOSBox)
-            String backend = project.debug().backend();
             io.github.dinamo541.idearm.domain.model.TargetProfile profile =
                     io.github.dinamo541.idearm.domain.model.TargetProfileCatalog.require(project.target().profile());
             // Arguments reach the program's command tail and the generated batch files, so they are checked first.
@@ -104,7 +103,7 @@ public final class DebugProject {
             }
             // GDB debugs native programs; a DOS program is debugged in DOSBox or in the built-in emulator.
             boolean useGdb = !profile.isDos();
-            boolean useEmu = !useGdb && ("emu8086".equalsIgnoreCase(backend) || "internal".equalsIgnoreCase(backend));
+            boolean useEmu = !useGdb && project.debug().usesEmulator();
 
             DebugEnvironmentProvider envProvider;
             ToolInstallation envTool;
@@ -170,7 +169,9 @@ public final class DebugProject {
                                 .or(() -> tools.find("turbo-debugger"))
                                 .or(() -> tools.find("cv"))
                                 .orElseThrow(() -> new DomainException("debug.tool.missing",
-                                        "Turbo Debugger (TD.EXE) was not found in registered tool paths. Please place TD.EXE in your TASM directory.",
+                                        "Turbo Debugger (TD.EXE) was not found in registered tool paths. Register it, "
+                                                + "or choose the built-in 8086 emulator in Project Properties, which "
+                                                + "needs no extra tool.",
                                         "Turbo Debugger", "TD.EXE", "TASM"));
                     } else {
                         debuggerKind = "cv";
@@ -178,7 +179,9 @@ public final class DebugProject {
                                 .or(() -> tools.find("codeview"))
                                 .or(() -> tools.find("td"))
                                 .orElseThrow(() -> new DomainException("debug.tool.missing",
-                                        "Microsoft CodeView (CV.EXE) was not found in registered tool paths. Please place CV.EXE in your MASM directory.",
+                                        "Microsoft CodeView (CV.EXE) was not found in registered tool paths. Register it, "
+                                                + "or choose the built-in 8086 emulator in Project Properties, which "
+                                                + "needs no extra tool.",
                                         "CodeView", "CV.EXE", "MASM"));
                     }
                 }
