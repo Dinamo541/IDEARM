@@ -29,6 +29,20 @@ IDEARM brings your editor, assembler, linker and debugger into one workspace. Cr
 program, then build, run or debug it with a keyboard shortcut. Every tool command remains visible in the
 **Build Log**, so you can learn what happens between source code and a running program.
 
+## About this project / Acerca de este proyecto
+
+**English.** IDEARM was built with artificial intelligence. The AI wrote practically all of the
+code and designed the architecture, the interface and the features. My role was to write the
+prompts, decide what the IDE should have and do, and check that it met what I needed. I chose
+this approach because of time and complexity, and because I wanted a tool that supports my own
+learning of Assembly language. I hope it is as useful to you as it is to me.
+
+**Español.** IDEARM se desarrolló con inteligencia artificial. La IA escribió prácticamente todo
+el código y diseñó la arquitectura, la interfaz y las funcionalidades. Mi papel fue escribir los
+prompts, decidir qué debía tener y hacer el IDE, y comprobar que cumpliera con lo que yo
+necesitaba. Elegí hacerlo así por tiempo y por complejidad, y porque quería una herramienta que
+apoyara mi propio aprendizaje de ensamblador. Espero que les sea tan útil como lo es para mí.
+
 ## Installation
 
 ### 1. Get the app
