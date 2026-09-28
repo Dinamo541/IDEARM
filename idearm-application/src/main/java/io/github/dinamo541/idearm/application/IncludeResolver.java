@@ -217,12 +217,11 @@ final class IncludeResolver {
             searched.add(fold(folder));
         }
         try (var tree = Files.walk(root, SourceSet.MAX_DEPTH)) {
+            // Compare folded names instead of resolving the folded one: on Linux the file system is case-sensitive.
             return tree.filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
+                    .filter(path -> fold(path.getFileName().toString()).equals(wanted))
                     .map(path -> folderOf(normalize(root.relativize(path).toString())))
                     .filter(folder -> !searched.contains(fold(folder)) && !isSkipped(folder))
-                    .filter(folder -> Files.isRegularFile(
-                            root.resolve(folder.equals(".") ? wanted : folder + "/" + wanted),
-                            LinkOption.NOFOLLOW_LINKS))
                     .findFirst();
         } catch (IOException | RuntimeException unreadable) {
             return Optional.empty();
