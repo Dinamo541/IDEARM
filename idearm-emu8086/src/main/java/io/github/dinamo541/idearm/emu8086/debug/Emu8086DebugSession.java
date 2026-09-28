@@ -1,7 +1,9 @@
 package io.github.dinamo541.idearm.emu8086.debug;
 
 import io.github.dinamo541.idearm.domain.debug.Breakpoint;
+import io.github.dinamo541.idearm.domain.debug.DebugCapability;
 import io.github.dinamo541.idearm.domain.debug.DebugEvent;
+import io.github.dinamo541.idearm.domain.debug.DisasmLine;
 import io.github.dinamo541.idearm.domain.debug.MemoryView;
 import io.github.dinamo541.idearm.domain.debug.RegisterState;
 import io.github.dinamo541.idearm.domain.debug.StackFrame;
@@ -12,6 +14,7 @@ import io.github.dinamo541.idearm.domain.execution.ExitInfo;
 import io.github.dinamo541.idearm.domain.execution.SessionState;
 import io.github.dinamo541.idearm.domain.port.DebugSession;
 import io.github.dinamo541.idearm.emu8086.cpu.Cpu8086;
+import io.github.dinamo541.idearm.emu8086.cpu.Disassembler8086;
 import io.github.dinamo541.idearm.emu8086.cpu.ModRmDecoder;
 import io.github.dinamo541.idearm.emu8086.cpu.RealModeMemory;
 import io.github.dinamo541.idearm.emu8086.dos.DosInterruptHandler;
@@ -36,7 +39,8 @@ public final class Emu8086DebugSession implements DebugSession {
     private final LoadedProgram program;
     private final SourceMap sourceMap;
     private final List<Breakpoint> breakpoints;
-    private final Set<Integer> breakpointOffsets = new HashSet<>();
+    /** Replaced as a whole by {@link #setBreakpoints(List)}, so the worker thread always reads a complete set. */
+    private volatile Set<Integer> breakpointOffsets = Set.of();
     private final Consumer<DebugEvent> events;
     private final DosInterruptHandler dosHandler;
     private final long startTimeNanos;
@@ -44,7 +48,13 @@ public final class Emu8086DebugSession implements DebugSession {
     private final CompletableFuture<ExitInfo> exitFuture = new CompletableFuture<>();
     private final AtomicBoolean paused = new AtomicBoolean(false);
     private final AtomicBoolean stopped = new AtomicBoolean(false);
+    /** Set by {@link #pause()} from another thread; the run loops clear it where they stop. */
+    private final AtomicBoolean pauseRequested = new AtomicBoolean(false);
     private volatile SessionState sessionState = SessionState.RUNNING;
+    /** Instructions between two output flushes while running; a power of two. */
+    private static final int OUTPUT_FLUSH_INTERVAL = 8192;
+    /** Counted on the worker thread only. */
+    private int instructionsSinceFlush;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "emu8086-debugger-worker");
@@ -77,11 +87,7 @@ public final class Emu8086DebugSession implements DebugSession {
                 diagnostic(Severity.WARNING, code, message, arguments, cpu.instructionIp()))));
 
         // Index active breakpoint offsets
-        for (Breakpoint bp : this.breakpoints) {
-            if (bp.enabled()) {
-                this.sourceMap.findOffset(bp.path(), bp.line()).ifPresent(breakpointOffsets::add);
-            }
-        }
+        this.breakpointOffsets = resolveOffsets(this.breakpoints);
 
         // Initially pause at entry point
         this.paused.set(true);
@@ -98,10 +104,96 @@ public final class Emu8086DebugSession implements DebugSession {
         return sessionState;
     }
 
+    /** The emulator runs the program itself, so every panel of the debugger works with it. */
+    @Override
+    public Set<DebugCapability> capabilities() {
+        return EnumSet.of(DebugCapability.STEP, DebugCapability.PAUSE, DebugCapability.BREAKPOINTS,
+                DebugCapability.REGISTERS, DebugCapability.MEMORY, DebugCapability.WATCHES,
+                DebugCapability.CALL_STACK, DebugCapability.PROGRAM_INPUT, DebugCapability.DISASSEMBLY);
+    }
+
+    /**
+     * The machine instructions from the current CS:IP onwards, which is what the source line actually became.
+     * One source line often assembles to several instructions — {@code shl ax, 3} on an 8086 is three shifts — and
+     * this is where a student sees that.
+     */
+    @Override
+    public List<DisasmLine> disassemble(int count) {
+        var lines = new ArrayList<DisasmLine>();
+        int segment = cpu.registers().cs;
+        int offset = cpu.registers().ip;
+        for (int index = 0; index < Math.max(0, count); index++) {
+            var instruction = Disassembler8086.decode(memory, segment, offset);
+            lines.add(new DisasmLine(
+                    "%04X:%04X".formatted(segment, offset),
+                    machineCode(segment, offset, instruction.length()),
+                    instruction.text(),
+                    index == 0));
+            offset = (offset + instruction.length()) & 0xFFFF;
+        }
+        return lines;
+    }
+
+    private String machineCode(int segment, int offset, int length) {
+        var text = new StringBuilder();
+        for (int index = 0; index < length; index++) {
+            if (index > 0) {
+                text.append(' ');
+            }
+            text.append("%02X".formatted(memory.read8(segment, (offset + index) & 0xFFFF)));
+        }
+        return text.toString();
+    }
+
+    /**
+     * Asks the run loop to stop where the program currently is. A program in an endless loop — a classic student
+     * bug — can then be inspected instead of only killed.
+     */
+    @Override
+    public void pause() {
+        if (stopped.get() || exitFuture.isDone() || paused.get()) return;
+        pauseRequested.set(true);
+    }
+
+    /**
+     * Takes the breakpoints of a live session, so one set during a pause stops the program on the next resume.
+     * The offsets are resolved again from the listing, exactly as at launch.
+     */
+    @Override
+    public void setBreakpoints(List<Breakpoint> updated) {
+        breakpointOffsets = resolveOffsets(updated == null ? List.of() : updated);
+    }
+
+    private Set<Integer> resolveOffsets(List<Breakpoint> source) {
+        Set<Integer> offsets = new HashSet<>();
+        for (Breakpoint bp : source) {
+            if (bp.enabled()) {
+                sourceMap.findOffset(bp.path(), bp.line()).ifPresent(offsets::add);
+            }
+        }
+        return Set.copyOf(offsets);
+    }
+
+    /**
+     * Starts a run command. A pause request left over from the previous run — Pause pressed just as a breakpoint
+     * stopped the program — must not stop this one after its first instruction.
+     */
+    private void beginRun() {
+        pauseRequested.set(false);
+        paused.set(false);
+    }
+
+    /** Called after every instruction of a run: output reaches the IDE regularly even if the program never pauses. */
+    private void afterInstruction() {
+        if ((++instructionsSinceFlush & (OUTPUT_FLUSH_INTERVAL - 1)) == 0) {
+            dosHandler.flushOutput();
+        }
+    }
+
     @Override
     public void resume() {
         if (stopped.get() || exitFuture.isDone()) return;
-        paused.set(false);
+        beginRun();
         events.accept(new DebugEvent.Resumed());
 
         executor.submit(() -> {
@@ -118,6 +210,13 @@ public final class Emu8086DebugSession implements DebugSession {
 
                 boolean ok = cpu.step();
                 if (!ok) break;
+                afterInstruction();
+
+                if (pauseRequested.compareAndSet(true, false)) {
+                    paused.set(true);
+                    notifyPaused();
+                    return;
+                }
 
                 if (isBreakpointHit(cpu.registers().ip)) {
                     paused.set(true);
@@ -148,6 +247,7 @@ public final class Emu8086DebugSession implements DebugSession {
     @Override
     public void stepOver() {
         if (stopped.get() || exitFuture.isDone()) return;
+        pauseRequested.set(false);
         executor.submit(() -> {
             if (endIfFaulted()) return;
             int cs = cpu.registers().cs;
@@ -181,6 +281,13 @@ public final class Emu8086DebugSession implements DebugSession {
 
                 boolean ok = cpu.step();
                 if (!ok) break;
+                afterInstruction();
+
+                if (pauseRequested.compareAndSet(true, false)) {
+                    paused.set(true);
+                    notifyPaused();
+                    return;
+                }
 
                 if (cpu.registers().cs == cs && cpu.registers().ip == targetIp) {
                     paused.set(true);
@@ -202,6 +309,7 @@ public final class Emu8086DebugSession implements DebugSession {
     @Override
     public void stepOut() {
         if (stopped.get() || exitFuture.isDone()) return;
+        pauseRequested.set(false);
         executor.submit(() -> {
             if (endIfFaulted()) return;
             int targetDepth = cpu.getCallDepth() - 1;
@@ -219,6 +327,13 @@ public final class Emu8086DebugSession implements DebugSession {
 
                 boolean ok = cpu.step();
                 if (!ok) break;
+                afterInstruction();
+
+                if (pauseRequested.compareAndSet(true, false)) {
+                    paused.set(true);
+                    notifyPaused();
+                    return;
+                }
 
                 if (cpu.getCallDepth() <= targetDepth) {
                     paused.set(true);
@@ -418,14 +533,23 @@ public final class Emu8086DebugSession implements DebugSession {
     /**
      * A breakpoint stops only on the first instruction of its line. Matching the nearest mapped line instead would
      * also stop inside code the listing does not describe, such as another module's procedures.
+     *
+     * <p>The listing's offsets belong to the program's code segment, so the segment is compared too: an interrupt
+     * handler the program installs elsewhere reaches the same offsets and must not trigger a breakpoint of its own.
      */
     private boolean isBreakpointHit(int ip) {
-        return breakpointOffsets.contains(ip);
+        return inProgramCode() && breakpointOffsets.contains(ip);
+    }
+
+    /** Whether execution is inside the code segment the listing describes. */
+    private boolean inProgramCode() {
+        return cpu.registers().cs == (program.initialCs() & 0xFFFF);
     }
 
     private void notifyPaused() {
+        dosHandler.flushOutput();
         RegisterState regState = registers();
-        var locOpt = sourceMap.findLocation(cpu.registers().ip);
+        var locOpt = inProgramCode() ? sourceMap.findLocation(cpu.registers().ip) : Optional.<SourceLocation>empty();
         // Without a mapped line the registers still update, but no editor line is marked.
         String file = locOpt.map(SourceLocation::file).orElse("");
         int line = locOpt.map(SourceLocation::line).orElse(0);
@@ -438,6 +562,11 @@ public final class Emu8086DebugSession implements DebugSession {
      * next resume or step ends the program; an {@code INT 3} pauses like a breakpoint; anything else ends the program.
      */
     private void finishRun() {
+        if (stopped.get()) {
+            // Stop already ended the session and reported it; the run loop only noticed now.
+            return;
+        }
+        dosHandler.flushOutput();
         Cpu8086.Fault fault = cpu.fault();
         if (cpu.state() != Cpu8086.State.FAULTED || fault == null) {
             checkTermination();

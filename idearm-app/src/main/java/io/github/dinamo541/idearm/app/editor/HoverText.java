@@ -28,7 +28,7 @@ public final class HoverText {
     private static HoverInfo number(HoverInfo info, long value, Localization localization) {
         String hex = "0x" + Long.toHexString(value).toUpperCase(Locale.ROOT);
         var description = new StringBuilder()
-                .append(localization.get("hover.number.decimal")).append(": ").append(value).append('\n')
+                .append(localization.get("hover.number.decimal")).append(": ").append(Long.toUnsignedString(value)).append('\n')
                 .append(localization.get("hover.number.hexadecimal")).append(": ").append(hex).append('\n')
                 .append(localization.get("hover.number.binary")).append(": ").append(QueryHover.formatBinary(value));
         if (value >= 32 && value <= 126) {
@@ -36,8 +36,9 @@ public final class HoverText {
                     .append((char) value).append('\'');
         }
         String literal = info.title().substring(info.title().lastIndexOf(' ') + 1);
+        HoverInfo secondary = info.secondary() != null ? localize(info.secondary(), localization) : null;
         return new HoverInfo(localization.get("hover.number.title", literal), info.syntax(), description.toString(),
-                null, null, info.kind(), info.number(), null);
+                null, null, info.kind(), info.number(), null, secondary);
     }
 
     private static HoverInfo symbol(HoverInfo info, HoverInfo.SymbolFacts facts, Localization localization) {
@@ -49,6 +50,7 @@ public final class HoverText {
                     "0x" + Long.toHexString(live).toUpperCase(Locale.ROOT), String.valueOf(live)));
         }
         String title = localization.get("hover.symbol.kind." + facts.kind()) + " " + facts.name();
-        return new HoverInfo(title, info.syntax(), description.toString(), null, null, info.kind(), null, facts);
+        HoverInfo secondary = info.secondary() != null ? localize(info.secondary(), localization) : null;
+        return new HoverInfo(title, info.syntax(), description.toString(), null, null, info.kind(), null, facts, secondary);
     }
 }

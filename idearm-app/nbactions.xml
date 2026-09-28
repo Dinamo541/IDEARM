@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Every launch action first runs "build-with-dependencies" (install with also-make) so the sibling
+        modules come from this checkout, not from stale jars in ~/.m2.
+    -->
     <actions>
+        <action>
+            <actionName>build-with-dependencies</actionName>
+            <reactor>also-make</reactor>
+            <goals>
+                <goal>install</goal>
+            </goals>
+            <properties>
+                <skipTests>true</skipTests>
+            </properties>
+        </action>
         <action>
             <actionName>run</actionName>
             <packagings>
                 <packaging>jar</packaging>
             </packagings>
+            <preAction>build-with-dependencies</preAction>
             <goals>
                 <goal>clean</goal>
                 <goal>javafx:run</goal>
@@ -12,6 +27,7 @@
         </action>
         <action>
             <actionName>debug</actionName>
+            <preAction>build-with-dependencies</preAction>
             <goals>
                 <goal>clean</goal>
                 <goal>javafx:run@ide-debug</goal>
@@ -22,6 +38,7 @@
         </action>
         <action>
             <actionName>profile</actionName>
+            <preAction>build-with-dependencies</preAction>
             <goals>
                 <goal>clean</goal>
                 <goal>javafx:run@ide-profile</goal>
@@ -30,6 +47,7 @@
         <action>
             <actionName>CUSTOM-jlink</actionName>
             <displayName>jlink</displayName>
+            <preAction>build-with-dependencies</preAction>
             <goals>
                 <goal>clean</goal>
                 <!-- compile not needed with javafx-maven-plugin v0.0.5 -->

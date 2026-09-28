@@ -1,0 +1,451 @@
+[
+  {
+    "id": "syntax.common.colon.label",
+    "token": ":",
+    "syntaxClass": "PUNCTUATION",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DEFINITION", "LABEL"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [
+      "syntax.common.colon.segoverride",
+      "syntax.common.colon.logicaladdress",
+      "syntax.common.colon.registerpair"
+    ],
+    "summaryEn": "Code label terminator (defines a jump destination)",
+    "summaryEs": "Terminador de etiqueta de código (define un destino de salto)",
+    "descriptionEn": "Placed immediately after an identifier at the beginning of a line to declare a code label. The label represents the offset of the instruction following it.",
+    "descriptionEs": "Colocado tras un identificador al inicio de una línea para declarar una etiqueta de código. Representa el desplazamiento de la instrucción contigua.",
+    "example": "bucle:\n    dec cx\n    jnz bucle",
+    "sources": ["src.irvine.5e-es#3.4:62", "src.nasm.3.02#3.1"]
+  },
+  {
+    "id": "syntax.common.colon.segoverride",
+    "token": ":",
+    "syntaxClass": "SEGMENT_OVERRIDE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_MEMORY"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [
+      "syntax.common.colon.label",
+      "syntax.common.colon.logicaladdress",
+      "syntax.common.colon.registerpair"
+    ],
+    "summaryEn": "Segment override operator (specifies explicit segment register)",
+    "summaryEs": "Operador de sobreescritura de segmento (especifica registro de segmento explícito)",
+    "descriptionEn": "Separates a segment register from the memory expression, generating a hardware segment override prefix byte (26h for ES, 2Eh for CS, 36h for SS, 3Eh for DS, 64h for FS, 65h for GS).",
+    "descriptionEs": "Separa el registro de segmento de la expresión de memoria, generando un prefijo de sobreescritura de segmento en código máquina (26h para ES, 2Eh para CS, 36h para SS, 3Eh para DS, 64h para FS, 65h para GS).",
+    "example": "mov ax, es:[di]",
+    "sources": ["src.stallings.7e-es#11.2:416", "src.intel-sdm.093#vol2:PREFIXES"]
+  },
+  {
+    "id": "syntax.common.colon.logicaladdress",
+    "token": ":",
+    "syntaxClass": "PUNCTUATION",
+    "dialects": [
+      { "dialect": "COMMON", "version": "1.0", "assemblable": false, "note": "Notation only, not assemblable" }
+    ],
+    "contexts": ["NOTATION", "ADDRESS"],
+    "notation": true,
+    "assemblable": false,
+    "contrastWith": [
+      "syntax.common.colon.label",
+      "syntax.common.colon.segoverride",
+      "syntax.common.colon.registerpair"
+    ],
+    "summaryEn": "Logical address notation segment:offset (pedagogical notation, not code)",
+    "summaryEs": "Notación de dirección lógica segmento:desplazamiento (notación explicativa, no ensamblable)",
+    "descriptionEn": "Represents a 16-bit real mode logical memory address where the physical address is calculated as Segment * 16 + Offset. Used in textbooks and debuggers, but cannot be typed directly as a machine instruction operand.",
+    "descriptionEs": "Representa una dirección lógica en modo real donde la dirección física es Segmento * 16 + Desplazamiento. Empleada en manuales y depuradores, pero no constituye una sintaxis ensamblable directa.",
+    "example": "CS:IP = 1000:0100 -> Dirección física 10100h",
+    "sources": ["src.irvine.5e-es#2.2.3:36", "src.stallings.7e-es#11.2:415"]
+  },
+  {
+    "id": "syntax.common.colon.registerpair",
+    "token": ":",
+    "syntaxClass": "PUNCTUATION",
+    "dialects": [
+      { "dialect": "COMMON", "version": "1.0", "assemblable": false, "note": "Notation only, not assemblable" }
+    ],
+    "contexts": ["NOTATION", "REGISTER_PAIR"],
+    "notation": true,
+    "assemblable": false,
+    "contrastWith": [
+      "syntax.common.colon.label",
+      "syntax.common.colon.segoverride",
+      "syntax.common.colon.logicaladdress"
+    ],
+    "summaryEn": "Register pair notation (e.g. DX:AX, EDX:EAX for extended values)",
+    "summaryEs": "Notación de pareja de registros (ej. DX:AX, EDX:EAX para valores de doble tamaño)",
+    "descriptionEn": "Explanatory notation denoting high:low concatenation used by multiplication (MUL/IMUL), division (DIV/IDIV), and sign extension (CWD/CDQ). Not an assemblable instruction operand.",
+    "descriptionEs": "Notación explicativa que representa la concatenación parte-alta:parte-baja en multiplicaciones (MUL/IMUL), divisiones (DIV/IDIV) y extensiones de signo (CWD/CDQ). No es sintaxis ensamblable.",
+    "example": "DX:AX := AX * BX",
+    "sources": ["src.irvine.5e-es#7.4:204"]
+  },
+  {
+    "id": "syntax.common.bracket.memory",
+    "token": "[",
+    "syntaxClass": "OPERATOR",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_MEMORY"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.op.offset"],
+    "summaryEn": "Memory indirection / effective address brackets",
+    "summaryEs": "Corchetes de indirección / cálculo de dirección efectiva de memoria",
+    "descriptionEn": "Encloses base registers, index registers, scale factors, and displacements to access the contents of memory at the calculated effective address. In 16-bit real mode only BX, BP, SI, DI can be used inside brackets.",
+    "descriptionEs": "Encierra registros base, registros índice, factores de escala y desplazamientos para acceder al contenido en memoria en la dirección efectiva calculada. En modo real de 16 bits solo pueden usarse BX, BP, SI y DI.",
+    "example": "mov ax, [bx+si+4]",
+    "sources": ["src.stallings.7e-es#11.2:415", "src.nasm.3.02#3.3"]
+  },
+  {
+    "id": "syntax.common.dir.db",
+    "token": "DB",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.dw", "syntax.common.dir.dd"],
+    "summaryEn": "Define byte (8-bit data allocation)",
+    "summaryEs": "Define byte (reserva e inicializa datos de 8 bits)",
+    "descriptionEn": "Allocates one or more 8-bit bytes of memory, initialized with integer, character, or string constants.",
+    "descriptionEs": "Reserva uno o varios bytes de 8 bits en memoria, inicializados con enteros, caracteres o cadenas.",
+    "example": "mensaje DB 'Hola Mundo$', 0",
+    "sources": ["src.irvine.5e-es#3.4:67"]
+  },
+  {
+    "id": "syntax.common.dir.dw",
+    "token": "DW",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.db", "syntax.common.dir.dd"],
+    "summaryEn": "Define word (16-bit data allocation)",
+    "summaryEs": "Define palabra (reserva e inicializa datos de 16 bits)",
+    "descriptionEn": "Allocates one or more 16-bit words (stored in little-endian byte order).",
+    "descriptionEs": "Reserva una o más palabras de 16 bits (almacenadas en orden little-endian).",
+    "example": "cuenta DW 1000h",
+    "sources": ["src.irvine.5e-es#3.4:69"]
+  },
+  {
+    "id": "syntax.common.dir.dd",
+    "token": "DD",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.dw", "syntax.common.dir.dq"],
+    "summaryEn": "Define doubleword (32-bit data allocation)",
+    "summaryEs": "Define doble palabra (reserva e inicializa datos de 32 bits)",
+    "descriptionEn": "Allocates one or more 32-bit doublewords (4 bytes in little-endian order) or single-precision IEEE 754 floats.",
+    "descriptionEs": "Reserva una o más dobles palabras de 32 bits (4 bytes en orden little-endian) o números de coma flotante IEEE 754 de precisión simple.",
+    "example": "valor DD 12345678h",
+    "sources": ["src.irvine.5e-es#3.4:70"]
+  },
+  {
+    "id": "syntax.common.dir.dq",
+    "token": "DQ",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.dd", "syntax.common.dir.dt"],
+    "summaryEn": "Define quadword (64-bit data allocation)",
+    "summaryEs": "Define cuatro palabras (reserva e inicializa datos de 64 bits)",
+    "descriptionEn": "Allocates one or more 64-bit quadwords (8 bytes) or double-precision IEEE 754 floating-point numbers.",
+    "descriptionEs": "Reserva una o más palabras cuádruples de 64 bits (8 bytes) o números en coma flotante de doble precisión.",
+    "example": "puntero64 DQ 0",
+    "sources": ["src.irvine.5e-es#3.4:71"]
+  },
+  {
+    "id": "syntax.common.dir.dt",
+    "token": "DT",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.dq"],
+    "summaryEn": "Define ten bytes (80-bit extended-precision or BCD data)",
+    "summaryEs": "Define diez bytes (datos de 80 bits en coma flotante extendida o BCD)",
+    "descriptionEn": "Allocates 80 bits (10 bytes) for x87 extended precision floats or packed binary-coded decimal (BCD).",
+    "descriptionEs": "Reserva 80 bits (10 bytes) para valores x87 en precisión extendida o decimal empaquetado (BCD).",
+    "example": "piExt DT 3.14159265358979323846",
+    "sources": ["src.irvine.5e-es#17.1:600"]
+  },
+  {
+    "id": "syntax.common.dir.equ",
+    "token": "EQU",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DEFINITION", "CONSTANT"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Equate directive (defines assembly-time symbolic constant)",
+    "summaryEs": "Directiva de igualdad (define constante simbólica en tiempo de ensamblado)",
+    "descriptionEn": "Assigns a numeric or textual constant to a symbol. Unlike variables, constants defined with EQU allocate no memory in the final executable.",
+    "descriptionEs": "Asigna un valor constante o expresión a un símbolo. A diferencia de las variables, las constantes EQU no consumen memoria en el ejecutable final.",
+    "example": "MAX_BUFFER EQU 256",
+    "sources": ["src.irvine.5e-es#3.5:74"]
+  },
+  {
+    "id": "syntax.common.dir.org",
+    "token": "ORG",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["ORGANIZATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Set origin location counter",
+    "summaryEs": "Fija el contador de posición de origen",
+    "descriptionEn": "Sets the location counter for the current segment. In DOS .COM executables, ORG 100h leaves space for the 256-byte Program Segment Prefix (PSP).",
+    "descriptionEs": "Establece el contador de posición del segmento actual. En programas DOS .COM, ORG 100h reserva los 256 bytes del Prefijo de Segmento de Programa (PSP).",
+    "example": "ORG 100h",
+    "sources": ["src.irvine.5e-es#3.3:59"]
+  },
+  {
+    "id": "syntax.common.dir.end",
+    "token": "END",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["ORGANIZATION", "TERMINATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.exit"],
+    "summaryEn": "End of assembly module / specify entry point",
+    "summaryEs": "Fin de módulo ensamblador / punto de entrada del programa",
+    "descriptionEn": "Marks the end of an assembly source file. In MASM and TASM, an optional label argument specifies the program entry point (e.g. 'END main'). Any text after END is ignored.",
+    "descriptionEs": "Marca el fin del archivo fuente ensamblador. En MASM y TASM, un argumento opcional especifica la etiqueta de inicio o punto de entrada (ej. 'END main'). Cualquier texto posterior a END es ignorado.",
+    "example": "END main",
+    "sources": ["src.irvine.5e-es#3.4:67"]
+  },
+  {
+    "id": "syntax.common.dir.align",
+    "token": "ALIGN",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["ORGANIZATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.even"],
+    "summaryEn": "Memory boundary alignment directive",
+    "summaryEs": "Directiva de alineación de límite de memoria",
+    "descriptionEn": "Aligns the next instruction or data on an N-byte boundary (2, 4, 8, 16). Reduces processor bus cycles by aligning data with CPU memory word boundaries.",
+    "descriptionEs": "Alinea la siguiente instrucción o variable a un múltiplo de N bytes (2, 4, 8, 16). Reduce los ciclos de bus del procesador al alinear con los anchos de palabra de memoria.",
+    "example": "ALIGN 4\ntabla DWORD 100 DUP(0)",
+    "sources": ["src.irvine.5e-es#4.3.5:99"]
+  },
+  {
+    "id": "syntax.common.dir.even",
+    "token": "EVEN",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["ORGANIZATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.align"],
+    "summaryEn": "Even word boundary alignment (ALIGN 2)",
+    "summaryEs": "Alineación a límite par de palabra (ALIGN 2)",
+    "descriptionEn": "Aligns the next instruction or data on an even word (2-byte) boundary. Inserts a NOP padding byte if currently at an odd address.",
+    "descriptionEs": "Alinea la siguiente instrucción o dato en una dirección de memoria par (múltiplo de 2 bytes). Inserta un byte NOP de relleno si la dirección actual es impar.",
+    "example": "EVEN\nvar1 DW 0",
+    "sources": ["src.irvine.5e-es#4.3.5:99"]
+  },
+  {
+    "id": "syntax.common.dir.global",
+    "token": "GLOBAL",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DECLARATION", "LINKING"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.extern", "syntax.masm.dir.public"],
+    "summaryEn": "Export symbol for external linking",
+    "summaryEs": "Exporta un símbolo para enlace externo entre módulos",
+    "descriptionEn": "Declares a label or procedure as public/globally accessible by other modules during linking. Standard export directive in NASM and supported in modern MASM.",
+    "descriptionEs": "Declara una etiqueta o procedimiento como accesible globalmente para otros módulos durante el enlazado. Es la directiva estándar en NASM y soportada en MASM moderno.",
+    "example": "global _start",
+    "sources": ["src.nasm.3.02#6.5"]
+  },
+  {
+    "id": "syntax.common.dir.extern",
+    "token": "EXTERN",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DECLARATION", "LINKING"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.global"],
+    "summaryEn": "Declare external symbol defined in another module",
+    "summaryEs": "Declara un símbolo externo definido en otro módulo",
+    "descriptionEn": "Informs the assembler that a symbol is defined in another object file or library. The linker resolves the final physical address.",
+    "descriptionEs": "Informa al ensamblador de que el símbolo está definido en otro archivo objeto o biblioteca. El enlazador resolverá la dirección definitiva.",
+    "example": "extern ExitProcess\nextern printf",
+    "sources": ["src.nasm.3.02#6.6", "src.irvine.5e-es#8.4:250"]
+  },
+  {
+    "id": "syntax.common.dir.extrn",
+    "token": "EXTRN",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["DECLARATION", "LINKING"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.extern"],
+    "summaryEn": "External symbol declaration (MASM/TASM classic syntax)",
+    "summaryEs": "Declaración de símbolo externo (sintaxis clásica MASM/TASM)",
+    "descriptionEn": "Classic MASM/TASM directive declaring an external symbol along with its qualified type: EXTRN name:type (e.g. EXTRN sumar:PROC, EXTRN total:WORD).",
+    "descriptionEs": "Directiva clásica de MASM/TASM para declarar un símbolo externo junto a su tipo calificado: EXTRN nombre:tipo (ej. EXTRN sumar:PROC, EXTRN total:WORD).",
+    "example": "EXTRN imprimeCadena:PROC",
+    "sources": ["src.irvine.5e-es#8.4:250"]
+  },
+  {
+    "id": "syntax.common.dir.include",
+    "token": "INCLUDE",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["ORGANIZATION", "PREPROCESSOR"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Include source file at assembly time",
+    "summaryEs": "Incluye un archivo fuente durante el ensamblado",
+    "descriptionEn": "Textually inserts the contents of the specified include file (.inc or .asm) into the current compilation unit at the directive location.",
+    "descriptionEs": "Inserta textualmente el contenido del archivo especificado (.inc o .asm) en la posición de la directiva durante el ensamblado.",
+    "example": "INCLUDE macros.inc",
+    "sources": ["src.irvine.5e-es#3.4:67"]
+  },
+  {
+    "id": "syntax.common.sym.dollar",
+    "token": "$",
+    "syntaxClass": "PREDEFINED_SYMBOL",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION", "STRING_LITERAL"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.sym.doubledollar"],
+    "summaryEn": "Current location counter / DOS string terminator",
+    "summaryEs": "Contador de posición actual / Terminador de cadena DOS",
+    "descriptionEn": "In assembly expressions, '$' represents the current memory offset within the active segment (e.g. 'len EQU $ - msg' computes byte length). In DOS INT 21h AH=09h, '$' (ASCII 24h) serves as the string termination marker.",
+    "descriptionEs": "En expresiones de ensamblado, '$' representa el desplazamiento de memoria actual dentro del segmento activo (ej. 'len EQU $ - msg' calcula la longitud en bytes). En servicios DOS INT 21h AH=09h, '$' (ASCII 24h) actúa como carácter de terminación de cadena.",
+    "example": "msg DB 'Hola Mundo$', 0\nlen EQU $ - msg",
+    "sources": ["src.irvine.5e-es#3.4:70", "src.nasm.3.02#3.5"]
+  },
+  {
+    "id": "syntax.common.sym.doubledollar",
+    "token": "$$",
+    "syntaxClass": "PREDEFINED_SYMBOL",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_EXPRESSION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.sym.dollar"],
+    "summaryEn": "Beginning of current section (NASM)",
+    "summaryEs": "Inicio de la sección actual (NASM)",
+    "descriptionEn": "In NASM, '$$' evaluates to the base offset of the current section. Used in calculating offsets and padding: 'times 510 - ($ - $$) db 0'.",
+    "descriptionEs": "En NASM, '$$' evalúa al desplazamiento base de la sección actual. Es común en cálculo de relleno de sectores: 'times 510 - ($ - $$) db 0'.",
+    "example": "times 510 - ($ - $$) db 0\ndw 0xAA55",
+    "sources": ["src.nasm.3.02#3.5"]
+  },
+  {
+    "id": "syntax.common.comment.semicolon",
+    "token": ";",
+    "syntaxClass": "PUNCTUATION",
+    "dialects": [
+      { "dialect": "MASM", "version": "6.11", "assemblable": true },
+      { "dialect": "TASM", "version": "4.1", "assemblable": true },
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["COMMENT"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Line comment delimiter",
+    "summaryEs": "Delimitador de comentario de línea",
+    "descriptionEn": "Starts a single-line comment. All characters following the semicolon until the end of the line are ignored by the assembler.",
+    "descriptionEs": "Inicia un comentario de una sola línea. Todos los caracteres desde el punto y coma hasta el fin de línea son ignorados por el ensamblador.",
+    "example": "; Inicializar puntero al búfer\nmov bx, OFFSET buffer",
+    "sources": ["src.irvine.5e-es#3.1:54"]
+  }
+]

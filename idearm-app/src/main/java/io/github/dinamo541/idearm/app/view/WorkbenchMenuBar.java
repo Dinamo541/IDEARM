@@ -25,8 +25,19 @@ public final class WorkbenchMenuBar extends MenuBar {
     private final WorkbenchViewModel viewModel;
     private final Localization localization;
     private Runnable onCommandPaletteRequested;
+    private Runnable onDictionaryRequested;
     private Runnable onNewFileRequested = () -> { };
     private Runnable onNewFolderRequested = () -> { };
+    private final javafx.scene.control.CheckMenuItem fullScreen = new javafx.scene.control.CheckMenuItem();
+    private final javafx.scene.control.CheckMenuItem minimap = new javafx.scene.control.CheckMenuItem();
+
+    public javafx.beans.property.BooleanProperty minimapVisibleProperty() { return minimap.selectedProperty(); }
+
+    public void bindWindow(javafx.stage.Stage stage) {
+        fullScreen.setSelected(stage.isFullScreen());
+        stage.fullScreenProperty().addListener((o, before, after) -> fullScreen.setSelected(after));
+        fullScreen.setOnAction(e -> io.github.dinamo541.idearm.app.ui.WindowChrome.toggleFullScreen(stage));
+    }
 
     public WorkbenchMenuBar(WorkbenchViewModel viewModel, Localization localization) {
         this.viewModel = viewModel;
@@ -44,6 +55,10 @@ public final class WorkbenchMenuBar extends MenuBar {
 
     public void setOnCommandPaletteRequested(Runnable onCommandPaletteRequested) {
         this.onCommandPaletteRequested = onCommandPaletteRequested;
+    }
+
+    public void setOnDictionaryRequested(Runnable onDictionaryRequested) {
+        this.onDictionaryRequested = onDictionaryRequested;
     }
 
     /** File > New File creates the entry inline in the explorer, as in VS Code. */
@@ -241,7 +256,13 @@ public final class WorkbenchMenuBar extends MenuBar {
         terminal.setAccelerator(new KeyCodeCombination(KeyCode.BACK_QUOTE, KeyCombination.CONTROL_DOWN));
         terminal.setOnAction(e -> viewModel.openTerminal());
 
-        menu.getItems().addAll(palette, new SeparatorMenuItem(), terminal);
+        fullScreen.textProperty().bind(localization.text("menu.view.fullScreen"));
+        fullScreen.setAccelerator(new KeyCodeCombination(KeyCode.F11, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN));
+        fullScreen.setId("menu-fullscreen");
+        minimap.setSelected(true);
+        minimap.textProperty().bind(localization.text("editor.minimap"));
+        minimap.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.MINIMAP.create());
+        menu.getItems().addAll(palette, new SeparatorMenuItem(), terminal, minimap, new SeparatorMenuItem(), fullScreen);
         return menu;
     }
 
@@ -306,28 +327,40 @@ public final class WorkbenchMenuBar extends MenuBar {
         restartDebug.setOnAction(e -> viewModel.restartDebug());
         restartDebug.disableProperty().bind(viewModel.getBottomPanel().getDebugViewModel().activeProperty().not());
 
+        // Stepping is offered only when the attached debugger can step. Turbo Debugger in a DOSBox window cannot,
+        // and an entry that does nothing is worse than one that is greyed out.
+        var debugModel = viewModel.getBottomPanel().getDebugViewModel();
+        var steppable = debugModel.pausedProperty().and(debugModel.canStepProperty());
+
         var resume = new MenuItem();
         resume.textProperty().bind(localization.text("menu.run.resume"));
         resume.setOnAction(e -> viewModel.resumeDebug());
-        resume.disableProperty().bind(viewModel.getBottomPanel().getDebugViewModel().pausedProperty().not());
+        resume.disableProperty().bind(steppable.not());
+
+        var pause = new MenuItem();
+        pause.textProperty().bind(localization.text("menu.run.pause"));
+        pause.setAccelerator(new KeyCodeCombination(KeyCode.F6));
+        pause.setOnAction(e -> viewModel.pauseDebug());
+        pause.disableProperty().bind(debugModel.activeProperty()
+                .and(debugModel.pausedProperty().not()).and(debugModel.canPauseProperty()).not());
 
         var stepOver = new MenuItem();
         stepOver.textProperty().bind(localization.text("menu.run.stepOver"));
         stepOver.setAccelerator(new KeyCodeCombination(KeyCode.F10));
         stepOver.setOnAction(e -> viewModel.stepOver());
-        stepOver.disableProperty().bind(viewModel.getBottomPanel().getDebugViewModel().pausedProperty().not());
+        stepOver.disableProperty().bind(steppable.not());
 
         var stepInto = new MenuItem();
         stepInto.textProperty().bind(localization.text("menu.run.stepInto"));
         stepInto.setAccelerator(new KeyCodeCombination(KeyCode.F11));
         stepInto.setOnAction(e -> viewModel.stepInto());
-        stepInto.disableProperty().bind(viewModel.getBottomPanel().getDebugViewModel().pausedProperty().not());
+        stepInto.disableProperty().bind(steppable.not());
 
         var stepOut = new MenuItem();
         stepOut.textProperty().bind(localization.text("menu.run.stepOut"));
         stepOut.setAccelerator(new KeyCodeCombination(KeyCode.F11, KeyCombination.SHIFT_DOWN));
         stepOut.setOnAction(e -> viewModel.stepOut());
-        stepOut.disableProperty().bind(viewModel.getBottomPanel().getDebugViewModel().pausedProperty().not());
+        stepOut.disableProperty().bind(steppable.not());
 
         var run = new MenuItem();
         run.textProperty().bind(localization.text("menu.run.run"));
@@ -356,13 +389,27 @@ public final class WorkbenchMenuBar extends MenuBar {
         stop.setOnAction(e -> viewModel.stop());
         stop.disableProperty().bind(viewModel.busyProperty().not());
 
-        menu.getItems().addAll(debug, restartDebug, resume, stepOver, stepInto, stepOut, new SeparatorMenuItem(), run, runKeepOpen, new SeparatorMenuItem(), toggleBp, clearBps, new SeparatorMenuItem(), stop);
+        menu.getItems().addAll(debug, restartDebug, resume, pause, stepOver, stepInto, stepOut,
+                new SeparatorMenuItem(), run, runKeepOpen, new SeparatorMenuItem(), toggleBp, clearBps,
+                new SeparatorMenuItem(), stop);
         return menu;
     }
 
     private Menu createHelpMenu() {
         var menu = new Menu();
         menu.textProperty().bind(localization.text("menu.help"));
+
+        var dictionary = new MenuItem();
+        dictionary.textProperty().bind(localization.text("menu.help.dictionary"));
+        dictionary.setAccelerator(new KeyCodeCombination(KeyCode.F1, KeyCombination.SHIFT_DOWN));
+        dictionary.setOnAction(e -> {
+            if (onDictionaryRequested != null) {
+                onDictionaryRequested.run();
+            } else {
+                Window window = getScene() != null ? getScene().getWindow() : null;
+                new MnemonicsDictionaryDialog(window, localization).show();
+            }
+        });
 
         var doctor = new MenuItem();
         doctor.textProperty().bind(localization.text("menu.help.doctor"));
@@ -375,13 +422,15 @@ public final class WorkbenchMenuBar extends MenuBar {
         about.textProperty().bind(localization.text("menu.help.about"));
         about.setOnAction(e -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.initOwner(getScene().getWindow());
+            alert.setGraphic(io.github.dinamo541.idearm.app.ui.BrandLogo.create(48));
             alert.setTitle(IdearmInfo.NAME);
             alert.setHeaderText(IdearmInfo.NAME + " v" + IdearmInfo.version());
             alert.setContentText(localization.get("dialog.about.content"));
             alert.showAndWait();
         });
 
-        menu.getItems().addAll(doctor, new SeparatorMenuItem(), about);
+        menu.getItems().addAll(dictionary, doctor, new SeparatorMenuItem(), about);
         return menu;
     }
 

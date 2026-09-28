@@ -67,6 +67,13 @@ final class DosStaging {
         return List.copyOf(sources);
     }
 
+    /** Every project file the staged drive must hold: the planned sources and the files they INCLUDE. */
+    static List<String> stagedFiles(BuildPlan plan) {
+        var files = new ArrayList<>(sources(plan));
+        files.addAll(plan.dependencies());
+        return List.copyOf(files);
+    }
+
     static String stepName(int index) {
         return "S%03d".formatted(index + 1);
     }

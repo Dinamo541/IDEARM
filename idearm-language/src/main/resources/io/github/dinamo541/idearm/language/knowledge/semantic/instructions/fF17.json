@@ -1,0 +1,137 @@
+[
+  {
+    "id": "x86.instr.xadd",
+    "mnemonic": "XADD",
+    "kind": "INSTRUCTION",
+    "family": "F-17",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80486",
+    "syntaxVariants": [
+      "XADD reg, reg",
+      "XADD mem, reg"
+    ],
+    "example": "lock xadd [contador], eax",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:XADD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.xadd#form.1",
+        "text": "XADD reg, reg",
+        "minCpu": "80486"
+      },
+      {
+        "id": "x86.instr.xadd#form.2",
+        "text": "XADD mem, reg",
+        "minCpu": "80486"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmpxchg",
+    "mnemonic": "CMPXCHG",
+    "kind": "INSTRUCTION",
+    "family": "F-17",
+    "category": "DATA_TRANSFER",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "80486",
+    "syntaxVariants": [
+      "CMPXCHG reg, reg",
+      "CMPXCHG mem, reg"
+    ],
+    "example": "lock cmpxchg [mutex], ebx",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMPXCHG",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmpxchg#form.1",
+        "text": "CMPXCHG reg, reg",
+        "minCpu": "80486"
+      },
+      {
+        "id": "x86.instr.cmpxchg#form.2",
+        "text": "CMPXCHG mem, reg",
+        "minCpu": "80486"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lock",
+    "mnemonic": "LOCK",
+    "kind": "INSTRUCTION",
+    "family": "F-17",
+    "category": "FLAGS_CONTROL",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LOCK instruction"
+    ],
+    "example": "lock inc dword ptr [counter]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LOCK",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lock#form.1",
+        "text": "LOCK instruction",
+        "minCpu": "8086"
+      }
+    ]
+  }
+]

@@ -55,13 +55,16 @@ IDEARM checks the project before starting any tool, so these problems show no to
 | *DOS tools only accept 8.3 names (...): src/functions.asm* | A DOS source path has a part longer than eight characters, or an extension longer than three. | Rename it (`funcs.asm`). Folder names count too. |
 | *Device names such as CON, PRN, AUX or NUL cannot be used in paths: ...* | Windows and DOS reserve these names, with any extension. | Rename the file (`con.asm` → `console.asm`). |
 | *Two paths name the same file: src/A.asm and src/a.asm* | Two modules differ only in upper/lower case, or produce the same object file name. | Rename one of them. |
-| *Source files must end in .asm: ...* | A module is not an `.asm` file. | Put include files in `[sources] include` folders, not in `modules`. |
+| *Source files must end in .asm: ...* | A module is not an `.asm` file. | An included file is never a module: remove it from `modules`. It is found automatically when it sits beside the source that includes it. |
+| *Cannot find the included file manzana.inc. Folders searched: src* | No folder on the search path holds the file named by an `INCLUDE`. The row points at the INCLUDE line itself; no tool ran. | Check the spelling, or put the file beside the source that includes it. |
+| *Cannot find manzana.inc in src; it is in sprite. Add that folder...* | The file exists, in a folder the build does not search. | **Project → Properties... → Include Folders → Add...** and pick that folder, or add it to `[sources] include` in `idearm.toml`. |
 | *The main source file does not exist: src/main.asm* | `[sources] entry` points to a missing file. | Fix `entry`, or use **Project → Properties...** to check the settings. |
 | *idearm.toml is not valid: ...* | A typo in the project file: an unknown field, a string where a list is expected, a TOML syntax error. | The value after the colon names the field or the parser's complaint. |
 | *This version of IDEARM does not support project format 2.* | The project was written by a newer IDEARM. | Update IDEARM. |
 | *Another task is still running for this project; wait for it to finish or press Stop.* | A build, run or debug session is active. | Wait, or press **Stop** (`Shift+F5`). |
 | *The temporary build folder needs an ASCII path without spaces; point IDEARM_STAGING_DIR to one: ...* | DOSBox cannot mount a folder whose path has spaces or accents. IDEARM already tries `%LOCALAPPDATA%\IDEARM\staging`, its short 8.3 name, `%ProgramData%\IDEARM\staging` and `C:\IDEARM\staging` (on Linux `~/.cache/idearm/staging`, then `/tmp/idearm-<user>/staging`); none of them could be used. | Set `IDEARM_STAGING_DIR`, for example to `C:\IdearmStaging`, and restart IDEARM. Native (NASM) projects are not affected. |
 | *The build took too long and was stopped. A tool may be waiting for input.* | A DOS tool asked a question (LINK prompts when an argument is missing) or the machine is very slow. | Read the Build Log. For slow machines, set `IDEARM_BUILD_TIMEOUT_SECONDS` (default 60). |
+| *A DOS command is longer than 126 characters and needs a response file.* | DOS passes at most 126 characters to a program. MASM is the only tool affected, and only when it runs entirely inside DOSBox (on Linux) with several include folders declared. | Declare fewer include folders, or use shorter folder names. TASM is not affected: it already uses a response file. |
 
 ---
 
@@ -116,6 +119,25 @@ nasm: fatal: unable to open input file `nothere.asm' No such file or directory
 After every DOS build IDEARM lists warnings such as *The procedure main never returns to DOS (MOV AH, 4Ch /
 INT 21h, or .EXIT), so the program will not end cleanly.* They do not stop the build, but each one describes a
 real bug: a program without an exit keeps running into whatever bytes follow it.
+
+Some of these warnings also appear while you type, about 400 ms after you stop, without waiting for a build. The
+word they are about is underlined in the editor with a wavy amber line, and hovering it shows the message.
+
+### *No instruction is called MUV. Did you mean MOV?*
+
+A word written where an instruction belongs that no instruction is called: almost always a typo. This one is
+marked in **red**, not amber, and listed as an error rather than a warning, because the file will not assemble
+until it is fixed.
+
+- If the word is a **macro you define in another file**, IDEARM cannot see the definition until that file is part
+  of the project sources, so it reports the invocation. Add the file to `[sources] modules`.
+- If the word is **your own label or symbol** and it is reported anyway, give it a name no mnemonic could have —
+  an underscore, a leading `@@` or a dot is enough, and it is the convention course code already follows.
+- **Floating-point (x87), SETcc and CMOVcc instructions are checked like any other**, and each condition is
+  described separately, so `SETA` and `SETZ` are told apart rather than treated as one family. A misspelling
+  inside them, such as `FADDD` for `FADD`, is reported with the same suggestion as any other typo. Earlier
+  versions stayed quiet about every word starting with `F`, and about `SET` or `CMOV` followed by a condition
+  code, because the built-in dictionary did not describe them.
 
 ---
 
@@ -187,12 +209,16 @@ programs, but they run directly on the operating system and can reach the rest o
 | *Breakpoint src/main.asm:12 could not be set: the line has no code, or the program was built without debug information.* | The line is a comment, a label alone, data, or an `equ`. | Move the breakpoint to an instruction. |
 | The program runs to the end without stopping | No breakpoint is on an instruction that runs. | Check the Terminal Output panel for the message above. Without breakpoints, GDB stops at `main` and the emulator at the entry point. |
 | The debugger stops, but no line is marked | Execution is inside Windows or a DLL, where there is no source. | **Step Out** (`Shift+F11`) or **Continue** (`F5`). |
-| Watch shows `<error>` | The expression is not valid at this stop: a 64-bit register in a 32-bit program, an unknown label, or a label in the built-in emulator (which does not know label names). | See the watch syntax table in the [user guide](user-guide.md#66-watches). |
+| Watch shows *cannot be read here* | The expression is not valid at this stop: a 64-bit register in a 32-bit program, an unknown label, or a label in the built-in emulator (which does not know label names). | See the watch syntax table in the [user guide](user-guide.md#66-watches). |
 | Memory dump is empty | The address is not readable by the program (32/64-bit), or the text is not a hexadecimal number or register name. | Try `RSP`/`ESP`, or the value a watch such as `message` shows. |
 | *No debugger can debug linux-elf64 programs on this machine.* | GDB debugs programs the current machine runs. | Debug Linux programs on Linux. |
 | Turbo Debugger shows no source | The program was built in release, or TD cannot find the source file. | Debug builds add `/zi` and `/v` automatically; press `F5` rather than running `TD` by hand. |
 | *Turbo Debugger (TD.EXE) was not found...* | TD is not next to the registered TASM. | Put `TD.EXE` in the TASM folder and register the folder again, or use `backend = "emu8086"`. |
-| The IDE panels stay empty while debugging a DOS program | `backend = "external"` runs Turbo Debugger or CodeView, which show their own panels in the DOSBox window. | Use `backend = "emu8086"` to see registers, memory and watches in the IDE. |
+| The step buttons are greyed out and the panels say the debugging happens in the DOSBox window | `backend = "external"` runs Turbo Debugger or CodeView, which drive the program themselves and report nothing back, so the IDE cannot step or read registers. | Choose the built-in 8086 emulator in **Project → Properties → Debugger**, which is the default for new projects. |
+| Pause (`F6`) is greyed out | The chosen debugger cannot interrupt a running program. Only the built-in emulator and GDB can. | Switch to one of those, or set a breakpoint before starting. |
+| A breakpoint added while paused did nothing | With Turbo Debugger or CodeView the IDE's breakpoints never reach the debugger at all. | Set it inside the TD or CV window, or use the built-in emulator, where a breakpoint added during a pause applies on the next Continue. |
+| The program is in an endless loop and Stop is the only thing that works | Before, there was no way to interrupt a running program. | Press `F6` (**Pause**): the debugger stops where it is and shows the line and the registers. |
+| A disassembled instruction reads `DB xx` | The byte is not an instruction this 8086 emulator knows — usually data reached as if it were code, or an instruction of a later CPU. | Check that execution really belongs there; a `JMP` into a data area is a common cause. |
 | Linux: under GDB, a program that reads the keyboard gets nothing (0 bytes) | GDB's input carries the IDE's commands, so the program's input is empty while debugging. | Run it with `Ctrl+F5` to type input, or debug it with the input written into the program. |
 
 ### The built-in 8086 emulator (`backend = "emu8086"`)
@@ -235,3 +261,15 @@ memory; **Continue** then ends the program with exit code 255.
 - If the IDE shows *IDEARM could not start.*, the dialog gives the reason below it; include it when you report
   the problem.
 - When reporting a bug, include the Build Log, the Tool Doctor list and your `idearm.toml`.
+
+---
+
+## 9. Academic Assistant, Compatibility and External Libraries
+
+| Message / Symptom | Cause | Fix |
+|---|---|---|
+| *Cannot find the included file Irvine32.inc* or *Unresolved external symbol WriteString / Irvine32.lib* | The project references **Irvine32** (or Irvine16), a third-party library written by Kip R. Irvine for his textbook. **IDEARM does NOT distribute, bundle, or package Irvine32.** | Install the library from the textbook distributor. Then configure **Project → Properties... → Include Folders** to add the directory containing `Irvine32.inc`, and **Library Folders** to add the directory containing `Irvine32.lib`. |
+| *The built-in emulator does not implement opcode ... (e.g. FSQRT)* | The built-in `emu8086` emulator executes 16-bit 8086 integer code but does not emulate the full x87 floating-point unit (FPU coprocessor). | Configure **Project → Properties... → Run Environment** to use **DOSBox** (or GDB on 32/64-bit targets), where full x87 FPU hardware emulation is active. Alternatively, for integer-only projects, implement an integer square root algorithm (such as Newton-Raphson). |
+| *Instruction ... is invalid in 64-bit Long Mode (e.g. AAA, DAA, PUSHA, POPA, INTO, BOUND, LDS, LES)* | 64-bit x86-64 long mode eliminated 15 legacy 16-bit instructions (BCD adjust, PUSHA/POPA, 16-bit far pointer loads, etc.). | In 64-bit projects (`win-pe64-console`, `linux-elf64-console`), replace legacy BCD or PUSHA with standard 64-bit general-purpose instructions, or switch the project profile to 16-bit DOS or 32-bit Windows. |
+| *Operand mode ... is invalid in 16-bit real mode (e.g. [bx+bp], [ax])* | The 8086 addressing unit only permits combinations of `[BX|BP + SI|DI + disp]`. Registers like `AX`, `CX`, `DX` or double base registers `[BX+BP]` cannot form effective addresses in 16 bits. | Replace `[bx+bp]` with `[bp+si]` or `[bp+di]`. Use 32-bit registers (e.g. `[eax]`, `[eax+ebx*4]`) only when targeting 386+ protected or flat memory models. |
+

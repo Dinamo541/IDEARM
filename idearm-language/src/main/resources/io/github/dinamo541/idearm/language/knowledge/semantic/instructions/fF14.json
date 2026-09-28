@@ -1,0 +1,224 @@
+[
+  {
+    "id": "x86.instr.int",
+    "mnemonic": "INT",
+    "kind": "INSTRUCTION",
+    "family": "F-14",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "INT imm8",
+      "INT 3",
+      "INT 21h"
+    ],
+    "example": "mov ah, 4Ch\nmov al, 0\nint 21h",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "CLEARED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "CLEARED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:INT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.int#form.1",
+        "text": "INT imm8",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.int#form.2",
+        "text": "INT 3",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.int#form.3",
+        "text": "INT 21h",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.into",
+    "mnemonic": "INTO",
+    "kind": "INSTRUCTION",
+    "family": "F-14",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "invalidModes": ["LONG"],
+    "syntaxVariants": [
+      "INTO"
+    ],
+    "example": "into",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:INTO",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.into#form.1",
+        "text": "INTO",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cpuid",
+    "mnemonic": "CPUID",
+    "kind": "INSTRUCTION",
+    "family": "F-14",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "Pentium",
+    "syntaxVariants": [
+      "CPUID"
+    ],
+    "example": "mov eax, 0\ncpuid",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CPUID",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cpuid#form.1",
+        "text": "CPUID",
+        "minCpu": "Pentium"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.rdtsc",
+    "mnemonic": "RDTSC",
+    "kind": "INSTRUCTION",
+    "family": "F-14",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "Pentium",
+    "syntaxVariants": [
+      "RDTSC"
+    ],
+    "example": "rdtsc",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:RDTSC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.rdtsc#form.1",
+        "text": "RDTSC",
+        "minCpu": "Pentium"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.ud2",
+    "mnemonic": "UD2",
+    "kind": "INSTRUCTION",
+    "family": "F-14",
+    "category": "SYSTEM_INTERRUPTS",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "Pentium",
+    "syntaxVariants": [
+      "UD2"
+    ],
+    "example": "ud2",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:UD2",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.ud2#form.1",
+        "text": "UD2",
+        "minCpu": "Pentium"
+      }
+    ]
+  }
+]

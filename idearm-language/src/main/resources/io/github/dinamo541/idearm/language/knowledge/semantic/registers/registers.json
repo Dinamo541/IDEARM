@@ -1,0 +1,686 @@
+[
+  {
+    "id": "x86.reg.rax",
+    "name": "RAX",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Acumulador principal para operaciones aritméticas y valor de retorno en ABI x86-64.",
+    "writeSemantics": "Escribir en la vista de 32 bits (EAX) pone a cero los 32 bits superiores de RAX.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.eax", "name": "EAX", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.ax", "name": "AX", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.al", "name": "AL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.ah", "name": "AH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.rbx",
+    "name": "RBX",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro base para direccionamiento de memoria. Preservado por el llamante en ABI System V / Win64.",
+    "writeSemantics": "Escribir en EBX pone a cero los 32 bits superiores de RBX.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.ebx", "name": "EBX", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.bx", "name": "BX", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.bl", "name": "BL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.bh", "name": "BH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.rcx",
+    "name": "RCX",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Contador para bucles y desplazamientos. Primer argumento en Win64, 4to argumento en System V AMD64.",
+    "writeSemantics": "Escribir en ECX pone a cero los 32 bits superiores de RCX.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.ecx", "name": "ECX", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.cx", "name": "CX", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.cl", "name": "CL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.ch", "name": "CH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.rdx",
+    "name": "RDX",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro de datos, extensión de acumulador (RDX:RAX en multiplicación y división), 2do argumento en Win64.",
+    "writeSemantics": "Escribir en EDX pone a cero los 32 bits superiores de RDX.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.edx", "name": "EDX", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.dx", "name": "DX", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.dl", "name": "DL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.dh", "name": "DH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.eax",
+    "name": "EAX",
+    "group": "G1_GENERAL",
+    "sizeBits": 32,
+    "conventionalUse": "Acumulador de 32 bits para operaciones y valor de retorno de funciones en 32 bits.",
+    "parent": "x86.reg.rax",
+    "requirement": { "minGeneration": "80386" },
+    "views": [
+      { "id": "x86.reg.ax", "name": "AX", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.al", "name": "AL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.ah", "name": "AH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.ebx",
+    "name": "EBX",
+    "group": "G1_GENERAL",
+    "sizeBits": 32,
+    "conventionalUse": "Puntero base a datos en el segmento DS en modo de 32 bits.",
+    "parent": "x86.reg.rbx",
+    "requirement": { "minGeneration": "80386" },
+    "views": [
+      { "id": "x86.reg.bx", "name": "BX", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.bl", "name": "BL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.bh", "name": "BH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.ecx",
+    "name": "ECX",
+    "group": "G1_GENERAL",
+    "sizeBits": 32,
+    "conventionalUse": "Contador de bucles e instrucciones de cadena de 32 bits (LOOP, REP).",
+    "parent": "x86.reg.rcx",
+    "requirement": { "minGeneration": "80386" },
+    "views": [
+      { "id": "x86.reg.cx", "name": "CX", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.cl", "name": "CL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.ch", "name": "CH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.edx",
+    "name": "EDX",
+    "group": "G1_GENERAL",
+    "sizeBits": 32,
+    "conventionalUse": "Registro de datos de 32 bits, par EDX:EAX en multiplicación y división.",
+    "parent": "x86.reg.rdx",
+    "requirement": { "minGeneration": "80386" },
+    "views": [
+      { "id": "x86.reg.dx", "name": "DX", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.dl", "name": "DL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.dh", "name": "DH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.ax",
+    "name": "AX",
+    "group": "G1_GENERAL",
+    "sizeBits": 16,
+    "conventionalUse": "Acumulador primario para aritmética y E/S en 16 bits.",
+    "parent": "x86.reg.eax",
+    "requirement": { "minGeneration": "8086" },
+    "views": [
+      { "id": "x86.reg.al", "name": "AL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.ah", "name": "AH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.bx",
+    "name": "BX",
+    "group": "G1_GENERAL",
+    "sizeBits": 16,
+    "conventionalUse": "Registro base en 16 bits; único registro de propósito general válido como puntero base en modo real.",
+    "parent": "x86.reg.ebx",
+    "requirement": { "minGeneration": "8086" },
+    "views": [
+      { "id": "x86.reg.bl", "name": "BL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.bh", "name": "BH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.cx",
+    "name": "CX",
+    "group": "G1_GENERAL",
+    "sizeBits": 16,
+    "conventionalUse": "Contador para bucles LOOP y repeticiones de cadena REP en 16 bits.",
+    "parent": "x86.reg.ecx",
+    "requirement": { "minGeneration": "8086" },
+    "views": [
+      { "id": "x86.reg.cl", "name": "CL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.ch", "name": "CH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.dx",
+    "name": "DX",
+    "group": "G1_GENERAL",
+    "sizeBits": 16,
+    "conventionalUse": "Puntero de puerto en IN/OUT y parte alta de DX:AX en multiplicación y división de 16 bits.",
+    "parent": "x86.reg.edx",
+    "requirement": { "minGeneration": "8086" },
+    "views": [
+      { "id": "x86.reg.dl", "name": "DL", "sizeBits": 8, "offsetBits": 0 },
+      { "id": "x86.reg.dh", "name": "DH", "sizeBits": 8, "offsetBits": 8 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.al",
+    "name": "AL",
+    "group": "G1_GENERAL",
+    "sizeBits": 8,
+    "conventionalUse": "Byte bajo de AX. Acumulador de 8 bits para operaciones aritméticas y XLAT.",
+    "parent": "x86.reg.ax",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.ah",
+    "name": "AH",
+    "group": "G1_GENERAL",
+    "sizeBits": 8,
+    "conventionalUse": "Byte alto de AX. Número de función para servicios DOS (INT 21h) y BIOS (INT 10h/16h).",
+    "parent": "x86.reg.ax",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.bl",
+    "name": "BL",
+    "group": "G1_GENERAL",
+    "sizeBits": 8,
+    "conventionalUse": "Byte bajo de BX.",
+    "parent": "x86.reg.bx",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.bh",
+    "name": "BH",
+    "group": "G1_GENERAL",
+    "sizeBits": 8,
+    "conventionalUse": "Byte alto de BX.",
+    "parent": "x86.reg.bx",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.cl",
+    "name": "CL",
+    "group": "G1_GENERAL",
+    "sizeBits": 8,
+    "conventionalUse": "Byte bajo de CX. Registro de conteo obligatorio para desplazamientos y rotaciones variables en 8086.",
+    "parent": "x86.reg.cx",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.ch",
+    "name": "CH",
+    "group": "G1_GENERAL",
+    "sizeBits": 8,
+    "conventionalUse": "Byte alto de CX.",
+    "parent": "x86.reg.cx",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.dl",
+    "name": "DL",
+    "group": "G1_GENERAL",
+    "sizeBits": 8,
+    "conventionalUse": "Byte bajo de DX. Carácter para salida por pantalla en INT 21h / AH=02h.",
+    "parent": "x86.reg.dx",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.dh",
+    "name": "DH",
+    "group": "G1_GENERAL",
+    "sizeBits": 8,
+    "conventionalUse": "Byte alto de DX.",
+    "parent": "x86.reg.dx",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.r8",
+    "name": "R8",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro general extendido en x86-64.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.r8d", "name": "R8D", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.r8w", "name": "R8W", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.r8b", "name": "R8B", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.r9",
+    "name": "R9",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro general extendido en x86-64.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.r9d", "name": "R9D", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.r9w", "name": "R9W", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.r9b", "name": "R9B", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.r10",
+    "name": "R10",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro general extendido en x86-64.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.r10d", "name": "R10D", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.r10w", "name": "R10W", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.r10b", "name": "R10B", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.r11",
+    "name": "R11",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro general extendido en x86-64.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.r11d", "name": "R11D", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.r11w", "name": "R11W", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.r11b", "name": "R11B", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.r12",
+    "name": "R12",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro general extendido en x86-64.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.r12d", "name": "R12D", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.r12w", "name": "R12W", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.r12b", "name": "R12B", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.r13",
+    "name": "R13",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro general extendido en x86-64.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.r13d", "name": "R13D", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.r13w", "name": "R13W", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.r13b", "name": "R13B", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.r14",
+    "name": "R14",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro general extendido en x86-64.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.r14d", "name": "R14D", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.r14w", "name": "R14W", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.r14b", "name": "R14B", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.r15",
+    "name": "R15",
+    "group": "G1_GENERAL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro general extendido en x86-64.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.r15d", "name": "R15D", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.r15w", "name": "R15W", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.r15b", "name": "R15B", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.rsi",
+    "name": "RSI",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 64,
+    "conventionalUse": "Índice fuente (Source Index) en cadenas e instrucciones de transferencia.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.esi", "name": "ESI", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.si", "name": "SI", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.sil", "name": "SIL", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.rdi",
+    "name": "RDI",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 64,
+    "conventionalUse": "Índice destino (Destination Index) en cadenas y primer argumento en System V AMD64.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.edi", "name": "EDI", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.di", "name": "DI", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.dil", "name": "DIL", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.rsp",
+    "name": "RSP",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 64,
+    "conventionalUse": "Puntero de pila (Stack Pointer).",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.esp", "name": "ESP", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.sp", "name": "SP", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.spl", "name": "SPL", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.rbp",
+    "name": "RBP",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 64,
+    "conventionalUse": "Puntero base de marco de pila (Base / Frame Pointer).",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.ebp", "name": "EBP", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.bp", "name": "BP", "sizeBits": 16, "offsetBits": 0 },
+      { "id": "x86.reg.bpl", "name": "BPL", "sizeBits": 8, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.esi",
+    "name": "ESI",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 32,
+    "conventionalUse": "Índice fuente de 32 bits.",
+    "parent": "x86.reg.rsi",
+    "requirement": { "minGeneration": "80386" },
+    "views": [
+      { "id": "x86.reg.si", "name": "SI", "sizeBits": 16, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.edi",
+    "name": "EDI",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 32,
+    "conventionalUse": "Índice destino de 32 bits.",
+    "parent": "x86.reg.rdi",
+    "requirement": { "minGeneration": "80386" },
+    "views": [
+      { "id": "x86.reg.di", "name": "DI", "sizeBits": 16, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.esp",
+    "name": "ESP",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 32,
+    "conventionalUse": "Puntero de pila de 32 bits.",
+    "parent": "x86.reg.rsp",
+    "requirement": { "minGeneration": "80386" },
+    "views": [
+      { "id": "x86.reg.sp", "name": "SP", "sizeBits": 16, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.ebp",
+    "name": "EBP",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 32,
+    "conventionalUse": "Puntero base de marco de pila de 32 bits.",
+    "parent": "x86.reg.rbp",
+    "requirement": { "minGeneration": "80386" },
+    "views": [
+      { "id": "x86.reg.bp", "name": "BP", "sizeBits": 16, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.si",
+    "name": "SI",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 16,
+    "conventionalUse": "Índice fuente de 16 bits en DS.",
+    "parent": "x86.reg.esi",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.di",
+    "name": "DI",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 16,
+    "conventionalUse": "Índice destino de 16 bits en ES.",
+    "parent": "x86.reg.edi",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.sp",
+    "name": "SP",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 16,
+    "conventionalUse": "Puntero de pila de 16 bits en SS.",
+    "parent": "x86.reg.esp",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.bp",
+    "name": "BP",
+    "group": "G2_POINTERS_INDEXES",
+    "sizeBits": 16,
+    "conventionalUse": "Puntero base de pila de 16 bits en SS.",
+    "parent": "x86.reg.ebp",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.cs",
+    "name": "CS",
+    "group": "G3_SEGMENT",
+    "sizeBits": 16,
+    "conventionalUse": "Segmento de código (Code Segment).",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.2"]
+  },
+  {
+    "id": "x86.reg.ds",
+    "name": "DS",
+    "group": "G3_SEGMENT",
+    "sizeBits": 16,
+    "conventionalUse": "Segmento de datos principal (Data Segment).",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.2"]
+  },
+  {
+    "id": "x86.reg.ss",
+    "name": "SS",
+    "group": "G3_SEGMENT",
+    "sizeBits": 16,
+    "conventionalUse": "Segmento de pila (Stack Segment).",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.2"]
+  },
+  {
+    "id": "x86.reg.es",
+    "name": "ES",
+    "group": "G3_SEGMENT",
+    "sizeBits": 16,
+    "conventionalUse": "Segmento extra (Extra Segment), destino por defecto en cadenas.",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.2"]
+  },
+  {
+    "id": "x86.reg.fs",
+    "name": "FS",
+    "group": "G3_SEGMENT",
+    "sizeBits": 16,
+    "conventionalUse": "Segmento adicional FS (utilizado para TLS o Thread Information Block).",
+    "requirement": { "minGeneration": "80386" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.2"]
+  },
+  {
+    "id": "x86.reg.gs",
+    "name": "GS",
+    "group": "G3_SEGMENT",
+    "sizeBits": 16,
+    "conventionalUse": "Segmento adicional GS (utilizado para TLS en x86-64).",
+    "requirement": { "minGeneration": "80386" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.2"]
+  },
+  {
+    "id": "x86.reg.rip",
+    "name": "RIP",
+    "group": "G4_EXECUTION_CONTROL",
+    "sizeBits": 64,
+    "conventionalUse": "Puntero de instrucción de 64 bits.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.eip", "name": "EIP", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.ip", "name": "IP", "sizeBits": 16, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1.1"]
+  },
+  {
+    "id": "x86.reg.eip",
+    "name": "EIP",
+    "group": "G4_EXECUTION_CONTROL",
+    "sizeBits": 32,
+    "conventionalUse": "Puntero de instrucción de 32 bits.",
+    "parent": "x86.reg.rip",
+    "requirement": { "minGeneration": "80386" },
+    "views": [
+      { "id": "x86.reg.ip", "name": "IP", "sizeBits": 16, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.ip",
+    "name": "IP",
+    "group": "G4_EXECUTION_CONTROL",
+    "sizeBits": 16,
+    "conventionalUse": "Puntero de instrucción de 16 bits.",
+    "parent": "x86.reg.eip",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:3.4.1"]
+  },
+  {
+    "id": "x86.reg.rflags",
+    "name": "RFLAGS",
+    "group": "G4_EXECUTION_CONTROL",
+    "sizeBits": 64,
+    "conventionalUse": "Registro de banderas de estado y control de 64 bits.",
+    "requirement": { "minGeneration": "x86-64" },
+    "views": [
+      { "id": "x86.reg.eflags", "name": "EFLAGS", "sizeBits": 32, "offsetBits": 0 },
+      { "id": "x86.reg.flags", "name": "FLAGS", "sizeBits": 16, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.3"]
+  },
+  {
+    "id": "x86.reg.eflags",
+    "name": "EFLAGS",
+    "group": "G4_EXECUTION_CONTROL",
+    "sizeBits": 32,
+    "conventionalUse": "Registro de banderas de 32 bits.",
+    "parent": "x86.reg.rflags",
+    "requirement": { "minGeneration": "80386" },
+    "views": [
+      { "id": "x86.reg.flags", "name": "FLAGS", "sizeBits": 16, "offsetBits": 0 }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.3"]
+  },
+  {
+    "id": "x86.reg.flags",
+    "name": "FLAGS",
+    "group": "G4_EXECUTION_CONTROL",
+    "sizeBits": 16,
+    "conventionalUse": "Registro de banderas de 16 bits (CF, PF, AF, ZF, SF, TF, IF, DF, OF).",
+    "parent": "x86.reg.eflags",
+    "requirement": { "minGeneration": "8086" },
+    "fields": [
+      { "id": "x86.flag.cf", "name": "CF", "bitPosition": 0, "meaning": "Carry Flag (Bandera de acarreo)" },
+      { "id": "x86.flag.pf", "name": "PF", "bitPosition": 2, "meaning": "Parity Flag (Bandera de paridad)" },
+      { "id": "x86.flag.af", "name": "AF", "bitPosition": 4, "meaning": "Auxiliary Carry Flag (Acarreo auxiliar)" },
+      { "id": "x86.flag.zf", "name": "ZF", "bitPosition": 6, "meaning": "Zero Flag (Bandera de cero)" },
+      { "id": "x86.flag.sf", "name": "SF", "bitPosition": 7, "meaning": "Sign Flag (Bandera de signo)" },
+      { "id": "x86.flag.tf", "name": "TF", "bitPosition": 8, "meaning": "Trap Flag (Paso a paso)" },
+      { "id": "x86.flag.if", "name": "IF", "bitPosition": 9, "meaning": "Interrupt Enable Flag (Habilitación de interrupciones)" },
+      { "id": "x86.flag.df", "name": "DF", "bitPosition": 10, "meaning": "Direction Flag (Dirección de cadenas)" },
+      { "id": "x86.flag.of", "name": "OF", "bitPosition": 11, "meaning": "Overflow Flag (Bandera de desbordamiento con signo)" }
+    ],
+    "sources": ["src.intel-sdm.093#vol1:3.4.3"]
+  },
+  {
+    "id": "x86.reg.st0",
+    "name": "ST0",
+    "group": "G5_X87_SIMD",
+    "sizeBits": 80,
+    "conventionalUse": "Cima de la pila de coma flotante x87 (ST(0)).",
+    "requirement": { "minGeneration": "8086" },
+    "sources": ["src.intel-sdm.093#vol1:8.1.2"]
+  },
+  {
+    "id": "x86.reg.xmm0",
+    "name": "XMM0",
+    "group": "G5_X87_SIMD",
+    "sizeBits": 128,
+    "conventionalUse": "Registro vectorial SSE de 128 bits; primer argumento y retorno en coma flotante en System V AMD64 / Win64.",
+    "requirement": { "minGeneration": "P6", "features": ["SSE"] },
+    "sources": ["src.intel-sdm.093#vol1:10.1"]
+  },
+  {
+    "id": "x86.reg.cr0",
+    "name": "CR0",
+    "group": "G6_SYSTEM",
+    "sizeBits": 32,
+    "conventionalUse": "Registro de control del sistema (PE: modo protegido, PG: paginación).",
+    "requirement": { "minGeneration": "80386", "privilege": "CPL0" },
+    "sources": ["src.intel-sdm.093#vol3a:2.5"]
+  }
+]

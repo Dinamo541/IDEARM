@@ -64,6 +64,7 @@ mvn -f idearm-app/pom.xml javafx:run
 
 The first build needs an internet connection to download Maven dependencies. Check `java -version` and
 `mvn -version` if the build fails: Maven must use JDK 25 or newer. Linux needs a graphical desktop session.
+After pulling changes, run `mvn install -DskipTests` again before `javafx:run`, which only builds the app module.
 
 `pwsh scripts/package-native.ps1` builds the packages above for the system you run it on (the Windows installer
 needs the WiX Toolset; the Linux package needs `fakeroot`).

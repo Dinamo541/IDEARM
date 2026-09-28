@@ -721,6 +721,14 @@ dist/
 
 (These debugging levels L0–L2 are unrelated to the architecture layers L1–L4.)
 
+> **Amendment 1 (2026-09-23, [ADR-010](adr/ADR-010-debugger-capabilities-and-default-backend.md)).** L1 is the
+> default for DOS projects, not an alternative to L0: the emulator needs no proprietary tool and drives every
+> panel, while L0 debugs inside the DOSBox window and reports nothing back. The capabilities this section
+> assumed are now declared per session (`DebugCapability`), so the workbench offers only what the chosen
+> debugger can do. Disassembly exists (`Disassembler8086`, and `-data-disassemble` for GDB), as do Pause and
+> breakpoints that follow a live session. The source map still reads the `.LST` only; the `.MAP` remains unused,
+> which is why a multi-module project maps only its entry module.
+
 **Why an own emulator for integrated debugging** (and not DOSBox): the official DOSBox builds have no remote
 debugging API. TD and CodeView symbol formats are proprietary or poorly documented, whereas LST and MAP are text
 files both assemblers generate. An 8086 interpreter is bounded, testable with per-instruction test-vector suites
@@ -747,6 +755,14 @@ run in DOSBox. There is a go/no-go decision at the end of F8.
 - Educational lints derived from real defects: "program without termination" (Mastermind), "DS not initialized
   before INT 21h/09h", "two `END label` entry points in modules linked together" (Extras.asm), "register used
   before initialization" (Advanced, needs flow analysis).
+- **Validation while typing (ADR-011):** the active document is linted 400 ms after typing stops, off the JavaFX
+  thread, and the results are underlined in the editor with a wavy line and listed in Problems as a group of their
+  own, separate from what the build reported. A rule of its own, `UnknownInstructionRule`, reports a word written
+  where an instruction belongs that no instruction is called (`MUV` for `MOV`) and suggests the closest real
+  mnemonic by edit distance; it runs on every target, while the DOS-specific rules run only for DOS projects. The
+  rule keys on `InstructionCatalog.knownMnemonics()`, which the lexer and the editor highlighter also use, so a
+  mnemonic cannot be coloured one way and judged another. It stays silent on macros, labels and project symbols,
+  and on the instruction families the knowledge base does not describe yet (x87, SETcc, CMOVcc).
 - Encoding: files are saved as UTF-8 **without BOM**, with a warning when `DB` strings contain non-ASCII characters
   in DOS targets (they would render incorrectly in CP437). TASM 3.2/4.1 and ML 6.11 accept UTF-8 bytes in
   comments and strings, and LF-only line endings (F0).
@@ -800,7 +816,7 @@ isolation   = "required"
 keep-open   = true
 
 [debug]
-backend = "external"            # v0.5: "emu8086"
+backend = "emu8086"             # the default since ADR-010; "external" is TD/CodeView in DOSBox
 
 [dist]
 launcher = true

@@ -1,0 +1,578 @@
+[
+  {
+    "id": "syntax.nasm.dir.section",
+    "token": "SECTION",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["SEGMENT_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.segment", "syntax.masm.dir.code", "syntax.masm.dir.data"],
+    "summaryEn": "Section declaration directive (declares .text, .data, or .bss section)",
+    "summaryEs": "Directiva de sección (declara sección .text, .data o .bss en NASM)",
+    "descriptionEn": "Defines object file output sections such as .text (code), .data (initialized data), and .bss (uninitialized space). In MASM and TASM, sections are instead declared using SEGMENT or .CODE/.DATA.",
+    "descriptionEs": "Define secciones del fichero objeto tales como .text (código), .data (datos inicializados) y .bss (variables no inicializadas). En MASM y TASM las secciones se declaran mediante SEGMENT o .CODE/.DATA.",
+    "example": "section .text\nglobal _start\n_start:\n    mov eax, 1\n    int 0x80",
+    "sources": ["src.nasm.3.02#3.2.7"]
+  },
+  {
+    "id": "syntax.nasm.dir.default",
+    "token": "DEFAULT",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Set default addressing mode directive (e.g. DEFAULT REL)",
+    "summaryEs": "Directiva de direccionamiento por omisión (ej. DEFAULT REL en 64 bits)",
+    "descriptionEn": "Sets the default displacement mode. In 64-bit mode, 'default rel' instructs NASM to generate RIP-relative effective addresses instead of absolute 64-bit relocations.",
+    "descriptionEs": "Configura el modo de direccionamiento por omisión. En modo de 64 bits, 'default rel' indica a NASM que genere direcciones relativas al puntero de instrucción RIP en lugar de relocalizaciones absolutas.",
+    "example": "default rel",
+    "sources": ["src.nasm.3.02#7.1"]
+  },
+  {
+    "id": "syntax.nasm.dir.bits",
+    "token": "BITS",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.model"],
+    "summaryEn": "Target processor mode bit width (16, 32, or 64)",
+    "summaryEs": "Anchura de bits del modo de ejecución del procesador (16, 32 o 64)",
+    "descriptionEn": "Specifies whether NASM should generate code for 16-bit real mode, 32-bit protected mode, or 64-bit long mode.",
+    "descriptionEs": "Especifica si NASM debe generar código para modo real de 16 bits, modo protegido de 32 bits o modo largo de 64 bits.",
+    "example": "bits 64",
+    "sources": ["src.nasm.3.02#7.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.resb",
+    "token": "RESB",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.db"],
+    "summaryEn": "Reserve uninitialized bytes (in .bss section)",
+    "summaryEs": "Reserva bytes no inicializados (en sección .bss)",
+    "descriptionEn": "Reserves uninitialized byte space in the BSS section without storing bytes in the object file.",
+    "descriptionEs": "Reserva espacio de bytes no inicializados en la sección BSS sin ocupar espacio físico en el archivo ejecutable.",
+    "example": "buffer resb 256",
+    "sources": ["src.nasm.3.02#3.2.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.resw",
+    "token": "RESW",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.dw"],
+    "summaryEn": "Reserve uninitialized words (16-bit)",
+    "summaryEs": "Reserva palabras de 16 bits no inicializadas",
+    "descriptionEn": "Reserves space for 16-bit words in BSS.",
+    "descriptionEs": "Reserva espacio para palabras de 16 bits en la sección BSS.",
+    "example": "tabla resw 100",
+    "sources": ["src.nasm.3.02#3.2.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.resd",
+    "token": "RESD",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.dd"],
+    "summaryEn": "Reserve uninitialized doublewords (32-bit)",
+    "summaryEs": "Reserva dobles palabras de 32 bits no inicializadas",
+    "descriptionEn": "Reserves space for 32-bit doublewords in BSS.",
+    "descriptionEs": "Reserva espacio para dobles palabras de 32 bits en la sección BSS.",
+    "example": "indices resd 50",
+    "sources": ["src.nasm.3.02#3.2.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.resq",
+    "token": "RESQ",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.dq"],
+    "summaryEn": "Reserve uninitialized quadwords (64-bit)",
+    "summaryEs": "Reserva palabras cuádruples de 64 bits no inicializadas",
+    "descriptionEn": "Reserves space for 64-bit quadwords in BSS.",
+    "descriptionEs": "Reserva espacio para palabras cuádruples de 64 bits en la sección BSS.",
+    "example": "punteros resq 10",
+    "sources": ["src.nasm.3.02#3.2.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.struc",
+    "token": "STRUC",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["STRUCTURE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.struc", "syntax.nasm.dir.endstruc"],
+    "summaryEn": "Structure definition start (closed with ENDSTRUC in NASM)",
+    "summaryEs": "Inicio de definición de estructura en NASM (cerrada con ENDSTRUC)",
+    "descriptionEn": "Declares a structure template in NASM. Offsets are defined using RESB/RESW/RESD. Must be closed with ENDSTRUC (unlike MASM, which closes with ENDS).",
+    "descriptionEs": "Declara una plantilla de estructura en NASM. Los campos se reservan con RESB/RESW/RESD. Debe cerrarse con ENDSTRUC (a diferencia de MASM, que se cierra con ENDS).",
+    "example": "struc Punto\n    .x: resw 1\n    .y: resw 1\nendstruc",
+    "sources": ["src.nasm.3.02#5.9"]
+  },
+  {
+    "id": "syntax.nasm.dir.endstruc",
+    "token": "ENDSTRUC",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["STRUCTURE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.struc", "syntax.masm.dir.ends"],
+    "summaryEn": "Structure definition end (in NASM)",
+    "summaryEs": "Fin de definición de estructura en NASM",
+    "descriptionEn": "Terminates a STRUC definition in NASM.",
+    "descriptionEs": "Termina la definición de una estructura iniciada con STRUC en NASM.",
+    "example": "endstruc",
+    "sources": ["src.nasm.3.02#5.9"]
+  },
+  {
+    "id": "syntax.nasm.pp.macro",
+    "token": "%MACRO",
+    "syntaxClass": "PREPROCESSOR",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["MACRO", "PREPROCESSOR"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.proc", "syntax.nasm.pp.endmacro"],
+    "summaryEn": "Multi-line macro definition start in NASM",
+    "summaryEs": "Inicio de macro multilínea en el preprocesador de NASM",
+    "descriptionEn": "Defines a multi-line preprocessor macro in NASM. Parameters are accessed via %1, %2, etc. Terminated with %endmacro.",
+    "descriptionEs": "Declara una macro multilínea en el preprocesador de NASM. Los argumentos se leen con %1, %2, etc. Se cierra con %endmacro.",
+    "example": "%macro imprime 1\n    mov dx, %1\n    mov ah, 09h\n    int 21h\n%endmacro",
+    "sources": ["src.nasm.3.02#4.3"]
+  },
+  {
+    "id": "syntax.nasm.pp.endmacro",
+    "token": "%ENDMACRO",
+    "syntaxClass": "PREPROCESSOR",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["MACRO", "PREPROCESSOR"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.pp.macro"],
+    "summaryEn": "Multi-line macro definition end in NASM",
+    "summaryEs": "Fin de macro multilínea en el preprocesador de NASM",
+    "descriptionEn": "Closes a multi-line macro started by %macro.",
+    "descriptionEs": "Cierra la definición de una macro multilínea iniciada con %macro.",
+    "example": "%endmacro",
+    "sources": ["src.nasm.3.02#4.3"]
+  },
+  {
+    "id": "syntax.nasm.pp.define",
+    "token": "%DEFINE",
+    "syntaxClass": "PREPROCESSOR",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["PREPROCESSOR"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.equ"],
+    "summaryEn": "Single-line macro / preprocessor constant definition",
+    "summaryEs": "Definición de macro de una sola línea o constante de preprocesador",
+    "descriptionEn": "Assigns a text replacement token or single-line macro in NASM's preprocessor.",
+    "descriptionEs": "Define un reemplazo textual o macro de una sola línea en el preprocesador de NASM.",
+    "example": "%define BUFFER_SIZE 1024",
+    "sources": ["src.nasm.3.02#4.1"]
+  },
+  {
+    "id": "syntax.nasm.dir.times",
+    "token": "TIMES",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION", "INSTRUCTION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.op.dup"],
+    "summaryEn": "Repeat instruction or data declaration N times",
+    "summaryEs": "Repite una instrucción o reserva de datos N veces",
+    "descriptionEn": "Prefixes an instruction or data directive to assemble it multiple times. Essential in boot sectors: 'times 510 - ($ - $$) db 0' to pad up to 512 bytes.",
+    "descriptionEs": "Prefija una instrucción o directiva de datos para ensamblarla múltiples veces. Fundamental en sectores de arranque: 'times 510 - ($ - $$) db 0' para rellenar hasta los 512 bytes.",
+    "example": "times 510 - ($ - $$) db 0\ndw 0xAA55",
+    "sources": ["src.nasm.3.02#3.2.5"]
+  },
+  {
+    "id": "syntax.nasm.dir.cpu",
+    "token": "CPU",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.bits"],
+    "summaryEn": "Specify target CPU baseline architecture in NASM",
+    "summaryEs": "Especifica la arquitectura de CPU objetivo en NASM",
+    "descriptionEn": "Restricts or enables instruction set features in NASM according to CPU generation: CPU 8086, CPU 186, CPU 286, CPU 386, CPU 486, CPU 586, CPU x64.",
+    "descriptionEs": "Restringe o habilita las instrucciones admitidas por NASM según la generación de procesador: CPU 8086, CPU 186, CPU 286, CPU 386, CPU 486, CPU 586, CPU x64.",
+    "example": "cpu 8086",
+    "sources": ["src.nasm.3.02#6.8"]
+  },
+  {
+    "id": "syntax.nasm.dir.use16",
+    "token": "USE16",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.use32", "syntax.nasm.dir.use64"],
+    "summaryEn": "16-bit operand and address size mode in NASM",
+    "summaryEs": "Modo de operandos y direcciones de 16 bits en NASM",
+    "descriptionEn": "Instructs NASM to generate 16-bit real-mode code for the current section (equivalent to 'bits 16').",
+    "descriptionEs": "Indica a NASM que genere código para modo real de 16 bits en la sección actual (equivalente a 'bits 16').",
+    "example": "section .text use16",
+    "sources": ["src.nasm.3.02#7.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.use32",
+    "token": "USE32",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.use16", "syntax.nasm.dir.use64"],
+    "summaryEn": "32-bit operand and address size mode in NASM",
+    "summaryEs": "Modo de operandos y direcciones de 32 bits en NASM",
+    "descriptionEn": "Instructs NASM to generate 32-bit protected-mode code for the current section (equivalent to 'bits 32').",
+    "descriptionEs": "Indica a NASM que genere código para modo protegido de 32 bits en la sección actual (equivalente a 'bits 32').",
+    "example": "section .text use32",
+    "sources": ["src.nasm.3.02#7.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.use64",
+    "token": "USE64",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.use32"],
+    "summaryEn": "64-bit operand and address size mode in NASM",
+    "summaryEs": "Modo de operandos y direcciones de 64 bits en NASM",
+    "descriptionEn": "Instructs NASM to generate 64-bit long-mode code for the current section (equivalent to 'bits 64').",
+    "descriptionEs": "Indica a NASM que genere código para modo largo de 64 bits en la sección actual (equivalente a 'bits 64').",
+    "example": "section .text use64",
+    "sources": ["src.nasm.3.02#7.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.rel",
+    "token": "REL",
+    "syntaxClass": "KEYWORD",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_MEMORY", "CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.abs"],
+    "summaryEn": "RIP-relative addressing in 64-bit mode (NASM)",
+    "summaryEs": "Direccionamiento relativo a RIP en modo de 64 bits (NASM)",
+    "descriptionEn": "Generates RIP-relative addressing for position-independent code (PIC) in 64 bits. Used either in 'default rel' or per-operand: '[rel variable]'.",
+    "descriptionEs": "Genera direccionamiento relativo al puntero de instrucciones RIP para código independiente de posición (PIC). Se usa en 'default rel' o por operando: '[rel variable]'.",
+    "example": "default rel\nmov rax, [rel mensaje]",
+    "sources": ["src.nasm.3.02#7.1"]
+  },
+  {
+    "id": "syntax.nasm.dir.abs",
+    "token": "ABS",
+    "syntaxClass": "KEYWORD",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["OPERAND_MEMORY", "CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.dir.rel"],
+    "summaryEn": "Absolute addressing override in 64-bit mode (NASM)",
+    "summaryEs": "Direccionamiento absoluto en modo de 64 bits (NASM)",
+    "descriptionEn": "Forces absolute addressing for a memory operand instead of RIP-relative addressing.",
+    "descriptionEs": "Fuerza direccionamiento absoluto para un operando de memoria en lugar de direccionamiento relativo a RIP.",
+    "example": "mov rax, [qword abs variable]",
+    "sources": ["src.nasm.3.02#7.1"]
+  },
+  {
+    "id": "syntax.nasm.pp.include",
+    "token": "%INCLUDE",
+    "syntaxClass": "PREPROCESSOR",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["PREPROCESSOR"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.include"],
+    "summaryEn": "NASM preprocessor file inclusion directive",
+    "summaryEs": "Directiva de inclusión de archivo del preprocesador de NASM",
+    "descriptionEn": "Includes another file at the preprocessor stage in NASM, surrounding the filename in quotes.",
+    "descriptionEs": "Incluye otro archivo en fase de preprocesado en NASM, encerrando la ruta entre comillas.",
+    "example": "%include \"macros.mac\"",
+    "sources": ["src.nasm.3.02#4.6"]
+  },
+  {
+    "id": "syntax.nasm.pp.undef",
+    "token": "%UNDEF",
+    "syntaxClass": "PREPROCESSOR",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["PREPROCESSOR"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.pp.define"],
+    "summaryEn": "Undefine single-line preprocessor macro",
+    "summaryEs": "Anula la definición de una macro del preprocesador de NASM",
+    "descriptionEn": "Undefines a single-line macro previously created with %define.",
+    "descriptionEs": "Elimina la definición de una macro de una sola línea creada previamente con %define.",
+    "example": "%undef BUFFER_SIZE",
+    "sources": ["src.nasm.3.02#4.1"]
+  },
+  {
+    "id": "syntax.nasm.pp.if",
+    "token": "%IF",
+    "syntaxClass": "PREPROCESSOR",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["PREPROCESSOR"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.pp.endif"],
+    "summaryEn": "Conditional assembly preprocessor block start",
+    "summaryEs": "Inicio de bloque condicional de preprocesador en NASM",
+    "descriptionEn": "Conditionally includes source lines if the constant expression evaluates to non-zero.",
+    "descriptionEs": "Incluye condicionalmente líneas de código fuente si la expresión constante evalúa a distinto de cero.",
+    "example": "%if DEBUG == 1\n    call imprimeDebug\n%endif",
+    "sources": ["src.nasm.3.02#4.4"]
+  },
+  {
+    "id": "syntax.nasm.pp.elif",
+    "token": "%ELIF",
+    "syntaxClass": "PREPROCESSOR",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["PREPROCESSOR"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.pp.if", "syntax.nasm.pp.else"],
+    "summaryEn": "Else-if conditional preprocessor branch",
+    "summaryEs": "Rama alternativa condicional (else-if) en el preprocesador de NASM",
+    "descriptionEn": "Alternative conditional branch in an %if block.",
+    "descriptionEs": "Rama alternativa condicional dentro de un bloque %if en NASM.",
+    "example": "%elif OS == 2",
+    "sources": ["src.nasm.3.02#4.4"]
+  },
+  {
+    "id": "syntax.nasm.pp.else",
+    "token": "%ELSE",
+    "syntaxClass": "PREPROCESSOR",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["PREPROCESSOR"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.pp.if", "syntax.nasm.pp.endif"],
+    "summaryEn": "Else conditional preprocessor branch",
+    "summaryEs": "Rama alternativa (else) en el preprocesador de NASM",
+    "descriptionEn": "Default branch in an %if conditional compilation block.",
+    "descriptionEs": "Rama por omisión dentro de un bloque condicional %if en NASM.",
+    "example": "%else\n    mov ax, 0\n%endif",
+    "sources": ["src.nasm.3.02#4.4"]
+  },
+  {
+    "id": "syntax.nasm.pp.endif",
+    "token": "%ENDIF",
+    "syntaxClass": "PREPROCESSOR",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["PREPROCESSOR"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.nasm.pp.if"],
+    "summaryEn": "End of conditional assembly preprocessor block",
+    "summaryEs": "Fin de bloque condicional de preprocesador en NASM",
+    "descriptionEn": "Terminates an %if conditional compilation block in NASM.",
+    "descriptionEs": "Finaliza un bloque condicional %if en el preprocesador de NASM.",
+    "example": "%endif",
+    "sources": ["src.nasm.3.02#4.4"]
+  },
+  {
+    "id": "syntax.nasm.dir.common",
+    "token": "COMMON",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION", "LINKING"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Declare uninitialized common variable across modules",
+    "summaryEs": "Declara una variable común no inicializada compartida entre módulos",
+    "descriptionEn": "Declares uninitialized common variables merged by the linker across object modules: COMMON varname size.",
+    "descriptionEs": "Declara variables comunes no inicializadas combinadas por el enlazador entre diferentes módulos: COMMON nombre tamaño.",
+    "example": "common bufer_global 1024",
+    "sources": ["src.nasm.3.02#6.7"]
+  },
+  {
+    "id": "syntax.nasm.dir.struc",
+    "token": "STRUC",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["STRUCTURE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.masm.dir.struc"],
+    "summaryEn": "NASM structure definition start",
+    "summaryEs": "Inicio de definición de estructura en NASM",
+    "descriptionEn": "Defines a structured data type in NASM. Fields are declared using resb, resw, resd, etc. Closed with endstruc.",
+    "descriptionEs": "Define un tipo de datos estructurado en NASM. Los campos se declaran con resb, resw, resd, etc. y se cierra con endstruc.",
+    "example": "struc Punto\n    .x: resw 1\n    .y: resw 1\nendstruc",
+    "sources": ["src.nasm.3.02#5.1"]
+  },
+  {
+    "id": "syntax.nasm.dir.resq",
+    "token": "RESQ",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.dq"],
+    "summaryEn": "Reserve uninitialized quadwords (64-bit)",
+    "summaryEs": "Reserva palabras cuádruples de 64 bits no inicializadas",
+    "descriptionEn": "Reserves uninitialized 64-bit quadword space in BSS section.",
+    "descriptionEs": "Reserva espacio para palabras cuádruples de 64 bits no inicializadas en la sección BSS.",
+    "example": "puntero64 resq 1",
+    "sources": ["src.nasm.3.02#3.2.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.rest",
+    "token": "REST",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.common.dir.dt"],
+    "summaryEn": "Reserve uninitialized ten-bytes (80-bit float/BCD)",
+    "summaryEs": "Reserva espacio de diez bytes no inicializados (80 bits)",
+    "descriptionEn": "Reserves uninitialized 80-bit space in BSS for x87 extended precision floats.",
+    "descriptionEs": "Reserva espacio de 80 bits (10 bytes) para valores de coma flotante extendida x87 en BSS.",
+    "example": "valorExt rest 1",
+    "sources": ["src.nasm.3.02#3.2.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.reso",
+    "token": "RESO",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Reserve uninitialized octawords (128-bit SIMD)",
+    "summaryEs": "Reserva palabras octuples de 128 bits no inicializadas (SIMD)",
+    "descriptionEn": "Reserves 128-bit uninitialized space for SSE/AVX vectors.",
+    "descriptionEs": "Reserva espacio no inicializado de 128 bits para vectores SSE o AVX.",
+    "example": "vector128 reso 1",
+    "sources": ["src.nasm.3.02#3.2.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.resy",
+    "token": "RESY",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Reserve uninitialized 256-bit space (AVX/AVX2 YMM)",
+    "summaryEs": "Reserva espacio no inicializado de 256 bits (vectores AVX/AVX2 YMM)",
+    "descriptionEn": "Reserves 256-bit uninitialized space in BSS for AVX/AVX2 YMM vector operations.",
+    "descriptionEs": "Reserva espacio de 256 bits no inicializado en BSS para operaciones vectoriales AVX/AVX2 YMM.",
+    "example": "vector256 resy 1",
+    "sources": ["src.nasm.3.02#3.2.2"]
+  },
+  {
+    "id": "syntax.nasm.dir.resz",
+    "token": "RESZ",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "NASM", "version": "3.02", "assemblable": true }
+    ],
+    "contexts": ["DATA_DECLARATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Reserve uninitialized 512-bit space (AVX-512 ZMM)",
+    "summaryEs": "Reserva espacio no inicializado de 512 bits (vectores AVX-512 ZMM)",
+    "descriptionEn": "Reserves 512-bit uninitialized space in BSS for AVX-512 ZMM vector operations.",
+    "descriptionEs": "Reserva espacio de 512 bits no inicializado en BSS para vectores AVX-512 ZMM.",
+    "example": "vector512 resz 1",
+    "sources": ["src.nasm.3.02#3.2.2"]
+  }
+]

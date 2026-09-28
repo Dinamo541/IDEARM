@@ -1,0 +1,1324 @@
+[
+  {
+    "id": "x86.instr.add",
+    "mnemonic": "ADD",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "ADD reg, reg",
+      "ADD reg, mem",
+      "ADD mem, reg",
+      "ADD reg, imm",
+      "ADD mem, imm"
+    ],
+    "example": "add ax, 5",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:ADD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.add#form.1",
+        "text": "ADD reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.add#form.2",
+        "text": "ADD reg, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.add#form.3",
+        "text": "ADD mem, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.add#form.4",
+        "text": "ADD reg, imm",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.add#form.5",
+        "text": "ADD mem, imm",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.adc",
+    "mnemonic": "ADC",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "ADC reg, reg",
+      "ADC reg, mem",
+      "ADC reg, imm"
+    ],
+    "example": "add ax, bx\nadc dx, 0",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:ADC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.adc#form.1",
+        "text": "ADC reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.adc#form.2",
+        "text": "ADC reg, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.adc#form.3",
+        "text": "ADC reg, imm",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sub",
+    "mnemonic": "SUB",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "SUB reg, reg",
+      "SUB reg, mem",
+      "SUB mem, reg",
+      "SUB reg, imm",
+      "SUB mem, imm"
+    ],
+    "example": "sub cx, 1",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SUB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sub#form.1",
+        "text": "SUB reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.sub#form.2",
+        "text": "SUB reg, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.sub#form.3",
+        "text": "SUB mem, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.sub#form.4",
+        "text": "SUB reg, imm",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.sub#form.5",
+        "text": "SUB mem, imm",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sbb",
+    "mnemonic": "SBB",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "SBB reg, reg",
+      "SBB reg, mem",
+      "SBB reg, imm"
+    ],
+    "example": "sub ax, bx\nsbb dx, 0",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SBB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sbb#form.1",
+        "text": "SBB reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.sbb#form.2",
+        "text": "SBB reg, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.sbb#form.3",
+        "text": "SBB reg, imm",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.inc",
+    "mnemonic": "INC",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "INC reg",
+      "INC mem"
+    ],
+    "example": "inc si",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:INC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.inc#form.1",
+        "text": "INC reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.inc#form.2",
+        "text": "INC mem",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.dec",
+    "mnemonic": "DEC",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "DEC reg",
+      "DEC mem"
+    ],
+    "example": "dec cx",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:DEC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.dec#form.1",
+        "text": "DEC reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.dec#form.2",
+        "text": "DEC mem",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.neg",
+    "mnemonic": "NEG",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "NEG reg",
+      "NEG mem"
+    ],
+    "example": "neg ax",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:NEG",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.neg#form.1",
+        "text": "NEG reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.neg#form.2",
+        "text": "NEG mem",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmp",
+    "mnemonic": "CMP",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CMP reg, reg",
+      "CMP reg, mem",
+      "CMP reg, imm",
+      "CMP mem, imm"
+    ],
+    "example": "cmp ax, bx\nje son_iguales",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmp#form.1",
+        "text": "CMP reg, reg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.cmp#form.2",
+        "text": "CMP reg, mem",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.cmp#form.3",
+        "text": "CMP reg, imm",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.cmp#form.4",
+        "text": "CMP mem, imm",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.mul",
+    "mnemonic": "MUL",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "MUL reg8",
+      "MUL mem8",
+      "MUL reg16",
+      "MUL mem16",
+      "MUL reg32",
+      "MUL reg64"
+    ],
+    "example": "mov ax, 10\nmul bx",
+    "flags": {
+      "P": "UNDEFINED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "UNDEFINED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "UNDEFINED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:MUL",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.mul#form.rm8",
+        "text": "MUL reg8",
+        "minCpu": "8086",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [8], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "READ", "note": "multiplicando" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "WRITE", "note": "producto" }
+        ],
+        "requirement": { "minGeneration": "I8086" },
+        "sources": ["src.intel-sdm.093#vol2:MUL", "src.irvine.5e-es#7.4.1:204"]
+      },
+      {
+        "id": "x86.instr.mul#form.rm16",
+        "text": "MUL reg16",
+        "minCpu": "8086",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [16], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "READ", "note": "multiplicando" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.dx", "sizes": [16], "access": "WRITE", "note": "mitad alta del producto" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "WRITE", "note": "mitad baja del producto" }
+        ],
+        "requirement": { "minGeneration": "I8086" },
+        "sources": ["src.intel-sdm.093#vol2:MUL", "src.irvine.5e-es#7.4.1:204"]
+      },
+      {
+        "id": "x86.instr.mul#form.rm32",
+        "text": "MUL reg32",
+        "minCpu": "80386",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [32], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.eax", "sizes": [32], "access": "READ", "note": "multiplicando" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.edx", "sizes": [32], "access": "WRITE", "note": "mitad alta del producto" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.eax", "sizes": [32], "access": "WRITE", "note": "mitad baja del producto" }
+        ],
+        "requirement": { "minGeneration": "I80386" },
+        "sources": ["src.intel-sdm.093#vol2:MUL", "src.irvine.5e-es#7.4.1:204"]
+      },
+      {
+        "id": "x86.instr.mul#form.rm64",
+        "text": "MUL reg64",
+        "minCpu": "x86-64",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [64], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.rax", "sizes": [64], "access": "READ", "note": "multiplicando" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.rdx", "sizes": [64], "access": "WRITE", "note": "mitad alta del producto" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.rax", "sizes": [64], "access": "WRITE", "note": "mitad baja del producto" }
+        ],
+        "requirement": { "minGeneration": "X86_64", "validModes": ["LONG"] },
+        "sources": ["src.intel-sdm.093#vol2:MUL", "src.irvine.5e-es#7.4.1:204"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.imul",
+    "mnemonic": "IMUL",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "IMUL reg",
+      "IMUL mem",
+      "IMUL reg, reg",
+      "IMUL reg, reg, imm"
+    ],
+    "example": "imul ax, bx, 25",
+    "flags": {
+      "P": "UNDEFINED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "UNDEFINED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "UNDEFINED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:IMUL",
+      "src.irvine.5e-es#7.4.2:205"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.imul#form.rm8",
+        "text": "IMUL r/m8",
+        "minCpu": "8086",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [8], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "READ", "note": "multiplicando" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "WRITE", "note": "producto" }
+        ],
+        "requirement": { "minGeneration": "I8086" },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED", "condition": "se pone a 1 si AH no es la extensión de signo de AL" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED", "condition": "igual que CF" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "AVAILABLE" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205"]
+      },
+      {
+        "id": "x86.instr.imul#form.rm16",
+        "text": "IMUL r/m16",
+        "minCpu": "8086",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [16], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "READ", "note": "multiplicando" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.dx", "sizes": [16], "access": "WRITE", "note": "mitad alta del producto" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "WRITE", "note": "mitad baja del producto" }
+        ],
+        "requirement": { "minGeneration": "I8086" },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED", "condition": "se pone a 1 si DX no es la extensión de signo de AX" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED", "condition": "igual que CF" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "AVAILABLE" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205"]
+      },
+      {
+        "id": "x86.instr.imul#form.rm32",
+        "text": "IMUL r/m32",
+        "minCpu": "80386",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [32], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.eax", "sizes": [32], "access": "READ", "note": "multiplicando" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.edx", "sizes": [32], "access": "WRITE", "note": "mitad alta del producto" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.eax", "sizes": [32], "access": "WRITE", "note": "mitad baja del producto" }
+        ],
+        "requirement": { "minGeneration": "I80386" },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE", "reason": "32 bits no soportado en emu8086" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205"]
+      },
+      {
+        "id": "x86.instr.imul#form.rm64",
+        "text": "IMUL r/m64",
+        "minCpu": "x86-64",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [64], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.rax", "sizes": [64], "access": "READ", "note": "multiplicando" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.rdx", "sizes": [64], "access": "WRITE", "note": "mitad alta del producto" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.rax", "sizes": [64], "access": "WRITE", "note": "mitad baja del producto" }
+        ],
+        "requirement": { "minGeneration": "X86_64", "validModes": ["LONG"] },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205"]
+      },
+      {
+        "id": "x86.instr.imul#form.r16-rm16",
+        "text": "IMUL reg16, r/m16",
+        "minCpu": "80386",
+        "operands": [
+          { "position": 1, "kind": "REG", "sizes": [16], "access": "WRITE", "role": "EXPLICIT" },
+          { "position": 2, "kind": "REG_MEM", "sizes": [16], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [],
+        "requirement": { "minGeneration": "I80386" },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED", "condition": "se pone a 1 si el producto se trunca" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED", "condition": "igual que CF" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE", "reason": "forma de 2 operandos no soportada" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205"]
+      },
+      {
+        "id": "x86.instr.imul#form.r32-rm32",
+        "text": "IMUL reg32, r/m32",
+        "minCpu": "80386",
+        "operands": [
+          { "position": 1, "kind": "REG", "sizes": [32], "access": "WRITE", "role": "EXPLICIT" },
+          { "position": 2, "kind": "REG_MEM", "sizes": [32], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [],
+        "requirement": { "minGeneration": "I80386" },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205"]
+      },
+      {
+        "id": "x86.instr.imul#form.r64-rm64",
+        "text": "IMUL reg64, r/m64",
+        "minCpu": "x86-64",
+        "operands": [
+          { "position": 1, "kind": "REG", "sizes": [64], "access": "WRITE", "role": "EXPLICIT" },
+          { "position": 2, "kind": "REG_MEM", "sizes": [64], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [],
+        "requirement": { "minGeneration": "X86_64", "validModes": ["LONG"] },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205"]
+      },
+      {
+        "id": "x86.instr.imul#form.r16-rm16-imm8",
+        "text": "IMUL reg16, r/m16, imm8",
+        "minCpu": "80186",
+        "operands": [
+          { "position": 1, "kind": "REG", "sizes": [16], "access": "WRITE", "role": "EXPLICIT" },
+          { "position": 2, "kind": "REG_MEM", "sizes": [16], "access": "READ", "role": "EXPLICIT" },
+          { "position": 3, "kind": "IMM", "sizes": [8], "access": "READ", "role": "EXPLICIT", "extension": "SIGN" }
+        ],
+        "implicitOperands": [],
+        "requirement": { "minGeneration": "I80186" },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED", "condition": "se pone a 1 si el producto se trunca" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED", "condition": "igual que CF" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE", "reason": "opcodes 69h/6Bh no implementados en emu8086" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205-206"]
+      },
+      {
+        "id": "x86.instr.imul#form.r16-rm16-imm16",
+        "text": "IMUL reg16, r/m16, imm16",
+        "minCpu": "80186",
+        "operands": [
+          { "position": 1, "kind": "REG", "sizes": [16], "access": "WRITE", "role": "EXPLICIT" },
+          { "position": 2, "kind": "REG_MEM", "sizes": [16], "access": "READ", "role": "EXPLICIT" },
+          { "position": 3, "kind": "IMM", "sizes": [16], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [],
+        "requirement": { "minGeneration": "I80186" },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE", "reason": "opcodes 69h/6Bh no implementados en emu8086" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205-206"]
+      },
+      {
+        "id": "x86.instr.imul#form.r32-rm32-imm8",
+        "text": "IMUL reg32, r/m32, imm8",
+        "minCpu": "80386",
+        "operands": [
+          { "position": 1, "kind": "REG", "sizes": [32], "access": "WRITE", "role": "EXPLICIT" },
+          { "position": 2, "kind": "REG_MEM", "sizes": [32], "access": "READ", "role": "EXPLICIT" },
+          { "position": 3, "kind": "IMM", "sizes": [8], "access": "READ", "role": "EXPLICIT", "extension": "SIGN" }
+        ],
+        "implicitOperands": [],
+        "requirement": { "minGeneration": "I80386" },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205-206"]
+      },
+      {
+        "id": "x86.instr.imul#form.r32-rm32-imm32",
+        "text": "IMUL reg32, r/m32, imm32",
+        "minCpu": "80386",
+        "operands": [
+          { "position": 1, "kind": "REG", "sizes": [32], "access": "WRITE", "role": "EXPLICIT" },
+          { "position": 2, "kind": "REG_MEM", "sizes": [32], "access": "READ", "role": "EXPLICIT" },
+          { "position": 3, "kind": "IMM", "sizes": [32], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [],
+        "requirement": { "minGeneration": "I80386" },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205-206"]
+      },
+      {
+        "id": "x86.instr.imul#form.r64-rm64-imm8",
+        "text": "IMUL reg64, r/m64, imm8",
+        "minCpu": "x86-64",
+        "operands": [
+          { "position": 1, "kind": "REG", "sizes": [64], "access": "WRITE", "role": "EXPLICIT" },
+          { "position": 2, "kind": "REG_MEM", "sizes": [64], "access": "READ", "role": "EXPLICIT" },
+          { "position": 3, "kind": "IMM", "sizes": [8], "access": "READ", "role": "EXPLICIT", "extension": "SIGN" }
+        ],
+        "implicitOperands": [],
+        "requirement": { "minGeneration": "X86_64", "validModes": ["LONG"] },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205-206"]
+      },
+      {
+        "id": "x86.instr.imul#form.r64-rm64-imm32",
+        "text": "IMUL reg64, r/m64, imm32",
+        "minCpu": "x86-64",
+        "operands": [
+          { "position": 1, "kind": "REG", "sizes": [64], "access": "WRITE", "role": "EXPLICIT" },
+          { "position": 2, "kind": "REG_MEM", "sizes": [64], "access": "READ", "role": "EXPLICIT" },
+          { "position": 3, "kind": "IMM", "sizes": [32], "access": "READ", "role": "EXPLICIT", "extension": "SIGN" }
+        ],
+        "implicitOperands": [],
+        "requirement": { "minGeneration": "X86_64", "validModes": ["LONG"] },
+        "flags": [
+          { "flag": "x86.flag.cf", "effect": "MODIFIED" },
+          { "flag": "x86.flag.of", "effect": "MODIFIED" },
+          { "flag": "x86.flag.sf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.zf", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.af", "effect": "UNDEFINED" },
+          { "flag": "x86.flag.pf", "effect": "UNDEFINED" }
+        ],
+        "availability": [
+          { "backend": "emu8086", "status": "UNAVAILABLE" },
+          { "backend": "gdb", "status": "AVAILABLE" }
+        ],
+        "sources": ["src.intel-sdm.093#vol2:IMUL", "src.irvine.5e-es#7.4.2:205-206"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.div",
+    "mnemonic": "DIV",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "DIV reg8",
+      "DIV mem8",
+      "DIV reg16",
+      "DIV mem16",
+      "DIV reg32",
+      "DIV reg64"
+    ],
+    "example": "mov dx, 0\nmov ax, 100\ndiv bx",
+    "flags": {
+      "P": "UNDEFINED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "UNDEFINED",
+      "C": "UNDEFINED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "UNDEFINED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:DIV",
+      "src.irvine.5e-es#7.4.3:208"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.div#form.rm8",
+        "text": "DIV reg8",
+        "minCpu": "8086",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [8], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "READ", "note": "dividendo" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "WRITE", "note": "cociente" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ah", "sizes": [8], "access": "WRITE", "note": "resto" }
+        ],
+        "requirement": { "minGeneration": "I8086" },
+        "sources": ["src.intel-sdm.093#vol2:DIV", "src.irvine.5e-es#7.4.3:208"]
+      },
+      {
+        "id": "x86.instr.div#form.rm16",
+        "text": "DIV reg16",
+        "minCpu": "8086",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [16], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.dx", "sizes": [16], "access": "READ", "note": "dividendo parte alta" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "READ", "note": "dividendo parte baja" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "WRITE", "note": "cociente" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.dx", "sizes": [16], "access": "WRITE", "note": "resto" }
+        ],
+        "requirement": { "minGeneration": "I8086" },
+        "sources": ["src.intel-sdm.093#vol2:DIV", "src.irvine.5e-es#7.4.3:208"]
+      },
+      {
+        "id": "x86.instr.div#form.rm32",
+        "text": "DIV reg32",
+        "minCpu": "80386",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [32], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.edx", "sizes": [32], "access": "READ", "note": "dividendo parte alta" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.eax", "sizes": [32], "access": "READ", "note": "dividendo parte baja" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.eax", "sizes": [32], "access": "WRITE", "note": "cociente" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.edx", "sizes": [32], "access": "WRITE", "note": "resto" }
+        ],
+        "requirement": { "minGeneration": "I80386" },
+        "sources": ["src.intel-sdm.093#vol2:DIV", "src.irvine.5e-es#7.4.3:208"]
+      },
+      {
+        "id": "x86.instr.div#form.rm64",
+        "text": "DIV reg64",
+        "minCpu": "x86-64",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [64], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.rdx", "sizes": [64], "access": "READ", "note": "dividendo parte alta" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.rax", "sizes": [64], "access": "READ", "note": "dividendo parte baja" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.rax", "sizes": [64], "access": "WRITE", "note": "cociente" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.rdx", "sizes": [64], "access": "WRITE", "note": "resto" }
+        ],
+        "requirement": { "minGeneration": "X86_64", "validModes": ["LONG"] },
+        "sources": ["src.intel-sdm.093#vol2:DIV", "src.irvine.5e-es#7.4.3:208"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.idiv",
+    "mnemonic": "IDIV",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "IDIV reg",
+      "IDIV mem"
+    ],
+    "example": "cwd\nidiv bx",
+    "flags": {
+      "P": "UNDEFINED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "UNDEFINED",
+      "C": "UNDEFINED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "UNDEFINED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:IDIV",
+      "src.irvine.5e-es#7.4.3:208"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.idiv#form.rm8",
+        "text": "IDIV reg8",
+        "minCpu": "8086",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [8], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "READ", "note": "dividendo" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "WRITE", "note": "cociente" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ah", "sizes": [8], "access": "WRITE", "note": "resto" }
+        ],
+        "requirement": { "minGeneration": "I8086" },
+        "sources": ["src.intel-sdm.093#vol2:IDIV", "src.irvine.5e-es#7.4.3:208"]
+      },
+      {
+        "id": "x86.instr.idiv#form.rm16",
+        "text": "IDIV reg16",
+        "minCpu": "8086",
+        "operands": [
+          { "position": 1, "kind": "REG_MEM", "sizes": [16], "access": "READ", "role": "EXPLICIT" }
+        ],
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.dx", "sizes": [16], "access": "READ", "note": "dividendo parte alta" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "READ", "note": "dividendo parte baja" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ax", "sizes": [16], "access": "WRITE", "note": "cociente" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.dx", "sizes": [16], "access": "WRITE", "note": "resto" }
+        ],
+        "requirement": { "minGeneration": "I8086" },
+        "sources": ["src.intel-sdm.093#vol2:IDIV", "src.irvine.5e-es#7.4.3:208"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cbw",
+    "mnemonic": "CBW",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CBW"
+    ],
+    "example": "cbw",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CBW",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cbw#form.1",
+        "text": "CBW",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cwd",
+    "mnemonic": "CWD",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CWD"
+    ],
+    "example": "cwd\nidiv cx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CWD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cwd#form.1",
+        "text": "CWD",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cwde",
+    "mnemonic": "CWDE",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "CWDE"
+    ],
+    "example": "cwde",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CWDE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cwde#form.1",
+        "text": "CWDE",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cdq",
+    "mnemonic": "CDQ",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "CDQ"
+    ],
+    "example": "cdq\nidiv ebx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CDQ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cdq#form.1",
+        "text": "CDQ",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cqo",
+    "mnemonic": "CQO",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "x86-64",
+    "syntaxVariants": [
+      "CQO"
+    ],
+    "example": "cqo\nidiv rbx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CQO",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cqo#form.1",
+        "text": "CQO",
+        "minCpu": "x86-64"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cdqe",
+    "mnemonic": "CDQE",
+    "kind": "INSTRUCTION",
+    "family": "F-02",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "x86-64",
+    "syntaxVariants": [
+      "CDQE"
+    ],
+    "example": "cdqe",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CDQE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cdqe#form.1",
+        "text": "CDQE",
+        "minCpu": "x86-64"
+      }
+    ]
+  }
+]

@@ -110,12 +110,68 @@ mark if there was one, and the line endings. If you type a character Windows-125
 saved as UTF-8 instead and the status bar says so. Saving never leaves a half-written file: the new text is
 written next to the file and then replaces it.
 
+### Warnings while you type
+
+About 400 ms after you stop typing, IDEARM checks the file you are editing and underlines with a red wavy line any
+word written where an instruction belongs that no instruction is called — type `MUV AX, 1` and `MUV` is marked at
+once, without waiting for a build. Hover the underlined word and the card tells you what is wrong and suggests the
+closest real mnemonic: *No instruction is called MUV. Did you mean MOV?* Correct the word and the mark disappears.
+
+A red mark means the file will not assemble until you fix it; the educational warnings, such as a program that
+never returns to DOS, are marked in amber instead. The check covers every family the built-in dictionary
+describes, floating-point (x87), `SETcc` and `CMOVcc` included, so a slip such as `FADDD` for `FADD` is caught
+like any other. IDEARM still stays quiet when it cannot be sure: a macro or a label of your own is not reported.
+[`docs/troubleshooting.md`](troubleshooting.md) explains what to do when a word of yours is marked anyway.
+
 ### The Problems panel
 
-Build errors, linker errors and educational warnings are listed together. Double-click a row to open the file at
-that line. Messages written by the tools (TASM, MASM, NASM, ld) keep the tool's own words, so you can search for
+Build errors, linker errors and educational warnings are listed together, with the warnings found while typing
+below the ones the build reported; a new check replaces only its own group, so neither erases the other.
+Double-click a row to open the file at that line. Messages written by the tools (TASM, MASM, NASM, ld) keep the tool's own words, so you can search for
 them online; messages written by IDEARM itself follow the language you selected, and hovering over one shows the
 original English text.
+
+### Academic Assistance: Comprehensive Knowledge Base and Learning Center
+
+Students and instructors can access IDEARM's integrated **Academic Assistance** system at any time:
+- Via **Help → Academic Assistance: Mnemonics Dictionary...**
+- With the global hotkey **`Shift+F1`**
+- By clicking the **Academic Assistance** (book) icon in the left Activity Bar
+- By hovering over any instruction, addressing mode, symbol, or directive in the editor
+- By selecting any composite expression (e.g. `mov ax, [bx+si+4]`, `DS:DX`, `ES:[DI]`) and hovering or pressing `Shift+F1`
+- Or typing **Academic Assistance** in the Command Palette (`Ctrl+Shift+P` / `F1`).
+
+Features:
+- **Three browsable layers**: the window opens the corpus as three tabs, so each kind of entity is reachable
+  without having to know its name in advance.
+  - *Mnemonics* — the instruction cards.
+  - *Registers* — every architectural register, grouped, each row showing the widths its family covers.
+  - *Special operands* — the signs, operators and predefined symbols (`:`, `[ ]`, `OFFSET`, `PTR`, `@data`),
+    each marked as assemblable code or as documentation notation only.
+  The search box still searches across all of them at once; results replace the tabs while a query is active, and
+  choosing a result brings its layer back to the front.
+- **Register width family**: a register card lists the same storage at 64, 32, 16 and 8 bits (RAX, EAX, AX, AH, AL),
+  with the bit range each name covers, the width currently open marked as such, and every other width one click
+  away. The card also states what a partial write does: writing AL or AX leaves the wider bits untouched, while
+  writing EAX clears the upper 32 bits of RAX.
+- **18 Instruction Families (F-01 to F-18)**: Complete coverage of 298 mnemonics, including core 16/32/64-bit integer, BCD arithmetic, string operations, x87 floating-point, privileged system opcodes, undocumented instructions (`SALC`, `ICEBP`), and SIMD extensions (MMX, SSE, SSE2, AVX).
+- **Contextual Selection Deconstruction (`QueryExplain`)**: Selecting any composite expression (e.g., `mov ax, [bx+si+4]`) decomposes it into mnemonic, registers, effective address calculation formula (`BX + SI + 4`), default segment (`DS`), and 20-bit physical address translation (`(DS * 16) + EA`).
+- **Colon Notation Disambiguation**: Clear distinction between assemblable syntax (`label:`, segment override `ES:[DI]`) and conceptual documentation notations (`DS:DX` buffer pair, `DX:AX` 32-bit arithmetic pair) refuting false concatenation myths.
+- **Nine Guided Learning Paths (R-1 to R-9)**: Progressive curriculum paths covering:
+  - *R-1: Reading an Instruction*
+  - *R-2: Data and Registers*
+  - *R-3: Memory and Segments*
+  - *R-4: Conditions and Loops*
+  - *R-5: Stack and Procedures*
+  - *R-6: Environment Services*
+  - *R-7: A Complete Program*
+  - *R-8: Debugging*
+  - *R-9: Advanced Topics (x87 FPU & SIMD)*
+  Each path includes prerequisites, verifiable learning objectives, concept links, and original exercises with starter code and verified solutions.
+- **Architectural Fundamentals (Block G)**: Authoritative conceptual guides for binary representations, two's complement sign extension, the fundamental difference between Carry Flag (CF) and Overflow Flag (OF) with identical operands, ASCII conversion, and boolean bitmasks.
+- **Operating Environment APIs & Third-Party Guidance**: Complete contracts for DOS/BIOS interrupts (`INT 21h`, `INT 10h`, `INT 16h`), Windows `kernel32` console programming (`stdcall`), Linux 64-bit direct `SYSCALL` ABI (registers `RAX`, `RDI`..`R9`, 128-byte red zone), and explicit clarification that **Irvine32 is a third-party library not bundled by IDEARM**.
+- **Pedagogical Diagrams**: High-contrast, theme-independent ASCII and structural diagrams for subregister slicing (RAX → EAX → AX → AH/AL, including 64-bit zero-extension on 32-bit writes), stack frames (growth downwards, caller/callee frames, parameters, local variables), and 20-bit physical address segmentation.
+- **Non-Modal Side-by-Side Reference**: The dictionary and guide windows run non-modally so students can keep references open beside their code editor without interrupting their work.
 
 ---
 
@@ -200,7 +256,7 @@ version = ">=3.2"          # an exact version, ">=" a version, or "*"
 [sources]
 entry = "src/main.asm"     # the module with the program's entry point
 modules = ["src/*.asm"]    # other modules to assemble and link (optional)
-include = ["include"]      # folders searched by INCLUDE (optional)
+include = ["sprite"]       # extra folders searched by INCLUDE (optional, see 4.3)
 exclude = []               # files the patterns above should skip (optional)
 
 [resources]
@@ -225,7 +281,8 @@ memsize = 16               # memory in MB, 1 to 63 (optional)
 args = []                  # the program's command line: plain ASCII, at most 126 characters (optional)
 
 [debug]
-backend = "external"       # "external": Turbo Debugger / CodeView in DOSBox · "emu8086": built-in debugger
+backend = "emu8086"        # "emu8086" (default): built-in debugger, every IDE panel works
+                           # "external": Turbo Debugger / CodeView, which debug in their own DOSBox window
 
 [dist]
 launcher = true
@@ -234,6 +291,61 @@ zip = false
 
 DOS tools only understand **8.3 names**: up to eight letters, digits, `_` or `-`, a dot, and up to three more.
 IDEARM checks every source path before building and tells you which one is too long.
+
+#### The main file, and which one Run starts
+
+`entry` is the **main file**: the source Run executes, the one assembled first, and the one the program is named
+after, so `entry = "src/main.asm"` builds `bin/main.exe`. `modules` lists the other sources that are assembled and
+linked next to it; the default `["src/*.asm"]` means every `.asm` you add to `src/` joins the build by itself.
+
+Open **Project -> Properties...** to change it. **Main file** lists every `.asm` in the project, and under it sits
+**Build only this file**, which is the difference between the two ways a folder of sources is usually meant:
+
+| Your sources are | Leave the box | Because |
+|---|---|---|
+| One program split across files, one of them with the entry point and the others exporting procedures with `PUBLIC` / `EXTRN` | **unchecked** | all of them have to be assembled and linked together |
+| Separate programs, one per exercise | **checked** | otherwise every executable also carries the code of the other exercises, the program starts in whichever module came first, and the link fails outright as soon as two of them export the same name: *Error: MAIN defined in module EJERCIC2.ASM is duplicated in module EJERCIC1.ASM* |
+
+Checking the box empties `modules`; unchecking it brings back the pattern of the main file's folder. IDEARM asks
+before it drops modules you had listed. Either way the choice is saved to `idearm.toml` straight away, and the
+next Run rebuilds, because the project file counts as a source of the build.
+
+#### Include files
+
+A file you pull in with `INCLUDE` is not a module: it is assembled as part of the source that includes it, so it
+never goes in `entry` or `modules`, and it does not need to be listed anywhere as long as it sits **in the same
+folder as that source**:
+
+```text
+Project/
+  src/
+    main.asm        .DATA
+                        INCLUDE manzana.inc
+    manzana.inc
+```
+
+IDEARM reads the INCLUDE lines of every source before the build, copies the files it finds into the temporary
+build folder, and tells the assembler which folders to search. Neither TASM nor MASM looks beside the file that
+includes on its own, so this step is what makes the example above work.
+
+When the included file lives in **another folder** of the project, name that folder once:
+
+```text
+Project/
+  sprite/
+    manzana.inc
+  src/
+    main.asm        INCLUDE manzana.inc
+```
+
+Open **Project → Properties...**, and under **Include Folders** press **Add...** and pick `sprite`. That writes
+`include = ["sprite"]` in `idearm.toml`; you can also type it there yourself. A folder is searched for every
+source in the project, and folders are searched in the order they are listed, after the folder of the source
+being assembled. Until you declare it, the build stops with the file and the line of the INCLUDE, and the message
+names the folder the file is actually in.
+
+The folders must be inside the project and, for DOS targets, spelled as 8.3 names, because they are copied into
+the emulated drive along with the files.
 
 ### 4.3 Building
 
@@ -420,11 +532,17 @@ programs, so IDEARM explains this instead of building.
 
 ### 6.1 Which debugger runs
 
+Pick it in **Project → Properties → Debugger**, or in the New Project wizard. The choice is saved to
+`[debug] backend` in `idearm.toml`.
+
 | Project | `[debug] backend` | What happens on Start Debugging |
 |---|---|---|
-| DOS | `emu8086` | IDEARM's built-in 8086 emulator runs the program; every panel described below works. It stops at the entry point first. |
-| DOS | `external` (default) | Turbo Debugger (TASM) or CodeView (MASM) opens inside a DOSBox window with your program and its symbols. You debug there; the IDE panels stay empty. |
+| DOS | `emu8086` (default) | IDEARM's built-in 8086 emulator runs the program; every panel described below works. It stops at the entry point first. |
+| DOS | `external` | Turbo Debugger (TASM) or CodeView (MASM) opens inside a DOSBox window with your program and its symbols. **You debug in that window:** the IDE cannot step line by line or show registers, so it says so and hides those controls instead of offering buttons that would do nothing. |
 | 32/64-bit | `gdb` | GDB runs the program (in its own console window on Windows); every panel works. It runs until the first breakpoint (or stops at `main` when there is none). |
+
+The step, pause and register controls follow what the chosen debugger can actually do, so a control you can see
+is a control that works.
 
 The built-in emulator covers the 8086 instruction set and the console services student programs use: `INT 21h`
 character and string input/output and program exit, `INT 10h` teletype output and video mode calls, and `INT 16h`
@@ -439,36 +557,63 @@ Breakpoints are kept per project in `.idearm/breakpoints.json`, and **Run → Cl
 Put breakpoints on lines that contain an instruction. A breakpoint on a comment, a label alone or a data line
 cannot stop the program; GDB says so in the **Terminal Output** panel.
 
+A breakpoint set or cleared **while the program is paused** takes effect on the next Continue, so you can stop,
+look around, decide where to look next and carry on. Unticking a breakpoint in the **BREAKPOINTS** list keeps the
+line but stops it from interrupting the program; its margin dot becomes a hollow ring. Turbo Debugger and
+CodeView do not receive the IDE's breakpoints at all — set them inside their own window.
+
 ### 6.3 Controlling the program
 
 | Action | Key | Toolbar |
 |---|---|---|
 | Start Debugging / Continue | `F5` | Continue |
+| Pause (interrupt a running program) | `F6` | Pause |
 | Step Over (runs a whole `CALL` or `INT`) | `F10` | Step Over |
 | Step Into | `F11` | Step Into |
 | Step Out of the current procedure | `Shift+F11` | Step Out |
 | Stop | `Shift+F5` | Stop |
-| Restart Debugging | `Ctrl+Shift+F5` | |
+| Restart Debugging | `Ctrl+Shift+F5` | Restart |
 
-The line about to run is marked with **▶** in the editor margin. The program's output appears in the DOSBox
-window (external backend), in **Terminal Output** (built-in emulator, and GDB on Linux) or in the program's
-console window (GDB on Windows).
+The line about to run is **highlighted in the editor** and marked with **▶** in the margin, so stepping is easy
+to follow. The program's output appears in the DOSBox window (external backend), in **Terminal Output**
+(built-in emulator, and GDB on Linux) or in the program's console window (GDB on Windows).
+
+**Pause** is for the program that never comes back: a loop whose counter never reaches zero, a `JMP` that lands
+on itself. Instead of only being able to stop it, press `F6` and the debugger reports where it is, with its
+registers, so you can see which line it is going round on. It works with the built-in emulator and with GDB; the
+step buttons stay available afterwards.
 
 ### 6.4 Registers
 
-The **REGISTERS** table shows each register in hexadecimal and decimal. Values that changed since the last stop
-are shown in red.
+The **REGISTERS** table shows each register in hexadecimal, decimal and binary. Values that changed since the
+last stop are shown in red. Right-click a register to copy its value in the base you need.
 
 - DOS programs show `AX BX CX DX SI DI BP SP CS DS ES SS IP FLAGS`, and one badge per flag
-  (`CF ZF SF OF PF AF IF DF`), lit when the flag is set and highlighted when it changed.
+  (`CF ZF SF OF PF AF IF DF`), lit when the flag is set and highlighted when it changed. Hover over a badge to
+  read what that flag means.
+- The binary column groups the bits in fours, so each group reads against its hexadecimal digit
+  (`0A41h` is `0000 1010 0100 0001`). It is hidden for 32/64-bit programs, where 64 binary digits say little.
 - 64-bit programs show `RAX`...`R15`, `RIP`, `EFLAGS` and the segment registers; 32-bit programs show
   `EAX`...`ESP`, `EIP`, `EFLAGS` and the segment registers. The flag badges read `EFLAGS`.
 
 ### 6.5 Call stack
 
 The **CALL STACK** tab lists, for GDB sessions, the active procedures from the innermost one:
-`#0 0x00007ff65f0c102e in main at C:\...\src\main.asm:31`. The built-in emulator shows the words on the stack
-instead: `[SP+02] 1014:0102 = 0000`.
+`#0 0x00007ff65f0c102e in main at C:\...\src\main.asm:31`. Double-click a frame to open its line. The built-in
+emulator shows the words on the stack instead: `[SP+02] 1014:0102 = 0000`, which have no line to open.
+
+### 6.5b Disassembly
+
+The **DISASSEMBLY** tab shows the machine instructions from where the program stands, the current one
+highlighted, with the bytes each one occupies:
+
+```
+0710:0003  BB 78 56       MOV BX, 5678h
+```
+
+This is where one line of source turns out to be several instructions. On an 8086 baseline, `shl ax, 3`
+assembles to three `SHL AX, 1`, and `push 5` to a short sequence the assembler writes for you — the disassembly
+shows exactly what the processor will run.
 
 ### 6.6 Watches
 
@@ -484,7 +629,8 @@ Numbers are shown in decimal and hexadecimal: `4660 (0x1234)`.
 | A label | — | `message` gives its address |
 | GDB syntax | — | anything with `$`, casts or parentheses, e.g. `(char)$al` |
 
-`<error>` means the expression could not be evaluated at this stop (for example `RSP` in a 32-bit program).
+*cannot be read here* means the expression could not be evaluated at this stop (for example `RSP` in a 32-bit
+program, or a label in the built-in emulator, which does not know label names).
 
 ### 6.7 Memory dump
 
@@ -532,9 +678,12 @@ explains each message.
 | `Ctrl+F5` | Run |
 | `F5` | Start debugging, or continue when paused |
 | `F9` | Toggle breakpoint |
+| `F6` | Pause the running program |
 | `F10` / `F11` / `Shift+F11` | Step over / into / out |
+| `Ctrl+Shift+F5` | Restart debugging |
 | `Shift+F5` | Stop the running task |
 | `Ctrl+Shift+P` or `F1` | Command palette |
+| `Shift+F1` | Academic Assistance: Assembly Mnemonics Dictionary |
 | `Ctrl+Space` / `F12` / `Shift+F12` | Completion / Go to definition / Find references |
 | `Ctrl+B` / `Ctrl+J` | Toggle sidebar / bottom panel |
 

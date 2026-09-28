@@ -101,6 +101,20 @@ class QueryEditorUseCasesTest {
         assertEquals("0xA = 10", hover.syntax());
     }
 
+    /** Long.parseLong threw on values above Long.MAX_VALUE, so a full 64-bit mask had no hover. */
+    @Test
+    void sixtyFourBitLiteralsShowTheirUnsignedValue() {
+        var hover = new QueryHover().execute("0FFFFFFFFFFFFFFFFh", "en", index).orElseThrow();
+        assertEquals(HoverKind.NUMBER_CONVERSION, hover.kind());
+        assertEquals("0xFFFFFFFFFFFFFFFF = 18446744073709551615", hover.syntax());
+    }
+
+    @Test
+    void nasmPrefixLiteralsAreNumbers() {
+        assertEquals(5L, new QueryHover().execute("0b101", "en", index).orElseThrow().number());
+        assertEquals(15L, new QueryHover().execute("0o17", "en", index).orElseThrow().number());
+    }
+
     @Test
     void queryOutlineBuildsHierarchy() {
         QueryOutline outline = new QueryOutline();
@@ -139,5 +153,36 @@ class QueryEditorUseCasesTest {
 
         List<Diagnostic> diags = lint.execute(broken, "test.asm", "8086", index);
         assertTrue(diags.stream().anyMatch(d -> d.code().equals("lint.missing-exit")));
+    }
+
+    @Test
+    void queryHoverPrioritizesProjectSymbolOverInstructionAndAttachesSecondaryCard() {
+        // User defines a macro called MOV
+        String macroFile = """
+                MOV MACRO dest, src
+                    push src
+                    pop dest
+                ENDM
+                """;
+        index.updateFile("src/macros.inc", macroFile);
+
+        QueryHover hover = new QueryHover();
+        Optional<HoverInfo> result = hover.execute("MOV", "es", index);
+
+        assertTrue(result.isPresent());
+        HoverInfo info = result.get();
+
+        // 1. Primary info is the user's MACRO
+        assertEquals(HoverKind.SYMBOL_INFO, info.kind());
+        assertTrue(info.title().contains("MACRO MOV"));
+        assertNotNull(info.symbol());
+        assertEquals("MOV", info.symbol().name());
+        assertEquals("src/macros.inc", info.symbol().file());
+
+        // 2. Secondary info is the x86 instruction
+        assertNotNull(info.secondary(), "Secondary hover card must be present for collided instruction");
+        assertEquals(HoverKind.INSTRUCTION, info.secondary().kind());
+        assertTrue(info.secondary().title().contains("MOV"));
+        assertTrue(info.secondary().description().contains("Copia"));
     }
 }

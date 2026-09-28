@@ -5,8 +5,9 @@
 > [`docs/technical-plan.md`](docs/technical-plan.md), every decision in [`docs/adr/`](docs/adr/), and the Phase 0
 > evidence in [`spikes/REPORT.md`](spikes/REPORT.md).
 >
-> **Last updated:** 2026-09-22 · **Current phase:** Phase 1 of [`docs/action-plan.md`](docs/action-plan.md) is
-> implemented (Windows and Linux) → **release v1.0.0 once the user approves version, git init and tag** (§9)
+> **Last updated:** 2026-09-24 · **Current phase:** Phase 1 of [`docs/action-plan.md`](docs/action-plan.md) is
+> implemented (Windows and Linux), plus the debugger work of Phase 2 (D1, P2-02, P2-03, P2-09 — ADR-010)
+> → **release v1.0.0 once the user approves version, git init and tag** (§9)
 >
 > User documentation: [`docs/user-guide.md`](docs/user-guide.md) and [`docs/troubleshooting.md`](docs/troubleshooting.md).
 
@@ -157,6 +158,89 @@ The repository implements the 4-layer N-tier architecture defined in ADR-007. Ev
 
 ## 7. Roadmap and status
 
+### Release 2.0.0 preparation — 2026-09-27 (Claude)
+
+- **Why 2.0.0.** New DOS projects default to the built-in emulator instead of the `external` debugger (ADR-010),
+  and the editor, the Problems panel and the assistant changed in depth. `idearm.toml` is unchanged: a 1.0 project
+  keeps the backend it saved. The MSI keeps the same upgrade UUID, so 2.0 replaces 1.0 in place. Notes:
+  [`docs/release-notes/v2.0.0.md`](docs/release-notes/v2.0.0.md).
+- **English repository, as the rules require.** `docs/academic-assistant/` and `docs/prompts/` were written in
+  Spanish; both were translated and their files renamed (`expansion-plan.md`, `annex-a…g`, `implementation-progress.md`,
+  `usability-script-12-cases.md`, `academic-assistant-prompt*.md`). `coverage.md` is generated: `CoverageReportGenerator`
+  now writes English, `TreatmentLevel` is `COMPLETE/MINIMAL/OUTLINE/EXCLUDED`, and the percentages use
+  `Locale.ROOT` (they read `86,6%` on a Spanish Windows).
+- **The English UI showed Spanish.** About 300 corpus texts sit in fields with no language pair (register use and
+  write semantics, flag meanings, service inputs/outputs, operand notes, pitfalls, caveats). A gettext-style table,
+  `knowledge/text/translations.json`, now gives both languages keyed by the original text, `Corpus.localize` picks
+  one, and `AcademicCenterView`, `HoverView`, `QueryHover`, `QueryKnowledge` and the register search use it.
+  `CorpusTranslationTest` fails when a new prose text has no entry. ADR-013 addendum. The view's hardcoded
+  "Aviso emu8086" and "Compatible" became message keys.
+- **Left as is:** code examples in the corpus keep their authors' comments (some in Spanish); `QueryExplain` and
+  `QueryHover` still build bilingual text in the application layer (ADR-006 debt, already listed below).
+- Verified: `mvn clean verify` green before the changes (924 tests, 2 skipped) and after them, plus
+  `mvn install -Plocal-tools` with the real tools.
+
+### Downloaded PNG icon assets — 2026-09-26 (Codex)
+
+- Replaced custom Java path/glyph icons with 61 transparent Lucide 1.48.0 PNGs covering 64 semantic identifiers,
+  including eleven instruction categories, six register groups, explorer/actions, editor gutter and consoles.
+- Preserved the existing IDEARM brand PNG and switched `BrandLogo` to `ImageView`. All icon resources are local;
+  `RasterIcon` tints their alpha masks through CSS so theme and control-state colors remain consistent.
+- Added pinned download/export metadata, original ISC/Feather MIT notices and a maintenance script. No Maven
+  or runtime dependency changes. See the raster addendum in ADR-012 and `docs/branding.md`.
+- Added asset completeness, live color and brand reuse regressions, plus 16/28 px icon galleries and gutter
+  state captures to the four-theme/language design smoke.
+- Validation: `mvn -o test` passed with **832 tests, 0 failures/errors, 2 skipped**. Design smoke printed
+  **PASS**, producing 86 PNGs in `scratch/raster-icons/smoke`. Reviewed both icon galleries, academic lists,
+  narrow cards, debugger, terminal, gutter markers and About/header branding in dark/light and EN/ES.
+
+### Visual polish of the Academic Center and workbench — 2026-09-26 (Codex)
+
+- Added eleven instruction-category and six register-group line icons in `WorkbenchIcons`, reused by academic
+  lists, category filters and badges; replaced navigation symbols and explorer glyphs with the same 16 px set.
+- Separated detail titles, wrapping badges and muted summaries. Academic rows keep identifiers and metadata
+  readable while descriptions elide with tooltips. Localized operand class badges in both message bundles.
+- Unified dialog/picker spacing, card borders, icon alignment and explicit keyboard focus/hover states through
+  `workbench.css`; explorer folder colors now use a theme token. Existing branding and workbench geometry remain.
+- Expanded design smoke to all four theme/language combinations, all academic layers, search, narrow register
+  cards and the real About dialog. No business logic, corpus, view model or dependency changes.
+- Validation: offline `mvn -o test` passed, **829 tests, 0 failures/errors, 2 skipped**, including presentation
+  architecture and bundle consistency. Design smoke printed **PASS** and produced 78 PNGs in
+  `scratch/visual-polish-smoke`; reviewed both themes/languages, narrow filters, list ellipses, family focus,
+  dialog spacing and the existing 25/48 px brand marks. Desktop DPI/platform differences remain release checks.
+
+### Academic Assistant Expansion (Phases AA-P0 to AA-P7) — 2026-09-26
+
+- **Comprehensive Knowledge Corpus (ADR-013, ADR-014):**
+  - Expanded instruction catalog from 100 to 298 instructions across 18 distinct families (`F-01` through `F-18`) with zero "etc." omissions. Documented in [`docs/academic-assistant/coverage.md`](docs/academic-assistant/coverage.md).
+  - High-performance, pure JDK JSON reader (`Json.java`, `CorpusLoader.java` in `idearm-language`) ensuring strict adherence to ADR-007 (zero external dependencies in Layer 3). Measured in-memory corpus access latency is ~0.001 ms (< 50 ms budget) and lookup latency is ~0.47 µs.
+  - Dedicated knowledge schemas: `services.json` (DOS/BIOS interrupts with detailed INT 21h 09h/0Ah buffer specifications and emulator caveats), `registers.json` (register hierarchy and subregister slicing views), `concepts.json` (comparative pairs `MOV`/`LEA`, `CMP`/`TEST`, `MUL`/`IMUL`, `DIV`/`IDIV`; calling conventions; stack frames; segmentation myth refutation; binary fundamentals; OS environments Win32/Linux psABI and explicit Irvine32 third-party marking), `paths.json` (9 guided learning paths `R-1` to `R-9`), and `syntax.json` (MASM, TASM, NASM, emu8086 dialect directives and syntax).
+- **Position-Aware Contextual Intelligence & Analysis:**
+  - `OperandParser` parses complex addressing modes and operand structures across 16-bit, 32-bit, and 64-bit syntaxes.
+  - `AddressingModeRule` detects and warns on invalid real-mode 16-bit combinations (e.g. `[bx+bp]`, `[ax]`).
+  - `QueryExplain` deconstructs instructions into effective address calculations and clarifies conceptual notations (`DS:DX` vs label definitions).
+  - `QueryHover` prioritizes user symbols/macros over mnemonic documentation while attaching secondary cards.
+- **Independent Semantic Oracle & Usability Validation:**
+  - Independent oracle semantics tested against Intel SDM 093 without runtime emulator dependencies (flags CF/OF, INC/DEC CF preservation, shift flag behaviors).
+  - Accessible theme-independent educational ASCII diagrams (`PedagogicalDiagrams.java`).
+  - Usability guide with all 12 acceptance scenarios fully documented with automated test coverage in [`docs/academic-assistant/usability-script-12-cases.md`](docs/academic-assistant/usability-script-12-cases.md).
+- **Verification:** All 48 backlog packages across `AA-P0` through `AA-P7` implemented and verified with 100% pass rate.
+
+### Consistent workbench visual system — 2026-09-24 (Codex)
+
+- Applied a VS Code-inspired neutral dark/light palette, consistent controls and focus states, compact tabs,
+  activity indicators, syntax colors, table density and shared dialog headings/footers. Preserved prior work
+  in the working tree and existing application operations.
+- Added an actionable, scrollable welcome screen and guided empty tool panels. Debugger controls and flags
+  adapt to available space, with a taller panel and horizontal scrolling for narrow windows.
+- `WorkbenchTheme` shares the current theme with dialogs, alerts, menus and editor popups; an open dictionary
+  follows theme changes. New visible copy is localized in both English and Spanish. See
+  [ADR-012](docs/adr/ADR-012-workbench-visual-system.md).
+- Validation: full offline `mvn verify` passed, **673 tests, 0 failures/errors, 2 skipped**. A targeted
+  `CompletionPopupTest` run passed after the final popup theme adjustment. Final packaging compiled successfully.
+  Inspected the design gallery (28 captures, no CSS/runtime errors), including 800 × 600 layouts and live
+  dictionary theming; artifacts are under ignored `scratch/vscode-refresh/`. Updated README screenshots.
+
 ### GitHub documentation refresh — 2026-09-22 (Codex)
 
 - Rebuilt the README around installation, first use, real dark/light workbench screenshots, capabilities,
@@ -169,6 +253,73 @@ The repository implements the 4-layer N-tier architecture defined in ADR-007. Ev
 - Validation: 38 local links/anchors passed; both issue forms and their chooser configuration parsed as YAML;
   screenshots matched their original captures; the rendered README loaded all eight images. Documentation-only
   changes did not require running the Java test suite.
+
+### The editor marks a mistyped mnemonic while you type — 2026-09-23 (Claude)
+
+- **The defect.** A student typing `MUV AX, 1` got no feedback until a build. The pipeline could not have told
+  them either: `AssemblyLexer` typed a word as `INSTRUCTION` only from a private hardcoded set, `AssemblyParser`
+  built a node only when the first token was already `INSTRUCTION`, so the line was **dropped without a trace**,
+  and every rule iterates `ast.instructions()`. `LintSource`, written for exactly this, had no caller.
+- **Done: P2-06** of [`docs/action-plan.md`](docs/action-plan.md), recorded in
+  [ADR-011](docs/adr/ADR-011-live-source-validation.md). The word is underlined with a red wavy line about 400 ms
+  after typing stops, and hovering it reads *No instruction is called MUV. Did you mean MOV?* The educational
+  warnings that used to wait for a build now appear while typing too, in a Problems group of their own that never
+  erases what the assembler reported.
+- **Beyond the item:** a new `UnknownInstructionRule` (the item only asked for the existing rules), the parser now
+  records what it used to drop (`UnknownStatementNode`, `MacroNode`), `Location` gained a `length` so a diagnostic
+  can say how wide it is, and `AssemblyLexer` and `AssemblySyntaxHighlighter` both key on
+  `InstructionCatalog.knownMnemonics()` — there were **three divergent mnemonic lists**, and colouring from one
+  while judging from another would have contradicted itself. `BSWAP`, `MOVZX`, `XADD`, `CPUID` and about 20 more
+  are coloured as instructions for the first time. The catalog gained `RETF`, the generic `MOVS`/`CMPS`/`LODS`/
+  `STOS`/`SCAS` forms and the `REP` prefix family; `SAL` and `RETN` became variants of `SHL` and `RET`.
+- **Evidence.** Verified in `richtextfx-0.11.7.jar` before designing on it (rule 6): `TextExt` exposes
+  `-rtfx-underline-wave-radius` and `ParagraphText` builds the zig-zag `UnderlinePath` itself, so the squiggle is
+  a CSS class and needs no custom node. Measured on a generated 104 KB / 7 600-line program: one lint pass 25 ms
+  best / 37 ms average **off** the JavaFX thread (P2-06 asks for under 100 ms), one paragraph of highlighting
+  0.014 ms despite the instruction alternation growing from 85 names to 173 (ADR-005 budgets p95 11 ms).
+- **The real risk is a false positive**, so the rule errs on the side of silence behind five guards: the catalog,
+  the shape of the word, the macros and symbols of the file, the project symbol index, and the families the
+  catalog does not describe. Severity is `ERROR`, which is what paints the mark **red** as asked: once the guards
+  clear, no assembler will accept the word. The educational rules keep `WARNING` and their amber underline, so the
+  two kinds of mark mean different things. The guards, not the severity, are what keeps this honest.
+- **Verified.** Full offline `mvn verify` green, 21 new tests. Contrary to expectation, **no existing lexer or
+  parser test needed changing** despite the classification of 27 words moving.
+- **Debt this grew:** the catalog still has no x87, SETcc or CMOVcc entries, and the rule skips those families
+  wholesale to avoid warning about correct code. Registers and directives are still duplicated across
+  `AssemblyLexer`, `QueryCompletion` and `AssemblySyntaxHighlighter`; only the mnemonics were unified.
+
+### The debugger works with the debugger the IDE actually ships — 2026-09-23 (Claude)
+
+- **The defect.** Every `DebugSession` method beyond `exit`/`state`/`stop` was a default that does nothing, and
+  `DosBoxDebugSession` implemented only those three. Since `external` (Turbo Debugger or CodeView in a DOSBox
+  window) was the default backend for new and imported DOS projects, pressing F5 and then F10 did nothing at all
+  and the register table showed zeros, while the buttons looked enabled. The built-in emulator did all of it
+  correctly but was reachable only by hand-editing `idearm.toml`.
+- **Done: D1, P2-02, P2-03 and P2-09** of [`docs/action-plan.md`](docs/action-plan.md), recorded in
+  [ADR-010](docs/adr/ADR-010-debugger-capabilities-and-default-backend.md).
+  `DebugCapability` + `DebugSession.capabilities()`: the emulator and GDB declare what they do, DOSBox declares
+  nothing, and every control in the panel, menus, toolbar and palette is bound to a capability; a launch-only
+  session replaces the panels with an explanation instead of dead buttons. The **built-in 8086 emulator is now
+  the default** for DOS projects, and the debugger is chosen in New Project and Project Properties.
+- **Pause (F6)** for the endless loop a student writes by accident, plus `setBreakpoints` on a live session, the
+  execution line **highlighted in the editor** (there was only an 18 px `▶`), a navigable call stack, a
+  breakpoint checkbox that actually persists (it only ticked before), hollow margin rings for disabled
+  breakpoints, every stepping command in the palette and the toolbar, and `status.task.busy` instead of silence.
+- **Also delivered what §14/FR-32 promised and never had:** a `Disassembler8086` (text-only decoder, separate
+  from `ModRmDecoder`, which needs live registers) with a **DISASSEMBLY** panel, and a **binary column** in the
+  register table, grouped in nibbles, hidden for 64-bit sessions.
+- **Evidence.** Spike **S9** (`spikes/REPORT.md`): `-exec-interrupt` gets *no reply at all* from GDB until
+  `mi-async` is on; with it the program stops in 12–17 ms, but on Windows the stop lands on an injected thread in
+  `ntdll!DbgBreakPoint` with no source line, so the session selects the program's own thread before reporting.
+  The disassembler is checked against the machine-code column of the real TASM 4.1 listing in
+  `fixtures/listings`, comparing mnemonic and length. A new `EmulatorDebugIntegrationTest` walks the whole
+  default path with no external tool: stop on the first line, read the bytes, step, hit a breakpoint, exit 0.
+- **Verified.** Full offline `mvn test` green; the JavaFX startup smoke prints `SMOKE OK` and the visual smoke
+  passes its editor and snapshot steps (its hover step still needs window focus, as noted on 2026-09-22).
+  **Still needs a person:** clicking through F5/F6/F10 in the running IDE, the highlighted line, the Disassembly
+  tab and the two new Debugger dropdowns.
+- **Debt this grew:** `DebugProject` still selects the backend by comparing ids and `toolchainId.contains(...)`,
+  against rule 4; this change added a branch there. P3-01 should come soon.
 
 ### Phase 1 of the action plan implemented — 2026-09-22 (Claude)
 
@@ -194,6 +345,35 @@ The repository implements the 4-layer N-tier architecture defined in ADR-007. Ev
   `IDEARM_USER_DATA_DIR` pointing to a scratch folder, or it adds entries to the user's real recent history.
 - Not done (needs the user's approval): version `1.0.0`, git init/publish and the `v1.0.0` tag. Still open: window
   controls on a real Linux desktop, a packaged Linux build, macOS.
+
+### Build fix and robustness pass — 2026-09-27 (Claude)
+
+- **NetBeans Run failed with `cannot find symbol HoverKind.DIRECTIVE`.** The source was right: `javafx:run` builds
+  only `idearm-app` and took `idearm-application` from a stale `~/.m2` jar. `idearm-app/nbactions.xml` now runs
+  `build-with-dependencies` (install with also-make, tests skipped) before Run, Debug, Profile and jlink.
+  `javafx:run` also grants native access to the infrastructure module (FFM), as the packaged app does.
+- **Freezes and hangs fixed:** emulator output is sent in chunks and the Output panel coalesces writes and keeps
+  the last 1 MB (a printing loop flooded the JavaFX thread); GDB breakpoints are applied off the JavaFX thread and a
+  set changed while running is applied at the next stop; a failed GDB start, or GDB dying, ends the session and
+  fails waiting commands; `close()` never blocks; Stop in the emulator no longer reports a false exit code 0; a
+  stale Pause no longer stops the next run after one instruction.
+- **Language:** one numeric-literal reader (`NumericLiteral`) for lexer, operand parser and hover (NASM `0b/0o/0h/0d`
+  prefixes, `d/o/q` suffixes, unsigned 64-bit hover); `[esp+4]` is valid; `beach`/`fah` are labels, not numbers;
+  16-bit addressing rules apply to 16-bit addresses on any CPU; addressing messages follow the UI language;
+  `FREQUENCY EQU 1` resolves; `push -1` warns on 8086; "Pentium Pro/II" parse as P6; completion shows each register
+  once and the real CPU of CPUID/CMOVcc/SYSCALL.
+- **Editor and view models:** live lint keeps one pending pass per document and drops stale results; hover and
+  completion read the current line instead of copying the whole document, and ignore words in comments/strings;
+  the highlighter matches the lexer on strings and `.486/.586/.686`; the debugger view no longer runs `QueryHover`
+  on every repaint (ArchUnit rule `viewsDoNotRunUseCases`); memory/watch refreshes read no JavaFX state off its
+  thread; the corpus is warmed at startup (ADR-013) and its load errors are logged instead of swallowed.
+- **Includes:** absolute includes (`\MASM\INCLUDE\DOS.INC`, `C:\...`) are left to the assembler; the 512-file cap
+  is reported. A missing relative include is still an error, as before.
+- **Known debt, not changed:** `CpuGeneration` duplicates `CpuLevel`; two classes named `CompatibilityResolver`;
+  `KnowledgeEntityKind` and `language.knowledge.CompatibilityResolver` hold user-facing text (ADR-006); Pause does
+  not interrupt an emulator program waiting for a key; MASM in DOS mode passes `/I` folders inline (126-character
+  limit; TASM uses a response file); includes found only through the tool's own `INCLUDE` folders are reported as
+  missing; sessions and `DebugProject` both emit `Exited`; the new default `[debug] backend = "emu8086"`.
 
 ### Full review and action plan — 2026-09-21 (Claude)
 
@@ -280,6 +460,7 @@ The repository implements the 4-layer N-tier architecture defined in ADR-007. Ev
 | F13 | Source-level debugging, call stack, watches, memory, release workflow | v0.9 | **Complete** (2026-09-17) |
 | RC | User documentation, localized problems, full quality review | v1.0 RC | **Complete** (2026-09-17) |
 | AP1 | Action plan Phase 1: release blockers, DOSBox 0.74-3 by default, Windows + Linux | v1.0 | **Complete** (2026-09-22) except the release steps |
+| AA | Academic Assistant expansion (AA-P0 to AA-P7, 48 backlog packages, 298 instructions) | v1.0 | **Complete** (2026-09-26) |
 | Next | Action plan Phases 2–4, external plugins, managed downloads, LSP/DAP, macOS | Future | — |
 
 ### Phase 0 checklist
@@ -940,6 +1121,20 @@ Details and numbers: [`spikes/REPORT.md`](spikes/REPORT.md).
 
 ## 9. Next steps: v1.0.0 release and student feedback
 
+**PNG icon handoff (2026-09-26):** use downloaded resources through `WorkbenchIcons`, not Java geometry or
+symbol fonts. Extend `scripts/workbench-icons.json` and the enum together; preserve pinned provenance and
+license notices. Keep state colors in `-wb-icon-color` selectors. `docs/branding.md` describes regeneration;
+inspect `png-icons-*` and `gutter-icons-*` alongside the academic and About smoke captures.
+
+**Visual-polish handoff (2026-09-26):** extend the shared 16 px icon enum for future academic entities, keep
+category/group mappings in presentation and preserve wrapping metadata at the 840 px reference-window minimum.
+The design smoke now covers all four theme/language combinations; inspect its academic and About captures too.
+
+**Visual-system handoff (2026-09-24):** keep shared colors and control metrics in `workbench.css`, and use
+`WorkbenchTheme` / `DialogWindow` for secondary surfaces. Re-run `IDEARM_DESIGN_SMOKE` after broad UI changes;
+check both themes, both languages and a compact window. Native Linux rendering and desktop scaling remain
+platform checks before release. See ADR-012.
+
 **Release packaging (2026-09-22):** `scripts/package-native.ps1` (PowerShell 7, Windows and Linux) builds the
 release files from the poms' version: MSI and portable zip, or DEB and tar.gz, into `dist/release` with a
 `.sha256` beside each one. `release.yml` runs the tests, builds both systems (the DEB on Ubuntu 22.04) and
@@ -951,24 +1146,32 @@ consumed by JavaFX toolbar skins. Only arm dragging on a noninteractive title-ba
 **Workbench handoff (2026-09-17, Codex):** recent history, hover help, integrated window controls and original
 branding are implemented. Future refinements can add session restoration and configurable keybindings.
 Keep persistence behind `RecentItemsStore`, preserve corrupt history until explicit reset, and route every exit
-through the close-request event. Keep SVG and `BrandLogo` geometry synchronized; use `scripts/export-branding.py`
-to regenerate packaged icons. See ADR-009 for current limits, including native Snap Layout hover behavior.
+through the close-request event. Keep the editable brand SVG and bundled PNG synchronized when changing the
+mark; `BrandLogo` now loads that PNG. Use `scripts/export-branding.py` to regenerate packaged launcher icons.
+See ADR-009 for current limits, including native Snap Layout hover behavior.
 
 **RC status:** complete (2026-09-17): documentation, localized problems and the quality review above.
 
 **Action plan (2026-09-21):** a full review found release blockers. Phase 1 of
 [`docs/action-plan.md`](docs/action-plan.md) is implemented (2026-09-22, see §7); what remains of P1-08 is step 1
-below. Phases 2–4 follow the release. Each item lists its files, the fix and the tests that prove it.
+below. Of Phase 2, the debugger items are done (2026-09-23: D1, P2-02, P2-03, P2-09 — ADR-010) and so is lint
+while typing (2026-09-23: P2-06 — ADR-011); the rest follows the release. Each item lists its files, the fix and
+the tests that prove it.
 
-1. **Release:** the version is `1.0.0` and the repository is published at github.com/Dinamo541/IDEARM. Push
-   `main`, make the repository public, tag `v1.0.0-rc.1` to check the published files, then tag `v1.0.0`.
-   Afterwards move `main` to `1.1.0-SNAPSHOT`.
-2. **Student feedback:** have a class build, run and debug the examples following `docs/user-guide.md`; turn every
+1. **Release:** `v1.0.0` is published. `v2.0.0` is prepared on `release/2.0.0` (see §7): merge it through a PR
+   with green CI, tag `v2.0.0-rc.1` to check the published files, then tag `v2.0.0`, and afterwards move `main` to
+   `2.1.0-SNAPSHOT`.
+2. **Click through the debugger in the running IDE:** F5 on a new DOS project stops on the first line and
+   highlights it, F10/F11/Shift+F11 step, F6 pauses an endless loop, the Disassembly tab follows, and the
+   Debugger dropdown in New Project and Properties saves the choice. The automated tests cover the pipeline and a
+   whole emulator session; only the clicking still needs a person.
+3. **Click through the live validation:** type `MUV AX, 1` in a DOS project and check that only `MUV` is
+   underlined with a wavy red line, that the hover suggests `MOV`, that correcting the word clears the mark
+   without a build, and that `BSWAP` and `MOVZX` are now coloured and never underlined. Check both themes and
+   both languages, since the wave takes its colour from a theme token.
+4. **Student feedback:** have a class build, run and debug the examples following `docs/user-guide.md`; turn every
    confusing step into a guide fix or an issue.
-3. **Known limits to consider next:** the built-in emulator has no DOS file services or graphics output; native
-   programs link only `kernel32`; on Linux the window controls are unverified on a real desktop and there is no
-   packaged build; under GDB on Linux the program's input is empty; macOS is untested; the explorer shows every
-   file, including `.idearm/`.
+5. **Known limits to consider next:** the instruction catalog covers 298 instructions across 18 families including x87, SETcc, CMOVcc, MMX, SSE, SSE2, AVX/AVX2 outlines, and system opcodes; the built-in emulator focuses on 8086 baseline and has no DOS file services or graphics output; native programs link only `kernel32`; on Linux the window controls are unverified on a real desktop and there is no packaged build; under GDB on Linux the program's input is empty; macOS is untested; the explorer shows every file, including `.idearm/`.
 
 ### Notes for future AI agents and contributors:
 - Always preserve the N-layer architecture (ADR-007):
@@ -987,7 +1190,7 @@ below. Phases 2–4 follow the release. Each item lists its files, the fix and t
 ## 10. How to build and run
 
 ```powershell
-mvn clean install                                              # product build (requires JDK 25+)
+mvn clean install                                              # product build (requires JDK 25+); rerun after changing any module before javafx:run
 $env:IDEARM_SMOKE = '1'; mvn -f idearm-app/pom.xml javafx:run  # smoke run: shows the window, switches EN→ES, exits
 Remove-Item Env:IDEARM_SMOKE; mvn -f idearm-app/pom.xml javafx:run
 mvn -f idearm-app/pom.xml javafx:jlink                         # runtime image in idearm-app/target/idearm
@@ -1007,10 +1210,9 @@ Spikes: every command with its parameters is listed in [`spikes/REPORT.md`](spik
 
 ## 11. Open questions for the user
 
-- Whether to initialize git, publish the repository and tag v1.0.0 now (and bump the version from 0.1.0-SNAPSHOT).
 - Whether native programs should link more libraries than `kernel32` (for example `user32` or `msvcrt`).
 - The final product name ("IDEARM" may suggest the ARM architecture) and whether module names keep the GitHub
   handle (`dinamo541` triggers a javac warning).
-- Whether to install WiX Toolset so jpackage can produce MSI installers (the release workflow ships an app image).
-- The decisions D1–D5 in [`docs/action-plan.md`](docs/action-plan.md) §0: default DOS debugger, building while a
-  program runs, charset for non-UTF-8 sources and for new DOS files, and a real console for the Terminal.
+- The decisions still open in [`docs/action-plan.md`](docs/action-plan.md) §0: building while a program runs, the
+  charset for new DOS files, and a real console for the Terminal. (D1, the default DOS debugger, and D3, the
+  fallback charset, are decided; git, the v1.0.0 tag and WiX were settled with the 1.0.0 release.)

@@ -41,4 +41,23 @@ class DosStagingTest {
         assertTrue(Files.isRegularFile(driveS.resolve("SRC/MAIN.ASM")));
         assertEquals("DOS_EXIT EQU 4Ch", Files.readString(driveS.resolve("SRC/COMMON.INC")));
     }
+
+    /**
+     * A resolved INCLUDE is staged as one more source file, under the folder it has in the project, so the /i the
+     * assembler receives points at the same place the IDE resolved the file from.
+     */
+    @Test
+    void includedFilesAreStagedUnderTheirOwnProjectFolder() throws IOException {
+        Path project = Files.createDirectories(temp.resolve("project"));
+        Files.createDirectories(project.resolve("src"));
+        Files.createDirectories(project.resolve("sprite"));
+        Files.writeString(project.resolve("src/main.asm"), "INCLUDE manzana.inc");
+        Files.writeString(project.resolve("sprite/manzana.inc"), "MANZANA DB 'x'");
+        Path driveS = Files.createDirectories(temp.resolve("staging/S"));
+
+        DosStaging.copySources(project, driveS, List.of("src/main.asm", "sprite/manzana.inc"));
+
+        assertTrue(Files.isRegularFile(driveS.resolve("SRC/MAIN.ASM")));
+        assertEquals("MANZANA DB 'x'", Files.readString(driveS.resolve("SPRITE/MANZANA.INC")));
+    }
 }

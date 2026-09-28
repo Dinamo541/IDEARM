@@ -22,6 +22,11 @@ mvn install
 mvn -f idearm-app/pom.xml javafx:run
 ```
 
+`javafx:run` builds only `idearm-app` and takes the other modules from your local Maven repository. After
+changing another module, run `mvn -pl idearm-app -am install -DskipTests` first, or the app compiles against the
+old jars and fails with errors such as `cannot find symbol`. NetBeans does this for you: the Run, Debug and
+Profile actions in `idearm-app/nbactions.xml` build the changed modules first.
+
 See the [installation guide](README.md#installation) for platform requirements and external Assembly tools.
 The default test suite does not require TASM, MASM, NASM or DOSBox. Register tools through
 **Help → Tool Doctor...** when working on integrations that use them.

@@ -1,0 +1,1053 @@
+[
+  {
+    "id": "x86.instr.movsb",
+    "mnemonic": "MOVSB",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "MOVSB",
+      "REP MOVSB"
+    ],
+    "example": "cld\nrep movsb",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:MOVSB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.movsb#form.1",
+        "text": "MOVSB",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.si", "sizes": [16], "access": "READ_WRITE", "note": "puntero origen en DS:SI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.di", "sizes": [16], "access": "READ_WRITE", "note": "puntero destino en ES:DI" }
+        ]
+      },
+      {
+        "id": "x86.instr.movsb#form.2",
+        "text": "REP MOVSB",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.cx", "sizes": [16], "access": "READ_WRITE", "note": "contador de repetición" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.si", "sizes": [16], "access": "READ_WRITE", "note": "puntero origen en DS:SI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.di", "sizes": [16], "access": "READ_WRITE", "note": "puntero destino en ES:DI" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.movsw",
+    "mnemonic": "MOVSW",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "MOVSW",
+      "REP MOVSW"
+    ],
+    "example": "cld\nrep movsw",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:MOVSW",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.movsw#form.1",
+        "text": "MOVSW",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.si", "sizes": [16], "access": "READ_WRITE", "note": "puntero origen en DS:SI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.di", "sizes": [16], "access": "READ_WRITE", "note": "puntero destino en ES:DI" }
+        ]
+      },
+      {
+        "id": "x86.instr.movsw#form.2",
+        "text": "REP MOVSW",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.cx", "sizes": [16], "access": "READ_WRITE", "note": "contador de repetición" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.si", "sizes": [16], "access": "READ_WRITE", "note": "puntero origen en DS:SI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.di", "sizes": [16], "access": "READ_WRITE", "note": "puntero destino en ES:DI" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.movsd.string",
+    "mnemonic": "MOVSD",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "homonyms": [
+      "x86.instr.movsd.sse2"
+    ],
+    "syntaxVariants": [
+      "MOVSD",
+      "REP MOVSD"
+    ],
+    "example": "cld\nrep movsd",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:MOVSD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.movsd.string#form.1",
+        "text": "MOVSD",
+        "minCpu": "80386",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.esi", "sizes": [32], "access": "READ_WRITE", "note": "puntero origen en DS:ESI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.edi", "sizes": [32], "access": "READ_WRITE", "note": "puntero destino en ES:EDI" }
+        ]
+      },
+      {
+        "id": "x86.instr.movsd.string#form.2",
+        "text": "REP MOVSD",
+        "minCpu": "80386",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ecx", "sizes": [32], "access": "READ_WRITE", "note": "contador de repetición" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.esi", "sizes": [32], "access": "READ_WRITE", "note": "puntero origen en DS:ESI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.edi", "sizes": [32], "access": "READ_WRITE", "note": "puntero destino en ES:EDI" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lodsb",
+    "mnemonic": "LODSB",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LODSB"
+    ],
+    "example": "cld\nlodsb",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LODSB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lodsb#form.1",
+        "text": "LODSB",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.si", "sizes": [16], "access": "READ_WRITE", "note": "puntero origen en DS:SI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "WRITE", "note": "byte cargado" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lodsw",
+    "mnemonic": "LODSW",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LODSW"
+    ],
+    "example": "cld\nlodsw",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LODSW",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lodsw#form.1",
+        "text": "LODSW",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lodsd",
+    "mnemonic": "LODSD",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "LODSD"
+    ],
+    "example": "cld\nlodsd",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LODSD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lodsd#form.1",
+        "text": "LODSD",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.stosb",
+    "mnemonic": "STOSB",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "STOSB",
+      "REP STOSB"
+    ],
+    "example": "cld\nrep stosb",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:STOSB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.stosb#form.1",
+        "text": "STOSB",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "READ", "note": "byte a almacenar" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.di", "sizes": [16], "access": "READ_WRITE", "note": "puntero destino en ES:DI" }
+        ]
+      },
+      {
+        "id": "x86.instr.stosb#form.2",
+        "text": "REP STOSB",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.cx", "sizes": [16], "access": "READ_WRITE", "note": "contador de repetición" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "READ", "note": "byte a almacenar" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.di", "sizes": [16], "access": "READ_WRITE", "note": "puntero destino en ES:DI" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.stosw",
+    "mnemonic": "STOSW",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "STOSW",
+      "REP STOSW"
+    ],
+    "example": "cld\nrep stosw",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:STOSW",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.stosw#form.1",
+        "text": "STOSW",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.stosw#form.2",
+        "text": "REP STOSW",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.stosd",
+    "mnemonic": "STOSD",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "STOSD",
+      "REP STOSD"
+    ],
+    "example": "cld\nrep stosd",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:STOSD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.stosd#form.1",
+        "text": "STOSD",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.stosd#form.2",
+        "text": "REP STOSD",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmpsb",
+    "mnemonic": "CMPSB",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CMPSB",
+      "REPE CMPSB"
+    ],
+    "example": "repe cmpsb",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMPSB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmpsb#form.1",
+        "text": "CMPSB",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.si", "sizes": [16], "access": "READ_WRITE", "note": "puntero origen 1 en DS:SI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.di", "sizes": [16], "access": "READ_WRITE", "note": "puntero origen 2 en ES:DI" }
+        ]
+      },
+      {
+        "id": "x86.instr.cmpsb#form.2",
+        "text": "REPE CMPSB",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.cx", "sizes": [16], "access": "READ_WRITE", "note": "contador de repetición" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.si", "sizes": [16], "access": "READ_WRITE", "note": "puntero origen 1 en DS:SI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.di", "sizes": [16], "access": "READ_WRITE", "note": "puntero origen 2 en ES:DI" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmpsw",
+    "mnemonic": "CMPSW",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CMPSW",
+      "REPE CMPSW"
+    ],
+    "example": "repe cmpsw",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMPSW",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmpsw#form.1",
+        "text": "CMPSW",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.cmpsw#form.2",
+        "text": "REPE CMPSW",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmpsd.string",
+    "mnemonic": "CMPSD",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "homonyms": [
+      "x86.instr.cmpsd.sse2"
+    ],
+    "syntaxVariants": [
+      "CMPSD",
+      "REPE CMPSD"
+    ],
+    "example": "repe cmpsd",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMPSD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmpsd.string#form.1",
+        "text": "CMPSD",
+        "minCpu": "80386",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.esi", "sizes": [32], "access": "READ_WRITE", "note": "puntero origen 1 en DS:ESI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.edi", "sizes": [32], "access": "READ_WRITE", "note": "puntero origen 2 en ES:EDI" }
+        ]
+      },
+      {
+        "id": "x86.instr.cmpsd.string#form.2",
+        "text": "REPE CMPSD",
+        "minCpu": "80386",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.ecx", "sizes": [32], "access": "READ_WRITE", "note": "contador de repetición" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.esi", "sizes": [32], "access": "READ_WRITE", "note": "puntero origen 1 en DS:ESI" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.edi", "sizes": [32], "access": "READ_WRITE", "note": "puntero origen 2 en ES:EDI" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.scasb",
+    "mnemonic": "SCASB",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "SCASB",
+      "REPNE SCASB"
+    ],
+    "example": "repne scasb",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SCASB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.scasb#form.1",
+        "text": "SCASB",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "READ", "note": "valor a comparar" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.di", "sizes": [16], "access": "READ_WRITE", "note": "puntero destino en ES:DI" }
+        ]
+      },
+      {
+        "id": "x86.instr.scasb#form.2",
+        "text": "REPNE SCASB",
+        "minCpu": "8086",
+        "implicitOperands": [
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.cx", "sizes": [16], "access": "READ_WRITE", "note": "contador de repetición" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.al", "sizes": [8], "access": "READ", "note": "valor a comparar" },
+          { "kind": "IMPLICIT_REG", "register": "x86.reg.di", "sizes": [16], "access": "READ_WRITE", "note": "puntero destino en ES:DI" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.scasw",
+    "mnemonic": "SCASW",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "SCASW",
+      "REPNE SCASW"
+    ],
+    "example": "repne scasw",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SCASW",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.scasw#form.1",
+        "text": "SCASW",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.scasw#form.2",
+        "text": "REPNE SCASW",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.scasd",
+    "mnemonic": "SCASD",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SCASD",
+      "REPNE SCASD"
+    ],
+    "example": "repne scasd",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SCASD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.scasd#form.1",
+        "text": "SCASD",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.scasd#form.2",
+        "text": "REPNE SCASD",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.movs",
+    "mnemonic": "MOVS",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "MOVS dest, src"
+    ],
+    "example": "movs byte ptr es:[di], byte ptr ds:[si]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:MOVS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.movs#form.1",
+        "text": "MOVS dest, src",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.cmps",
+    "mnemonic": "CMPS",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "CMPS dest, src"
+    ],
+    "example": "cmps byte ptr es:[di], byte ptr ds:[si]",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:CMPS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.cmps#form.1",
+        "text": "CMPS dest, src",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.lods",
+    "mnemonic": "LODS",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "LODS src"
+    ],
+    "example": "lods byte ptr ds:[si]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LODS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.lods#form.1",
+        "text": "LODS src",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.stos",
+    "mnemonic": "STOS",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "STOS dest"
+    ],
+    "example": "stos byte ptr es:[di]",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:STOS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.stos#form.1",
+        "text": "STOS dest",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.scas",
+    "mnemonic": "SCAS",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "SCAS dest"
+    ],
+    "example": "scas byte ptr es:[di]",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SCAS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.scas#form.1",
+        "text": "SCAS dest",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.rep",
+    "mnemonic": "REP",
+    "kind": "INSTRUCTION",
+    "family": "F-11",
+    "category": "STRINGS",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "REP",
+      "REPE",
+      "REPZ",
+      "REPNE",
+      "REPNZ"
+    ],
+    "example": "mov cx, 10\nrep movsb",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "REP",
+        "dialect": "COMMON",
+        "name": "REPE"
+      },
+      {
+        "targetMnemonic": "REP",
+        "dialect": "COMMON",
+        "name": "REPNE"
+      },
+      {
+        "targetMnemonic": "REP",
+        "dialect": "COMMON",
+        "name": "REPNZ"
+      },
+      {
+        "targetMnemonic": "REP",
+        "dialect": "COMMON",
+        "name": "REPZ"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:REP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.rep#form.1",
+        "text": "REP",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.rep#form.2",
+        "text": "REPE",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.rep#form.3",
+        "text": "REPZ",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.rep#form.4",
+        "text": "REPNE",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.rep#form.5",
+        "text": "REPNZ",
+        "minCpu": "8086"
+      }
+    ]
+  }
+]

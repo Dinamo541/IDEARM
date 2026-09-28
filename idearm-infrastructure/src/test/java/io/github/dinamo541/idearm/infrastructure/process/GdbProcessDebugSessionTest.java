@@ -19,10 +19,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GdbProcessDebugSessionTest {
 
+    /**
+     * GDB output that stays open, as a running GDB's does. An empty stream ends at once, which the session
+     * rightly treats as GDB having died.
+     */
+    private static java.io.InputStream liveGdb() {
+        try {
+            return new java.io.PipedInputStream(new java.io.PipedOutputStream());
+        } catch (java.io.IOException e) {
+            throw new java.io.UncheckedIOException(e);
+        }
+    }
+
     @Test
     void streamsOutputEvents() {
         var out = new ByteArrayOutputStream();
-        var in = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        var in = liveGdb();
         List<DebugEvent> events = new ArrayList<>();
 
         try (var session = new GdbProcessDebugSession(out, in, null, null, events::add, System.nanoTime())) {
@@ -40,7 +52,7 @@ class GdbProcessDebugSessionTest {
     @Test
     void linesThatAreNotMiAreTheProgramsOutput() {
         var out = new ByteArrayOutputStream();
-        var in = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        var in = liveGdb();
         List<DebugEvent> events = new ArrayList<>();
 
         try (var session = new GdbProcessDebugSession(out, in, null, null, events::add, System.nanoTime())) {
@@ -77,7 +89,7 @@ class GdbProcessDebugSessionTest {
     @Test
     void sendsNumberedCommands() {
         var out = new ByteArrayOutputStream();
-        var in = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        var in = liveGdb();
 
         try (var session = new GdbProcessDebugSession(out, in, null, null, e -> {}, System.nanoTime())) {
             CompletableFuture<GdbMiRecord> f1 = session.sendCommand("-gdb-set pagination off");
@@ -102,7 +114,7 @@ class GdbProcessDebugSessionTest {
     @Test
     void transitionsToPausedOnBreakpointHit() {
         var out = new ByteArrayOutputStream();
-        var in = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        var in = liveGdb();
         List<DebugEvent> events = new ArrayList<>();
 
         try (var session = new GdbProcessDebugSession(out, in, null, null, events::add, System.nanoTime())) {
@@ -124,7 +136,7 @@ class GdbProcessDebugSessionTest {
     @Test
     void prioritizesFullnameOverFileWhenAvailable() {
         var out = new ByteArrayOutputStream();
-        var in = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        var in = liveGdb();
         List<DebugEvent> events = new ArrayList<>();
 
         try (var session = new GdbProcessDebugSession(out, in, null, null, events::add, System.nanoTime())) {
@@ -149,7 +161,7 @@ class GdbProcessDebugSessionTest {
     @Test
     void parsesCallStackFrames() {
         var out = new ByteArrayOutputStream();
-        var in = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        var in = liveGdb();
 
         try (var session = new GdbProcessDebugSession(out, in, null, null, e -> {}, System.nanoTime())) {
             CompletableFuture<List<io.github.dinamo541.idearm.domain.debug.CallFrame>> future =
@@ -185,7 +197,7 @@ class GdbProcessDebugSessionTest {
     @Test
     void evaluatesExpression() {
         var out = new ByteArrayOutputStream();
-        var in = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        var in = liveGdb();
 
         try (var session = new GdbProcessDebugSession(out, in, null, null, e -> {}, System.nanoTime())) {
             CompletableFuture<java.util.Optional<String>> future =
@@ -226,7 +238,7 @@ class GdbProcessDebugSessionTest {
     @Test
     void readsMemoryAtAFlatAddress() {
         var out = new ByteArrayOutputStream();
-        var in = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        var in = liveGdb();
 
         try (var session = new GdbProcessDebugSession(out, in, null, null, e -> {}, System.nanoTime())) {
             var future = CompletableFuture.supplyAsync(() -> session.readMemory(0x7FF612345000L, 4));
@@ -240,6 +252,66 @@ class GdbProcessDebugSessionTest {
             assertTrue(view.isFlat());
             assertEquals(0x7FF612345000L, view.address());
             assertTrue(view.toHexDump().startsWith("00007FF612345000  48 65 6C 6C"), view.toHexDump());
+        }
+    }
+
+    /** GDB crashing left every waiting command hanging and ended the session as if the user had stopped it. */
+    @Test
+    void gdbEndingUnexpectedlyFailsWaitingCommandsAndEndsTheSession() throws Exception {
+        var gdbOutput = new java.io.PipedOutputStream();
+        var in = new java.io.PipedInputStream(gdbOutput);
+        try (var session = new GdbProcessDebugSession(new ByteArrayOutputStream(), in, null, null, e -> { },
+                System.nanoTime())) {
+            CompletableFuture<GdbMiRecord> waiting = session.sendCommand("-data-list-register-names");
+            gdbOutput.close();
+
+            var failure = assertThrows(java.util.concurrent.ExecutionException.class,
+                    () -> waiting.get(5, TimeUnit.SECONDS));
+            assertInstanceOf(java.io.IOException.class, failure.getCause());
+            ExitInfo exit = session.exit().get(5, TimeUnit.SECONDS);
+            assertFalse(exit.wasStopped());
+            assertEquals(SessionState.EXITED, session.state());
+        }
+    }
+
+    @Test
+    void stopEndsTheSessionAsStopped() throws Exception {
+        var gdbOutput = new java.io.PipedOutputStream();
+        var in = new java.io.PipedInputStream(gdbOutput);
+        var session = new GdbProcessDebugSession(new ByteArrayOutputStream(), in, null, null, e -> { },
+                System.nanoTime());
+        session.stop();
+        gdbOutput.close();
+
+        assertTrue(session.exit().get(5, TimeUnit.SECONDS).wasStopped());
+        assertEquals(SessionState.STOPPED, session.state());
+    }
+
+    /**
+     * A breakpoint toggled while the program ran was dropped, and one toggled while paused blocked the JavaFX
+     * thread for up to two seconds per breakpoint while GDB answered.
+     */
+    @Test
+    void breakpointsChangedWhileRunningAreSentAtTheNextStopWithoutBlocking() throws Exception {
+        var gdbOutput = new java.io.PipedOutputStream();
+        var in = new java.io.PipedInputStream(gdbOutput);
+        var commands = new ByteArrayOutputStream();
+        try (var session = new GdbProcessDebugSession(commands, in, null, null, e -> { }, System.nanoTime())) {
+            long start = System.nanoTime();
+            session.setBreakpoints(List.of(new io.github.dinamo541.idearm.domain.debug.Breakpoint("src/main.asm", 12, true)));
+            assertTrue(System.nanoTime() - start < 100_000_000L, "setBreakpoints must not wait for GDB");
+            assertFalse(commands.toString(StandardCharsets.UTF_8).contains("-break-insert"),
+                    "GDB refuses breakpoints while the program runs");
+
+            gdbOutput.write("*stopped,reason=\"signal-received\"\n".getBytes(StandardCharsets.UTF_8));
+            gdbOutput.flush();
+            long deadline = System.nanoTime() + 5_000_000_000L;
+            while (!commands.toString(StandardCharsets.UTF_8).contains("-break-insert")
+                    && System.nanoTime() < deadline) {
+                Thread.sleep(10);
+            }
+            assertTrue(commands.toString(StandardCharsets.UTF_8).contains("-break-insert \"src/main.asm:12\""),
+                    commands.toString(StandardCharsets.UTF_8));
         }
     }
 }

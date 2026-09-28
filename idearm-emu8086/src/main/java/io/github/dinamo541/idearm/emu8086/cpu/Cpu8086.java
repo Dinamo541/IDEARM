@@ -42,7 +42,8 @@ public final class Cpu8086 {
     private final CpuRegisters registers;
     private final RealModeMemory memory;
     private InterruptHandler interruptHandler;
-    private State state = State.RUNNING;
+    // Written by the emulator thread and by Stop on the IDE thread.
+    private volatile State state = State.RUNNING;
     private int exitCode = 0;
     private long instructionsExecuted = 0;
     private int callDepth = 0;

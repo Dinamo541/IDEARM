@@ -1,0 +1,456 @@
+[
+  {
+    "id": "concept.proc.stack_frame",
+    "titleEn": "Stack Frames, Procedures, and Recursion",
+    "titleEs": "Marcos de Pila, Procedimientos y Recursión",
+    "category": "PROCEDURES",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "reg.sp",
+      "reg.bp",
+      "inst.push",
+      "inst.pop",
+      "inst.call",
+      "inst.ret"
+    ],
+    "relatedInstructions": [
+      "CALL",
+      "RET",
+      "PUSH",
+      "POP",
+      "ENTER",
+      "LEAVE"
+    ],
+    "relatedConcepts": [
+      "concept.proc.calling_conventions"
+    ],
+    "summaryEn": "Creation of stable stack frames using BP, parameter passing offsets, return addresses, and recursive call chains.",
+    "summaryEs": "Construcción de marcos de pila estables con BP, desplazamientos de parámetros, dirección de retorno y cadenas recursivas.",
+    "contentEn": "The processor stack is a Last-In, First-Out (LIFO) structure tracked by register SP (Stack Pointer). Because SP dynamically changes with every PUSH and POP instruction, referencing function parameters directly via SP is volatile and error-prone.\n\n### The Standard Stack Frame\nTo create a stable reference frame for local variables and parameters, the base pointer register (BP) is used as an anchor:\n```asm\nsumar PROC\n    push  bp             ; Save caller's base pointer\n    mov   bp, sp         ; Anchor frame: BP now points to saved BP\n    ; [bp+0] = Saved BP\n    ; [bp+2] = Return address (pushed by CALL)\n    ; [bp+4] = Second parameter (pushed last)\n    ; [bp+6] = First parameter (pushed first)\n    push  bx             ; Preserve registers modified by callee\n\n    mov   ax, [bp+6]\n    mov   bx, [bp+4]\n    add   ax, bx         ; Result returned in AX\n\n    pop   bx             ; Restore callee-saved registers\n    pop   bp             ; Restore caller's BP frame\n    ret   4              ; Return and pop 4 bytes of caller arguments\nsumar ENDP\n```\n\n### Key Architectural Insights\n1. **`MOV BP, SP` creates the anchor**: SP moves with every subsequent PUSH; BP remains fixed throughout the procedure execution, allowing parameters and local variables to be accessed at fixed offsets.\n2. **Fixed Offsets**: In 16-bit near calls, the return address is 2 bytes and saved BP is 2 bytes, placing the first parameter at `[BP+4]` or `[BP+6]` depending on push order. In far calls, the return address occupies 4 bytes (CS:IP), shifting offsets by 2 bytes.\n3. **`RET n` is the convention, not the instruction**: Plain `RET` transfers control back to the caller; the immediate value `n` specifies that the procedure cleans up `n` bytes of parameters from the stack. If caller and callee disagree on who cleans up the stack, stack pointer imbalance leads to catastrophic faults.\n4. **Recursion**: Recursion requires no special mechanism because every CALL instantiates its own isolated stack frame. The chained saved BP pointers allow debuggers to perform stack backtraces.\n5. **ENTER and LEAVE**: Introduced in 80186, `ENTER n, 0` automates frame setup and `LEAVE` automates teardown. Note: opcode `ENTER` (C8h) is NOT implemented in IDEARM's integrated emu8086.",
+    "contentEs": "La pila del procesador es una estructura LIFO gestionada por el puntero SP (Stack Pointer). Puesto que SP cambia continuamente con cada instrucción PUSH y POP, acceder a los parámetros de una función midiendo distancias directamente desde SP resulta inestable y propenso a errores.\n\n### El Marco de Pila Estándar\nPara establecer un marco de referencia fijo para variables locales y parámetros, se utiliza el registro puntero base (BP):\n```asm\nsumar PROC\n    push  bp             ; Guarda el puntero base del invocador\n    mov   bp, sp         ; Fija el marco: a partir de aquí todo se mide desde BP\n    ; [bp+0] = BP guardado\n    ; [bp+2] = Dirección de retorno (empujada por CALL)\n    ; [bp+4] = Segundo parámetro (empujado en último lugar)\n    ; [bp+6] = Primer parámetro (empujado en primer lugar)\n    push  bx             ; Preserva registros modificados por la rutina\n\n    mov   ax, [bp+6]\n    mov   bx, [bp+4]\n    add   ax, bx         ; Resultado devuelto en AX\n\n    pop   bx             ; Restaura registros preservados\n    pop   bp             ; Restaura el BP del invocador\n    ret   4              ; Retorna y libera los 4 bytes de los parámetros\nsumar ENDP\n```\n\n### Principios Fundamentales\n1. **`MOV BP, SP` hace útil el marco**: SP se desplaza con cada PUSH adicional; BP permanece inmutable durante el cuerpo del procedimiento, permitiendo acceder a parámetros y variables locales con desplazamientos fijos.\n2. **Desplazamientos fijos y calculables**: En llamadas de 16 bits (near), la dirección de retorno ocupa 2 bytes y el BP guardado otros 2 bytes, ubicando los parámetros a partir de `[BP+4]`. En llamadas lejanas (far), la dirección de retorno ocupa 4 bytes (CS:IP), desplazando los parámetros en memoria.\n3. **`RET n` es la convención, no la instrucción**: La instrucción `RET` a secas transfiere el flujo de vuelta; el número inmediato `n` representa el acuerdo de que el procedimiento llamado es responsable de limpiar los argumentos de la pila. Si ambas partes limpian la pila o ninguna lo hace, el desequilibrio provocará fallos graves en puntos posteriores de la ejecución.\n4. **Recursión**: Funciona de manera natural sin requerir lógica especial, dado que cada llamada anidada crea su propio marco de pila independiente. La cadena de punteros BP guardados permite al depurador reconstruir la pila de llamadas (call stack backtrace).\n5. **ENTER y LEAVE**: Introducidas en el 80186, `ENTER n, 0` automatiza el prólogo y `LEAVE` el epílogo. Nota: la instrucción `ENTER` (opcode C8h) NO está implementada en el emulador integrado emu8086 de IDEARM.",
+    "sources": [
+      "Intel SDM Vol. 1 §6.2: Stacks",
+      "Irvine Assembly Language for x86 Processors §5.4: Stack Operations",
+      "Abel IBM PC Assembly Language and Programming §8.1: Procedures and Stack Frames"
+    ]
+  },
+  {
+    "id": "concept.proc.calling_conventions",
+    "titleEn": "Calling Conventions and Application Binary Interfaces (ABI)",
+    "titleEs": "Convenciones de Llamada e Interfaces Binarias de Aplicación (ABI)",
+    "category": "PROCEDURES",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "concept.proc.stack_frame"
+    ],
+    "relatedInstructions": [
+      "CALL",
+      "RET",
+      "SYSCALL"
+    ],
+    "relatedConcepts": [
+      "concept.proc.stack_frame"
+    ],
+    "summaryEn": "Standardized register roles, parameter passing orders, cleanup responsibilities, and ABI conventions across 16, 32, and 64-bit platforms.",
+    "summaryEs": "Roles de registros, orden de paso de parámetros, limpieza de pila y convenciones ABI en plataformas de 16, 32 y 64 bits.",
+    "contentEn": "The x86 processor architecture does not mandate a single calling convention; it only provides the hardware instructions CALL and RET. How parameters are passed, who cleans the stack, and which registers must be preserved are governed by calling conventions and Operating System Application Binary Interfaces (ABIs).\n\n### 1. 16-bit DOS Calling Conventions\n- **cdecl**: Arguments pushed right-to-left on stack. Caller cleans stack with `ADD SP, n`. Return value in AX (or DX:AX).\n- **Pascal**: Arguments pushed left-to-right. Callee cleans stack with `RET n`.\n- **DOS API**: Parameters passed directly in CPU registers (e.g. function number in AH, buffer in DS:DX).\n\n### 2. 32-bit x86 Conventions\n- **cdecl**: Standard C convention. Arguments on stack (right-to-left). Caller cleans stack (`ADD ESP, n`).\n- **stdcall**: Used by Win32 API. Arguments on stack (right-to-left). Callee cleans stack (`RET n`).\n\n### 3. Microsoft x64 ABI (win-pe64-console)\n- **Parameters**: First 4 integer arguments in `RCX`, `RDX`, `R8`, `R9`. First 4 floating-point arguments in `XMM0`–`XMM3`. Fifth and subsequent arguments on stack.\n- **Shadow Space**: Caller MUST allocate 32 bytes of shadow store (home space) on the stack before issuing CALL, even if fewer than 4 arguments are passed.\n- **Stack Alignment**: RSP must be 16-byte aligned before issuing CALL.\n- **Volatile (Scratch)**: `RAX`, `RCX`, `RDX`, `R8`–`R11`, `XMM0`–`XMM5` (may be modified by callee).\n- **Non-Volatile (Callee-saved)**: `RBX`, `RBP`, `RDI`, `RSI`, `RSP`, `R12`–`R15`, `XMM6`–`XMM15`.\n\n### 4. System V AMD64 psABI (linux-elf64-console)\n- **Parameters**: First 6 integer arguments in `RDI`, `RSI`, `RDX`, `RCX`, `R8`, `R9`. First 8 floating-point arguments in `XMM0`–`XMM7`.\n- **Red Zone**: A 128-byte region beyond RSP that leaf functions may use without moving RSP (cannot be touched by signals or interrupts in user space).\n- **Stack Alignment**: RSP must be 16-byte aligned prior to CALL.\n- **Syscalls**: Performed using the `SYSCALL` instruction with syscall number in `RAX`. Syscall arguments use `RDI`, `RSI`, `RDX`, `R10`, `R8`, `R9` (RCX and R11 are destroyed by CPU hardware during SYSCALL).",
+    "contentEs": "La arquitectura x86 no impone una única convención de llamada en la ISA; el hardware únicamente proporciona las instrucciones CALL y RET. La forma en que se transmiten los parámetros, quién limpia la pila y qué registros se preservan corresponden a acuerdos denominados convenciones de llamada y ABIs del sistema operativo.\n\n### 1. Convenciones en DOS de 16 bits\n- **cdecl**: Parámetros empujados en la pila de derecha a izquierda. El invocador limpia la pila con `ADD SP, n`. Retorno en AX o DX:AX.\n- **Pascal**: Parámetros empujados de izquierda a derecha. El procedimiento limpia la pila con `RET n`.\n- **API de DOS**: Paso de parámetros directamente en registros hardware (ej. función en AH, dirección en DS:DX).\n\n### 2. Convenciones de 32 bits\n- **cdecl**: Convención estándar de C. Parámetros en pila (derecha a izquierda). Limpia el invocador (`ADD ESP, n`).\n- **stdcall**: Empleada por la API de Win32. Parámetros en pila (derecha a izquierda). Limpia el procedimiento invocado (`RET n`).\n\n### 3. ABI Microsoft x64 (win-pe64-console)\n- **Parámetros**: Los 4 primeros enteros en `RCX`, `RDX`, `R8`, `R9`. Los 4 primeros flotantes en `XMM0`–`XMM3`. El quinto y siguientes en la pila.\n- **Espacio sombra (Shadow Space)**: El invocador DEBE reservar 32 bytes en la pila antes del CALL, incluso si la función tiene menos de 4 argumentos.\n- **Alineación de pila**: RSP debe estar alineado a 16 bytes antes de emitir CALL.\n- **Volátiles (modificables)**: `RAX`, `RCX`, `RDX`, `R8`–`R11`, `XMM0`–`XMM5`.\n- **No volátiles (preservados)**: `RBX`, `RBP`, `RDI`, `RSI`, `RSP`, `R12`–`R15`, `XMM6`–`XMM15`.\n\n### 4. psABI System V AMD64 (linux-elf64-console)\n- **Parámetros**: Los 6 primeros enteros en `RDI`, `RSI`, `RDX`, `RCX`, `R8`, `R9`. Los 8 primeros flotantes en `XMM0`–`XMM7`.\n- **Zona Roja (Red Zone)**: Región de 128 bytes por debajo de RSP que las funciones hoja pueden usar sin alterar RSP.\n- **Alineación de pila**: RSP alineado a 16 bytes antes de CALL.\n- **Llamadas al sistema (Syscalls)**: Se ejecutan con la instrucción `SYSCALL` cargando el número en `RAX`. Los argumentos usan `RDI`, `RSI`, `RDX`, `R10`, `R8`, `R9` (el procesador destruye RCX y R11 durante el tránsito a kernel).",
+    "sources": [
+      "Microsoft Learn: x64 Calling Convention (2026-05-21)",
+      "System V Application Binary Interface AMD64 Architecture Processor Supplement v1.0 §3.2",
+      "Irvine Assembly Language for x86 Processors §8.2: Stack Parameters"
+    ]
+  },
+  {
+    "id": "concept.mem.segmentation",
+    "titleEn": "Real-Mode and Protected-Mode Memory Segmentation",
+    "titleEs": "Segmentación de Memoria en Modo Real y Modo Protegido",
+    "category": "MEMORY",
+    "level": "BASIC",
+    "prerequisites": [
+      "reg.cs",
+      "reg.ds",
+      "reg.ss",
+      "reg.es"
+    ],
+    "relatedInstructions": [
+      "MOV",
+      "LDS",
+      "LES"
+    ],
+    "relatedConcepts": [
+      "concept.mem.segments_vs_sections"
+    ],
+    "summaryEn": "Real-mode 20-bit address generation (Segment*16 + Offset), descriptor tables in protected mode, and debunking the 4-segment misconception.",
+    "summaryEs": "Cálculo de dirección física de 20 bits en modo real (Segmento*16 + Desplazamiento), tablas descriptoras y clarificación del límite de segmentos.",
+    "contentEn": "In 8086 16-bit real mode, processor registers are 16 bits wide, but the external address bus has 20 pins, addressing up to 1 MB of memory (00000h–FFFFFh). To produce a 20-bit physical address from 16-bit registers, the CPU shifts the segment register value 4 bits to the left (multiplying by 16) and adds the 16-bit offset:\n\n$$\\text{Physical Address} = \\text{Segment} \\times 16 + \\text{Offset}$$\n\n### The 4-Segment Myth\n**A program is NOT limited to four segments.** This is a frequent misconception in introductory assembly courses. A program can define dozens of logical segments. The 8086 processor simply has four hardware segment registers (`CS`, `DS`, `SS`, `ES`) loaded at any single moment. The software can change `DS` or `ES` at any time to access other memory segments. In 80386+, two additional segment registers (`FS`, `GS`) were added.\n\n### Protected and Long Modes\nIn 32-bit protected mode, segment registers no longer store paragraph base addresses; instead, they contain 16-bit *Segment Selectors* that index into Global or Local Descriptor Tables (GDT/LDT). In 64-bit Long Mode, segmentation is mostly flattened, with CS, DS, ES, and SS bases forced to 0, providing a contiguous 64-bit linear address space, while FS and GS retain programmable base registers.",
+    "contentEs": "En el modo real de 16 bits del 8086, los registros internos son de 16 bits, pero el bus de direcciones externo posee 20 líneas físicas, direccionando hasta 1 MB de memoria (00000h–FFFFFh). Para generar una dirección física de 20 bits a partir de registros de 16 bits, el procesador desplaza el registro de segmento 4 bits a la izquierda (multiplica por 16) y suma el desplazamiento (offset):\n\n$$\\text{Dirección Física} = \\text{Segmento} \\times 16 + \\text{Desplazamiento}$$\n\n### El Mito de los Cuatro Segmentos\n**Un programa NO está limitado a cuatro segmentos.** Esta es una confusión pedagógica recurrente en cursos iniciales. Un programa puede definir decenas de segmentos lógicos de datos, código o pila. Lo que está limitado a cuatro son los registros de segmento simultáneamente cargados en el procesador (`CS`, `DS`, `SS`, `ES`). El programa puede recargar `DS` o `ES` dinámicamente en cualquier momento para apuntar a otros segmentos de la memoria. A partir del 80386 se incorporaron además `FS` y `GS`.\n\n### Modo Protegido y Modo Largo\nEn modo protegido de 32 bits, los registros de segmento dejan de contener direcciones de párrafo y pasan a ser *selectores de segmento* que indexan tablas descriptoras (GDT y LDT). En modo largo de 64 bits, la segmentación se aplana casi en su totalidad (las bases de CS, DS, ES y SS se fuerzan por hardware a 0), proporcionando un espacio lineal plano, conservando únicamente FS y GS bases programables.",
+    "sources": [
+      "Intel SDM Vol. 1 §3.4.2: Segment Registers",
+      "Abel IBM PC Assembly Language and Programming §2.3: Segment Registers",
+      "Stallings Computer Organization and Architecture §11.2: Addressing"
+    ]
+  },
+  {
+    "id": "concept.mem.segments_vs_sections",
+    "titleEn": "CPU Segments, Assembler Directives, and Object Sections",
+    "titleEs": "Segmentos de CPU, Directivas de Ensamblador y Secciones de Objeto",
+    "category": "MEMORY",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "concept.mem.segmentation"
+    ],
+    "relatedInstructions": [
+      "MOV"
+    ],
+    "relatedConcepts": [
+      "concept.mem.segmentation"
+    ],
+    "summaryEn": "Comparing CPU hardware segmentation, source-level segment directives, linker object sections, and executable binary formats without false equivalences.",
+    "summaryEs": "Comparativa entre segmentación hardware de CPU, directivas de fuente, secciones del enlazador y formatos ejecutables sin falsas equivalencias.",
+    "contentEn": "Computer architecture literature often uses the words 'segment' and 'section' loosely. In professional software development, they denote three distinct concepts that must not be conflated:\n\n1. **CPU Hardware Segments**: Dedicated architectural registers (`CS`, `DS`, `SS`, `ES`, `FS`, `GS`) and hardware segmentation units built into the processor.\n2. **Assembler Directives**: Syntax keywords in source code (`SEGMENT`/`ENDS`, `.code`, `.data`, `section .text`, `GROUP`) that instruct the assembler how to organize emitted bytes into named logical groups.\n3. **Object File Sections**: Logical containers (`.text`, `.data`, `.bss`, `.rdata`) produced in compiled object files (OBJ, O, ELF, PE) that the linker relocates, merges, and maps into executable file headers.\n\n### The Build and Execution Cycle\n- **Source Code (`.asm`)**: Contains assembler directives dividing declarations into sections.\n- **Object Code (`.obj` / `.o`)**: Contains assembled machine code organized in relocatable sections with symbol and relocation tables.\n- **Linker Execution**: Collects object sections across multiple modules, resolves external symbol references, and produces the executable file.\n- **Executable Format**: Target-specific executable containers: DOS MZ (`.exe`), Windows PE (`.exe`), or Linux ELF (`elf64`).\n\n### Note on COM Flat Images\nNotice that **COM is NOT a multi-segment executable format or a standalone supported target profile** in IDEARM; a DOS `.com` file is a flat raw memory image without relocations or headers, loaded directly at CS:0100h into a single shared 64 KB segment.",
+    "contentEs": "La literatura técnica a menudo emplea los términos 'segmento' y 'sección' de manera imprecisa. En el desarrollo profesional corresponden a tres niveles arquitectónicos diferenciados que no deben presentarse como intercambiables:\n\n1. **Segmentos Hardware de CPU**: Registros físicos del procesador (`CS`, `DS`, `SS`, `ES`, `FS`, `GS`) y unidades de cálculo de direcciones de la CPU.\n2. **Directivas de Ensamblador**: Palabras clave en el código fuente (`SEGMENT`/`ENDS`, `.code`, `.data`, `section .text`, `GROUP`) que instruyen al ensamblador sobre cómo agrupar instrucciones y datos.\n3. **Secciones de Objeto y Enlazador**: Bloques lógicos (`.text`, `.data`, `.bss`, `.rdata`) estructurados dentro de ficheros objeto (OBJ, O, ELF, PE) que el enlazador fusiona, reubica y escribe en las cabeceras del binario.\n\n### El Ciclo Fuente → Objeto → Enlace → Carga\n- **Código fuente (`.asm`)**: Contiene directivas que delimitan las áreas de código y datos.\n- **Fichero objeto (`.obj` / `.o`)**: Contiene código máquina reubicable estructurado en secciones, con tablas de símbolos y reubicaciones.\n- **Enlazador (Linker)**: Agrupa secciones compatibles de distintos módulos, resuelve dependencias externas y emite el ejecutable final.\n- **Formato Ejecutable**: Contenedores específicos del perfil: DOS MZ (`.exe`), Windows PE (`.exe`) o Linux ELF (`elf64`).\n\n### Aclaración sobre el Formato COM\nNótese que **el formato COM NO es un ejecutable multisegmento ni un perfil de proyecto soportado** de manera independiente en IDEARM; un binario `.com` de DOS es una imagen plana de memoria sin cabeceras ni tabla de reubicación, cargada íntegramente en `CS:0100h` dentro de un único segmento compartido de 64 KB.",
+    "sources": [
+      "Intel SDM Vol. 3A §3.2: Using Segments",
+      "Irvine Assembly Language for x86 Processors §3.4: Defining Segments",
+      "Microsoft PE and COFF Specification §3.1: Section Headers",
+      "Tool Interface Standard (TIS) Executable and Linking Format (ELF) Specification §1.2"
+    ]
+  },
+  {
+    "id": "concept.pair.mov_vs_lea",
+    "titleEn": "Pair Comparison: MOV vs LEA",
+    "titleEs": "Comparativa de Parejas: MOV frente a LEA",
+    "category": "INSTRUCTION_PAIRS",
+    "level": "BASIC",
+    "prerequisites": [
+      "inst.mov",
+      "inst.lea",
+      "concept.ea"
+    ],
+    "relatedInstructions": [
+      "MOV",
+      "LEA"
+    ],
+    "relatedConcepts": [
+      "concept.ea",
+      "concept.mem.addressing_modes"
+    ],
+    "summaryEn": "Comparing MOV (memory contents read/write) vs LEA (effective address calculation without memory access).",
+    "summaryEs": "Comparativa entre MOV (lectura/escritura de contenidos de memoria) y LEA (cálculo de dirección efectiva sin tocar memoria).",
+    "contentEn": "Although both MOV and LEA accept memory-like operand syntax with brackets `[...]`, their fundamental operation is completely different:\n\n### 1. Fundamental Distinction\n- **`MOV reg, [mem]`**: Dereferences memory. The CPU computes the effective address and then performs a memory read across the data bus, loading the value stored at that address into `reg`.\n- **`LEA reg, [mem]`**: Load Effective Address. The CPU computes the effective address using its address generation unit (AGU) and places the calculated address directly into `reg`, **without performing any memory read or accessing the bus**.\n\n### 2. Concrete Example\n```asm\narray   DW 10, 20, 30\n\nmov bx, [array]     ; BX = 10 (value stored at array)\nlea bx, [array]     ; BX = offset of array (e.g. 0004h)\nmov bx, offset array; BX = offset of array (assembler constant)\n```\n\n### 3. Performance Trick: Fast Pointer Arithmetic\nBecause LEA computes `Base + Index * Scale + Displacement` entirely in the address ALU without modifying CPU flags, compilers frequently use LEA for arithmetic:\n```asm\nlea eax, [ebx + ecx*4 + 12] ; Computes EAX = EBX + 4*ECX + 12 in 1 cycle!\n```\nNeither `MOV` nor `LEA` modifies any condition flags.",
+    "contentEs": "Aunque tanto MOV como LEA aceptan corchetes `[...]` en sus operandos, su operación arquitectónica es completamente distinta:\n\n### 1. Distinción Fundamental\n- **`MOV reg, [mem]`**: Desreferencia memoria. El procesador calcula la dirección efectiva y realiza una lectura física a través del bus de datos, cargando el contenido almacenado en memoria dentro de `reg`.\n- **`LEA reg, [mem]`**: Carga de Dirección Efectiva (Load Effective Address). El procesador calcula la dirección utilizando la unidad generadora de direcciones (AGU) y deposita el resultado del cálculo en `reg`, **sin acceder a la memoria ni tocar el bus de datos**.\n\n### 2. Ejemplo Práctico\n```asm\narray   DW 10, 20, 30\n\nmov bx, [array]     ; BX = 10 (contenido almacenado en array)\nlea bx, [array]     ; BX = desplazamiento de array (ej. 0004h)\nmov bx, offset array; BX = desplazamiento fijo (calculado al ensamblar)\n```\n\n### 3. Uso Aritmético de LEA\nPuesto que LEA evalúa la expresión `Base + Índice * Escala + Desplazamiento` en un solo ciclo sin alterar ninguna bandera de FLAGS, los compiladores la utilizan comúnmente para sumas y multiplicaciones rápidas:\n```asm\nlea eax, [ebx + ecx*4 + 12] ; Calcula EAX = EBX + 4*ECX + 12 en 1 ciclo\n```\nNi `MOV` ni `LEA` modifican ninguna bandera del registro de estado.",
+    "sources": [
+      "Intel SDM Vol. 2A: MOV and LEA",
+      "Irvine Assembly Language for x86 Processors §4.3: LEA Instruction"
+    ]
+  },
+  {
+    "id": "concept.pair.cmp_vs_test",
+    "titleEn": "Pair Comparison: CMP vs TEST",
+    "titleEs": "Comparativa de Parejas: CMP frente a TEST",
+    "category": "INSTRUCTION_PAIRS",
+    "level": "BASIC",
+    "prerequisites": [
+      "inst.cmp",
+      "inst.test"
+    ],
+    "relatedInstructions": [
+      "CMP",
+      "TEST",
+      "SUB",
+      "AND"
+    ],
+    "relatedConcepts": [
+      "concept.flags.arithmetic"
+    ],
+    "summaryEn": "Comparing CMP (implicit subtraction, setting relation flags) vs TEST (implicit bitwise AND, setting mask flags).",
+    "summaryEs": "Comparativa entre CMP (resta implícita para relaciones de orden) y TEST (conjunción lógica AND implícita para máscaras).",
+    "contentEn": "Both CMP and TEST evaluate their operands, update the CPU flags, and discard the computation result without modifying either operand. Their underlying operation and flag semantics differ significantly:\n\n### 1. Underlying Operation\n- **`CMP dest, src`**: Performs an implicit subtraction `dest - src`. Sets arithmetic flags: `CF` (carry/borrow), `OF` (signed overflow), `ZF` (zero/equality), `SF` (sign), `AF`, and `PF`.\n- **`TEST dest, src`**: Performs an implicit bitwise logical `dest AND src`. Always clears `CF = 0` and `OF = 0`, while updating `ZF`, `SF`, and `PF` (AF is undefined).\n\n### 2. Intended Pedagogical Use\n- Use **`CMP`** for relative ordering and equality checks prior to conditional jumps (`JE`, `JNE`, `JA`, `JB`, `JG`, `JL`).\n- Use **`TEST`** to check if specific bits are set (using a bitmask), or to check if a register is zero or negative (`test eax, eax`).",
+    "contentEs": "Tanto CMP como TEST evalúan sus operandos, actualizan las banderas de la CPU y descartan el resultado sin alterar ninguno de los operandos. Sin embargo, su operación matemática y sus banderas son radicalmente diferentes:\n\n### 1. Operación Subyacente\n- **`CMP dest, src`**: Ejecuta una resta implícita `dest - src`. Actualiza las banderas aritméticas: `CF` (préstamo/acarreo), `OF` (desbordamiento con signo), `ZF` (igualdad/cero), `SF` (signo), `AF` y `PF`.\n- **`TEST dest, src`**: Ejecuta una conjunción lógica de bits implícita `dest AND src`. Pone siempre a cero `CF = 0` y `OF = 0`, actualizando `ZF`, `SF` y `PF` (dejando AF indefinida).\n\n### 2. Cuándo Usar Cada Una\n- Se emplea **`CMP`** para comparaciones de orden y magnitud antes de saltos condicionales (`JE`, `JNE`, `JA`, `JB`, `JG`, `JL`).\n- Se emplea **`TEST`** para comprobar bits individuales con máscaras, o para comprobar si un registro es cero o negativo (`test eax, eax`).",
+    "sources": [
+      "Intel SDM Vol. 2A: CMP and TEST",
+      "Irvine Assembly Language for x86 Processors §6.2: Boolean and Comparison Instructions"
+    ]
+  },
+  {
+    "id": "concept.pair.mul_vs_imul",
+    "titleEn": "Pair Comparison: MUL vs IMUL",
+    "titleEs": "Comparativa de Parejas: MUL frente a IMUL",
+    "category": "INSTRUCTION_PAIRS",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "inst.mul",
+      "inst.imul"
+    ],
+    "relatedInstructions": [
+      "MUL",
+      "IMUL"
+    ],
+    "relatedConcepts": [
+      "concept.pair.div_vs_idiv"
+    ],
+    "summaryEn": "Comparing unsigned multiplication (MUL) vs signed multiplication (IMUL with 1, 2, and 3 operand forms).",
+    "summaryEs": "Comparativa entre multiplicación sin signo (MUL) y con signo (IMUL en formas de 1, 2 y 3 operandos).",
+    "contentEn": "Multiplication on x86 separates signed and unsigned arithmetic into two instructions:\n\n### 1. Unsigned Multiplication (`MUL`)\n- Always 1 operand (`MUL r/m`). The other operand is implicitly the accumulator register (`AL`, `AX`, `EAX`, `RAX`).\n- Double-width product:\n  - Byte: `AL * r/m8 -> AX`\n  - Word: `AX * r/m16 -> DX:AX`\n  - Dword: `EAX * r/m32 -> EDX:EAX`\n- **Flags**: `CF = OF = 1` if the upper half of the product is non-zero; otherwise `CF = OF = 0`.\n\n### 2. Signed Multiplication (`IMUL`)\n- Supports 1, 2, and 3-operand forms:\n  - 1 operand: `IMUL r/m` (signed double-width product into accumulator pair).\n  - 2 operands (80386+): `IMUL reg, r/m` (`reg = reg * r/m`, truncated to reg width).\n  - 3 operands (80186+): `IMUL reg, r/m, imm` (`reg = r/m * imm`, truncated to reg width).\n- **Flags**: `CF = OF = 1` if the product exceeds the storage capacity of the destination register (i.e. upper bits are not a pure sign extension of the lower bits).",
+    "contentEs": "La multiplicación en x86 separa rigurosamente la aritmética con y sin signo:\n\n### 1. Multiplicación sin signo (`MUL`)\n- Siempre toma 1 solo operando explícito (`MUL r/m`). El otro es implícitamente el acumulador (`AL`, `AX`, `EAX`, `RAX`).\n- Produce un resultado de doble ancho:\n  - Byte: `AL * r/m8 -> AX`\n  - Palabra: `AX * r/m16 -> DX:AX`\n  - Doble palabra: `EAX * r/m32 -> EDX:EAX`\n- **Banderas**: `CF = OF = 1` si la mitad superior del producto contiene dígitos significativos (distinta de cero); en caso contrario `CF = OF = 0`.\n\n### 2. Multiplicación con signo (`IMUL`)\n- Soporta formas de 1, 2 y 3 operandos:\n  - 1 operando: `IMUL r/m` (producto con signo de doble ancho en acumulador).\n  - 2 operandos (80386+): `IMUL reg, r/m` (`reg = reg * r/m`, truncado al ancho del registro).\n  - 3 operandos (80186+): `IMUL reg, r/m, imm` (`reg = r/m * imm`, truncado al ancho del registro).\n- **Banderas**: `CF = OF = 1` si el resultado con signo no cabe en la mitad baja (es decir, la mitad alta no es una pura extensión de signo de la baja).",
+    "sources": [
+      "Intel SDM Vol. 2A: MUL and IMUL",
+      "Irvine Assembly Language for x86 Processors §7.4: Multiplication and Division"
+    ]
+  },
+  {
+    "id": "concept.pair.div_vs_idiv",
+    "titleEn": "Pair Comparison: DIV vs IDIV and Dividend Preparation",
+    "titleEs": "Comparativa de Parejas: DIV frente a IDIV y Preparación del Dividendo",
+    "category": "INSTRUCTION_PAIRS",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "inst.div",
+      "inst.idiv",
+      "inst.cbw",
+      "inst.cwd"
+    ],
+    "relatedInstructions": [
+      "DIV",
+      "IDIV",
+      "CBW",
+      "CWD",
+      "CDQ",
+      "CQO"
+    ],
+    "relatedConcepts": [
+      "concept.pair.mul_vs_imul"
+    ],
+    "summaryEn": "Comparing unsigned division (DIV) vs signed division (IDIV), dividend setup (CBW/CWD/CDQ), and divide error exception (#DE).",
+    "summaryEs": "Comparativa entre división sin signo (DIV) y con signo (IDIV), preparación con CBW/CWD/CDQ y excepción de error de división (#DE).",
+    "contentEn": "Division on x86 requires the dividend to be twice the width of the divisor. Failure to properly prepare the high-order bits of the dividend is one of the most common student programming bugs.\n\n### 1. Register Layout\n- Byte divisor (`r/m8`): Dividend in `AX` -> Quotient in `AL`, Remainder in `AH`.\n- Word divisor (`r/m16`): Dividend in `DX:AX` -> Quotient in `AX`, Remainder in `DX`.\n- Dword divisor (`r/m32`): Dividend in `EDX:EAX` -> Quotient in `EAX`, Remainder in `EDX`.\n\n### 2. Preparing the Dividend\n- **Unsigned (`DIV`)**: Clear the upper register to zero:\n  ```asm\n  mov ax, [dividendo]\n  xor dx, dx            ; Clear DX:AX for unsigned word division\n  div [divisor]\n  ```\n- **Signed (`IDIV`)**: Sign-extend the value into the high register:\n  - Byte to Word: `CBW` (Convert Byte to Word: sign-extends AL into AX)\n  - Word to Dword: `CWD` (Convert Word to Dword: sign-extends AX into DX:AX)\n  - Dword to Qword: `CDQ` (sign-extends EAX into EDX:EAX)\n  ```asm\n  mov ax, [dividendo_con_signo]\n  cwd                   ; Sign-extend AX into DX:AX\n  idiv [divisor_con_signo]\n  ```\n\n### 3. Divide Error Exception (#DE / INT 0)\nThe CPU automatically triggers a hardware divide error exception (`#DE` / Interrupt 0) if:\n1. The divisor is zero (`divisor == 0`).\n2. The quotient does not fit in the destination register (quotient overflow).",
+    "contentEs": "La división en x86 exige que el dividendo tenga el doble de ancho que el divisor. La falta de preparación adecuada de la mitad superior del dividendo es una de las causas más frecuentes de fallo en programas de estudiantes.\n\n### 1. Estructura de Registros\n- Divisor byte (`r/m8`): Dividendo en `AX` -> Cociente en `AL`, Resto en `AH`.\n- Divisor palabra (`r/m16`): Dividendo en `DX:AX` -> Cociente en `AX`, Resto en `DX`.\n- Divisor doble palabra (`r/m32`): Dividendo en `EDX:EAX` -> Cociente en `EAX`, Resto en `EDX`.\n\n### 2. Preparación Obligatoria del Dividendo\n- **División sin signo (`DIV`)**: La parte alta debe ponerse a cero:\n  ```asm\n  mov ax, [dividendo]\n  xor dx, dx            ; Limpia DX para formar DX:AX sin signo\n  div [divisor]\n  ```\n- **División con signo (`IDIV`)**: La parte alta debe ser la extensión de signo exacta de la parte baja:\n  - Byte a Palabra: `CBW` (Convierte Byte a Palabra: extiende el signo de AL en AX).\n  - Palabra a Doble: `CWD` (Convierte Palabra a Doble: extiende el signo de AX en DX:AX).\n  - Doble a Cuádruple: `CDQ` (extiende el signo de EAX en EDX:EAX).\n  ```asm\n  mov ax, [dividendo_con_signo]\n  cwd                   ; Extiende el signo de AX a DX:AX\n  idiv [divisor_con_signo]\n  ```\n\n### 3. Excepción de Error de División (#DE / INT 0)\nEl procesador lanza automáticamente una excepción hardware de error de división (`#DE`, vector de interrupción 0) si:\n1. El divisor es cero (`divisor == 0`).\n2. El cociente no cabe en el registro destino (desbordamiento de división).",
+    "sources": [
+      "Intel SDM Vol. 2A: DIV and IDIV",
+      "Irvine Assembly Language for x86 Processors §7.4: Multiplication and Division",
+      "Abel IBM PC Assembly Language and Programming §12.3: Division"
+    ]
+  },
+  {
+    "id": "concept.fund.binary_numbers",
+    "titleEn": "Binary Representation, Hexadecimal, and Bit Organization",
+    "titleEs": "Representación Binaria, Hexadecimal y Organización de Bits",
+    "category": "FUNDAMENTALS",
+    "level": "BASIC",
+    "prerequisites": [],
+    "relatedInstructions": [
+      "MOV",
+      "AND",
+      "OR",
+      "XOR",
+      "SHL",
+      "SHR"
+    ],
+    "relatedConcepts": [
+      "concept.fund.twos_complement",
+      "concept.fund.boolean_logic_masks"
+    ],
+    "summaryEn": "Positional number systems, bit numbering (LSB/MSB), nibbles, bytes, words, dwords, and seamless hexadecimal conversions.",
+    "summaryEs": "Sistemas posicionales, numeración de bits (LSB/MSB), cuartetos (nibbles), bytes, palabras, dobles y conversión hexadecimal.",
+    "contentEn": "All digital computers represent data using binary digits (bits: 0 and 1). Understanding bit hierarchies is fundamental to assembly programming:\n\n### 1. Data Sizes\n- **Bit (b)**: Smallest unit of storage (0 or 1).\n- **Nibble**: 4 bits (values 0–15, exactly 1 hexadecimal digit `0`–`F`).\n- **Byte (B)**: 8 bits (2 hex digits, 00h–FFh / 0–255 unsigned).\n- **Word (W)**: 16 bits (4 hex digits, 2 bytes, 0000h–FFFFh / 0–65535 unsigned).\n- **Doubleword (DWORD)**: 32 bits (8 hex digits, 4 bytes, 00000000h–FFFFFFFFh).\n- **Quadword (QWORD)**: 64 bits (16 hex digits, 8 bytes).\n\n### 2. Bit Numbering and Significance\nIn x86 architecture, bits are numbered from right to left starting at 0:\n- **Bit 0**: Least Significant Bit (LSB).\n- **Bit $N-1$**: Most Significant Bit (MSB), which represents the sign in two's complement.",
+    "contentEs": "Los ordenadores digitales representan toda la información mediante dígitos binarios (bits: 0 y 1). Comprender la jerarquía de tamaños es imprescindible para programar en ensamblador:\n\n### 1. Jerarquía de Tamaños de Datos\n- **Bit (b)**: Unidad mínima de información (0 o 1).\n- **Cuarteto (Nibble)**: 4 bits (valores 0–15, representados exactamente por 1 dígito hexadecimal `0`–`F`).\n- **Byte (B)**: 8 bits (2 dígitos hexadecimales, 00h–FFh / 0–255 sin signo).\n- **Palabra (Word)**: 16 bits (4 dígitos hexadecimales, 2 bytes, 0000h–FFFFh / 0–65535 sin signo).\n- **Doble Palabra (DWORD)**: 32 bits (8 dígitos hexadecimales, 4 bytes, 00000000h–FFFFFFFFh).\n- **Cuádruple Palabra (QWORD)**: 64 bits (16 dígitos hexadecimales, 8 bytes).\n\n### 2. Numeración y Significancia de Bits\nEn la arquitectura x86 los bits se numeran de derecha a izquierda comenzando en 0:\n- **Bit 0**: Bit Menos Significativo (LSB, Least Significant Bit).\n- **Bit $N-1$**: Bit Más Significativo (MSB, Most Significant Bit), que determina el signo en complemento a dos.",
+    "sources": [
+      "Stallings Computer Organization and Architecture §9.1: Number Systems",
+      "Mano Digital Design §1.2: Binary Numbers",
+      "Irvine Assembly Language for x86 Processors §1.2: Data Representation"
+    ]
+  },
+  {
+    "id": "concept.fund.twos_complement",
+    "titleEn": "Two's Complement and Sign Extension",
+    "titleEs": "Complemento a Dos y Extensión de Signo",
+    "category": "FUNDAMENTALS",
+    "level": "BASIC",
+    "prerequisites": [
+      "concept.fund.binary_numbers"
+    ],
+    "relatedInstructions": [
+      "NEG",
+      "CBW",
+      "CWD",
+      "CWDE",
+      "CDQ",
+      "MOVSX"
+    ],
+    "relatedConcepts": [
+      "concept.fund.carry_vs_overflow"
+    ],
+    "summaryEn": "Signed integer representation via two's complement, range calculations, arithmetic negation (NEG), and sign extension instructions.",
+    "summaryEs": "Representación de enteros con signo en complemento a dos, rangos, negación aritmética (NEG) e instrucciones de extensión de signo.",
+    "contentEn": "Two's complement is the standard encoding for signed integers in modern computing. It allows addition and subtraction circuits to operate identically regardless of whether operands are signed or unsigned.\n\n### 1. Mathematical Definition\nTo negate an $N$-bit number in two's complement:\n1. Invert all bits (one's complement / NOT).\n2. Add 1 to the result.\n$$\\text{NEG}(X) = \\sim X + 1$$\n\n### 2. Ranges for Common Integer Sizes\n- 8-bit Byte: $-128$ (`80h`) to $+127$ (`7Fh`).\n- 16-bit Word: $-32,768$ (`8000h`) to $+32,767$ (`7FFFh`).\n- 32-bit Dword: $-2,147,483,648$ to $+2,147,483,647$.\n\n### 3. Sign Extension Instructions\nWhen copying a smaller signed integer into a larger register, the sign bit (MSB) must be replicated across all higher bits:\n- `CBW`: Extends sign of AL into AH (making AX).\n- `CWD`: Extends sign of AX into DX (making DX:AX).\n- `CWDE`: Extends sign of AX into EAX.\n- `CDQ`: Extends sign of EAX into EDX (making EDX:EAX).\n- `MOVSX reg, r/m`: General sign-extension move (80386+).",
+    "contentEs": "El complemento a dos es la codificación estándar para enteros con signo en computación moderna. Su gran ventaja es que permite utilizar los mismos circuitos de suma y resta hardware independientemente de si los números se interpretan con o sin signo.\n\n### 1. Definición Matemática\nPara calcular el opuesto de un número de $N$ bits en complemento a dos:\n1. Invertir todos los bits (complemento a uno mediante `NOT`).\n2. Sumar 1 al resultado.\n$$\\text{NEG}(X) = \\sim X + 1$$\n\n### 2. Rangos para Tamaños Estándar\n- Byte (8 bits): $-128$ (`80h`) a $+127$ (`7Fh`).\n- Palabra (16 bits): $-32.768$ (`8000h`) a $+32.767$ (`7FFFh`).\n- Doble palabra (32 bits): $-2.147.483.648$ a $+2.147.483.647$.\n\n### 3. Instrucciones de Extensión de Signo\nAl transferir un entero con signo a un registro de mayor tamaño, el bit de signo (MSB) debe replicarse en todos los bits superiores para conservar el valor matemático:\n- `CBW`: Convierte Byte a Palabra (extiende AL en AX).\n- `CWD`: Convierte Palabra a Doble (extiende AX en DX:AX).\n- `CWDE`: Extiende AX en EAX (32 bits).\n- `CDQ`: Extiende EAX en EDX:EAX (64 bits).\n- `MOVSX reg, r/m`: Instrucción general de movimiento con extensión de signo (80386+).",
+    "sources": [
+      "Stallings Computer Organization and Architecture §9.3: Integer Representation",
+      "Irvine Assembly Language for x86 Processors §1.2: Integer Storage Formats",
+      "Mano Digital Design §1.6: Signed Binary Numbers"
+    ]
+  },
+  {
+    "id": "concept.fund.carry_vs_overflow",
+    "titleEn": "Carry Flag vs Overflow Flag: Unsigned vs Signed Arithmetic",
+    "titleEs": "Bandera de Acarreo (CF) frente a Desbordamiento (OF): Aritmética Sin Signo vs Con Signo",
+    "category": "FUNDAMENTALS",
+    "level": "BASIC",
+    "prerequisites": [
+      "concept.fund.twos_complement"
+    ],
+    "relatedInstructions": [
+      "ADD",
+      "ADC",
+      "SUB",
+      "SBB",
+      "CMP",
+      "JC",
+      "JO"
+    ],
+    "relatedConcepts": [
+      "concept.fund.twos_complement",
+      "concept.pair.cmp_vs_test"
+    ],
+    "summaryEn": "Dissecting CF (unsigned borrow/carry outside register width) vs OF (signed two's complement sign corruption) with identical binary operand examples.",
+    "summaryEs": "Distinción entre CF (acarreo o préstamo en aritmética sin signo) y OF (desbordamiento de signo en complemento a dos) con ejemplos binarios idénticos.",
+    "contentEn": "The CPU ALU executes identical bitwise addition and subtraction irrespective of whether the programmer intends signed or unsigned numbers. To support both interpretations, it updates two separate condition flags simultaneously:\n\n### 1. Carry Flag (CF)\n- **Meaning**: Indicates that the result of an **unsigned** operation exceeds the capacity of the destination register (carry out of MSB) or required a borrow during subtraction.\n- **Conditional Jumps**: Used by `JC`, `JNC`, `JA`, `JAE`, `JB`, `JBE`.\n\n### 2. Overflow Flag (OF)\n- **Meaning**: Indicates that the result of a **signed** operation exceeds the positive or negative range of two's complement (e.g. adding two positive numbers yields a negative result, or adding two negative numbers yields a positive result).\n- **Conditional Jumps**: Used by `JO`, `JNO`, `JG`, `JGE`, `JL`, `JLE`.\n\n### 3. Demonstrating CF vs OF with the Same Operands\nConsider 8-bit addition with operands `FFh` (-1 signed, 255 unsigned) and `01h` (+1):\n```asm\nmov al, 0FFh\nadd al, 01h     ; AL becomes 00h\n; CF = 1: Unsigned carry occurred (255 + 1 = 256 > 255)\n; OF = 0: No signed overflow (-1 + 1 = 0, which fits perfectly in 8-bit signed range!)\n```\nConversely, consider `7Fh` (+127 signed) and `01h` (+1):\n```asm\nmov al, 7Fh\nadd al, 01h     ; AL becomes 80h (-128 signed)\n; CF = 0: No unsigned carry (127 + 1 = 128 <= 255)\n; OF = 1: Signed overflow! (+127 + 1 = +128, which exceeds the +127 signed limit and corrupted the sign bit to 1!)\n```",
+    "contentEs": "La unidad aritmético-lógica (ALU) del procesador realiza exactamente la misma operación de bits independientemente de si el programador considera los números con signo o sin signo. Para permitir ambas interpretaciones, el procesador actualiza dos banderas de estado independientes simultáneamente:\n\n### 1. Bandera de Acarreo (CF - Carry Flag)\n- **Significado**: Señala que una operación **sin signo** ha generado un acarreo que desborda el ancho del registro (bit que sale del MSB) o ha requerido un préstamo en una resta.\n- **Saltos condicionales**: Empleada por `JC`, `JNC`, `JA`, `JAE`, `JB`, `JBE`.\n\n### 2. Bandera de Desbordamiento (OF - Overflow Flag)\n- **Significado**: Señala que una operación **con signo** en complemento a dos ha superado el rango admisible (por ejemplo, sumar dos positivos da un resultado negativo, o sumar dos negativos da un positivo).\n- **Saltos condicionales**: Empleada por `JO`, `JNO`, `JG`, `JGE`, `JL`, `JLE`.\n\n### 3. Demostración Práctica con los Mismos Operandos\nConsideremos la suma de 8 bits entre `FFh` (-1 con signo, 255 sin signo) y `01h` (+1):\n```asm\nmov al, 0FFh\nadd al, 01h     ; AL = 00h\n; CF = 1: Hay acarreo sin signo (255 + 1 = 256 > 255)\n; OF = 0: ¡No hay desbordamiento con signo! (-1 + 1 = 0, cabe perfectamente en 8 bits con signo)\n```\nPor el contrario, consideremos `7Fh` (+127 con signo) y `01h` (+1):\n```asm\nmov al, 7Fh\nadd al, 01h     ; AL = 80h (-128 con signo)\n; CF = 0: No hay acarreo sin signo (127 + 1 = 128 <= 255)\n; OF = 1: ¡Desbordamiento con signo! (+127 + 1 = +128, que no cabe en el rango [-128..+127], corrompiendo el bit de signo a 1)\n```",
+    "sources": [
+      "Intel SDM Vol. 1 §3.4.3: EFLAGS Register",
+      "Irvine Assembly Language for x86 Processors §6.2: Flags Affected by Addition and Subtraction",
+      "Stallings Computer Organization and Architecture §9.3: Overflow Rule"
+    ]
+  },
+  {
+    "id": "concept.fund.ascii_encoding",
+    "titleEn": "ASCII Character Encoding and String Formats",
+    "titleEs": "Codificación de Caracteres ASCII y Formatos de Cadenas",
+    "category": "FUNDAMENTALS",
+    "level": "BASIC",
+    "prerequisites": [
+      "concept.fund.binary_numbers"
+    ],
+    "relatedInstructions": [
+      "MOV",
+      "INT",
+      "LODSB",
+      "STOSB"
+    ],
+    "relatedConcepts": [
+      "concept.fund.binary_numbers"
+    ],
+    "summaryEn": "ASCII 7-bit standard, converting numeric digits to characters, and string termination conventions ('$' in DOS 09h vs null-terminated in C/Linux).",
+    "summaryEs": "Estándar ASCII de 7 bits, conversión de dígitos a caracteres y convenciones de terminación ('$' en DOS 09h frente a cero nulo en C/Linux).",
+    "contentEn": "The American Standard Code for Information Interchange (ASCII) maps alphanumeric characters and control codes to numbers from 0 to 127 (7 bits):\n\n### 1. Digits vs Numeric Values\n- The character `'0'` is encoded as `30h` (48 decimal).\n- The character `'9'` is encoded as `39h` (57 decimal).\n- To convert a single decimal digit to its ASCII character: `add al, '0'` (or `add al, 30h`).\n- To convert an ASCII digit to its numeric value: `sub al, '0'` (or `sub al, 30h`).\n\n### 2. Common Control Characters\n- Carriage Return (`CR`): `0Dh` (13 decimal) — moves cursor to start of line.\n- Line Feed (`LF`): `0Ah` (10 decimal) — moves cursor to next line.\n- Tab: `09h` (9 decimal).\n\n### 3. String Termination Conventions\n- **DOS INT 21h Function 09h**: Requires strings to be terminated by the dollar sign `'$'` (`24h`). If the dollar sign is missing, output runs past the buffer until a random `$` in memory is found.\n- **C / Linux / Windows API**: Requires strings to be null-terminated (`0` byte / `00h`).",
+    "contentEs": "El estándar ASCII asigna códigos numéricos del 0 al 127 (7 bits) a caracteres alfanuméricos y códigos de control:\n\n### 1. Caracteres Numéricos frente a Valores Numéricos\n- El carácter `'0'` tiene el código `30h` (48 en decimal).\n- El carácter `'9'` tiene el código `39h` (57 en decimal).\n- Para convertir un dígito numérico a su carácter ASCII: `add al, '0'` (o `add al, 30h`).\n- Para convertir un carácter ASCII a valor numérico: `sub al, '0'` (o `sub al, 30h`).\n\n### 2. Caracteres de Control Clave\n- Retorno de carro (`CR`): `0Dh` (13 decimal) — retrocede el cursor al inicio de la línea.\n- Salto de línea (`LF`): `0Ah` (10 decimal) — avanza el cursor a la siguiente línea.\n- Tabulador: `09h` (9 decimal).\n\n### 3. Convenciones de Terminación de Cadenas\n- **DOS INT 21h Función 09h**: Exige que las cadenas terminen con el carácter dólar `'$'` (`24h`). Si se omite, la impresión continúa leyendo basura de memoria hasta encontrar un byte 24h fortuito.\n- **C / Linux / API de Windows**: Emplean cadenas terminadas en byte nulo (`0` / `00h`).",
+    "sources": [
+      "Irvine Assembly Language for x86 Processors §1.2: Character Storage Formats",
+      "Abel IBM PC Assembly Language and Programming §1.4: ASCII Codes"
+    ]
+  },
+  {
+    "id": "concept.fund.boolean_logic_masks",
+    "titleEn": "Boolean Logic and Bitmasking",
+    "titleEs": "Lógica Booleana y Enmascaramiento de Bits",
+    "category": "FUNDAMENTALS",
+    "level": "BASIC",
+    "prerequisites": [
+      "concept.fund.binary_numbers"
+    ],
+    "relatedInstructions": [
+      "AND",
+      "OR",
+      "XOR",
+      "NOT",
+      "TEST"
+    ],
+    "relatedConcepts": [
+      "concept.pair.cmp_vs_test"
+    ],
+    "summaryEn": "Bitwise operations (AND, OR, XOR, NOT) used for setting, clearing, toggling, and testing individual bits with bitmasks.",
+    "summaryEs": "Operaciones a nivel de bit (AND, OR, XOR, NOT) para fijar, limpiar, conmutar y comprobar bits individuales mediante máscaras.",
+    "contentEn": "Bitwise operations apply boolean logic independently to each corresponding pair of bits across operands. They form the basis of hardware register manipulation and device communication:\n\n### 1. Core Bitwise Operations\n- **`AND`**: Output is 1 only if BOTH bits are 1. Used to **clear bits** to 0 (using a mask with 0s at target positions).\n  ```asm\n  and al, 0DFh      ; Clears bit 5 (converts lowercase ASCII to uppercase: 'a' -> 'A')\n  ```\n- **`OR`**: Output is 1 if EITHER bit is 1. Used to **set bits** to 1 (using a mask with 1s at target positions).\n  ```asm\n  or  al, 20h       ; Sets bit 5 (converts uppercase ASCII to lowercase: 'A' -> 'a')\n  ```\n- **`XOR`**: Output is 1 if bits DIFFER. Used to **toggle bits** (invert them) and idiomatically to clear a register to zero in fewer bytes than MOV:\n  ```asm\n  xor ax, ax        ; Sets AX = 0 in only 2 bytes and sets ZF = 1\n  ```\n- **`NOT`**: Inverts all bits. Does not modify CPU flags.\n- **`TEST`**: Performs bitwise AND without modifying destination register; updates flags to test if specific bits are set.",
+    "contentEs": "Las operaciones de bits aplican las reglas del álgebra booleana de forma independiente a cada par de bits homólogos. Son la base del control de periféricos y banderas hardware:\n\n### 1. Operaciones Fundamentales\n- **`AND`**: El resultado es 1 sólo si AMBOS bits son 1. Se utiliza para **apagar o limpiar bits** a 0 (poniendo ceros en las posiciones deseadas):\n  ```asm\n  and al, 0DFh      ; Apaga el bit 5 (convierte minúscula ASCII a mayúscula: 'a' -> 'A')\n  ```\n- **`OR`**: El resultado es 1 si CUALQUIERA de los bits es 1. Se utiliza para **encender o fijar bits** a 1:\n  ```asm\n  or  al, 20h       ; Enciende el bit 5 (convierte mayúscula a minúscula: 'A' -> 'a')\n  ```\n- **`XOR`**: El resultado es 1 si los bits son DISTINTOS. Se utiliza para **conmutar o invertir bits**, y de forma idiomática para poner un registro a cero en menos bytes que MOV:\n  ```asm\n  xor ax, ax        ; Fija AX = 0 en sólo 2 bytes y activa ZF = 1\n  ```\n- **`NOT`**: Invierte todos los bits. No modifica ninguna bandera de FLAGS.\n- **`TEST`**: Ejecuta una conjunción AND sin alterar el destino, actualizando banderas para verificar si determinados bits están activos.",
+    "sources": [
+      "Mano Digital Design §2.1: Boolean Logic",
+      "Irvine Assembly Language for x86 Processors §6.2: Boolean and Comparison Instructions"
+    ]
+  },
+  {
+    "id": "concept.env.win32_api",
+    "titleEn": "Win32 Console Programming and kernel32",
+    "titleEs": "Programación de Consola Win32 y kernel32",
+    "category": "ENVIRONMENT",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "concept.proc.calling_conventions"
+    ],
+    "relatedInstructions": [
+      "CALL",
+      "PUSH"
+    ],
+    "relatedConcepts": [
+      "concept.proc.calling_conventions",
+      "concept.env.third_party_libraries"
+    ],
+    "summaryEn": "Console I/O under 32-bit Windows using kernel32.dll (GetStdHandle, WriteFile, ExitProcess) with stdcall decoration.",
+    "summaryEs": "Entrada y salida por consola en Windows de 32 bits mediante kernel32.dll (GetStdHandle, WriteFile, ExitProcess) con convención stdcall.",
+    "contentEn": "In 32-bit Windows protected mode (`win-pe32-console`), DOS `INT 21h` interrupts are illegal and cause immediate termination. Operating system services are accessed by calling functions exported by dynamic link libraries, primarily `kernel32.dll`:\n\n### 1. Essential kernel32 Functions\n- **`GetStdHandle(nStdHandle)`**: Retrieves standard device handles (`STD_OUTPUT_HANDLE = -11`).\n- **`WriteFile(hConsole, lpBuffer, nBytesToWrite, lpBytesWritten, lpOverlapped)`**: Writes bytes to the console.\n- **`ExitProcess(uExitCode)`**: Terminates process returning exit code to Windows.\n\n### 2. Calling Convention and Name Decoration\nWin32 API uses the `stdcall` convention. Function names in symbol tables are decorated with a leading underscore and a trailing `@` followed by the total parameter byte count (e.g. `_WriteFile@20` for a 5-parameter 20-byte function). The callee pops the stack arguments upon return.",
+    "contentEs": "En el modo protegido de 32 bits de Windows (`win-pe32-console`), las interrupciones DOS como `INT 21h` son ilegales y provocan la terminación inmediata del proceso. Los servicios del sistema operativo se invocan llamando a funciones exportadas por bibliotecas dinámicas, fundamentalmente `kernel32.dll`:\n\n### 1. Funciones Clave de kernel32\n- **`GetStdHandle(nStdHandle)`**: Obtiene el identificador del dispositivo estándar (`STD_OUTPUT_HANDLE = -11`).\n- **`WriteFile(hConsole, lpBuffer, nBytesToWrite, lpBytesWritten, lpOverlapped)`**: Envía bytes a la consola.\n- **`ExitProcess(uExitCode)`**: Finaliza el proceso devolviendo el código de salida al sistema operativo.\n\n### 2. Convención stdcall y Decoración de Nombres\nLa API Win32 emplea la convención `stdcall`. Los nombres de símbolos en ensamblador se decoran con un guión bajo inicial y un sufijo `@` con el total de bytes de parámetros (por ejemplo `_WriteFile@20` para 5 parámetros de 4 bytes = 20 bytes). La función llamada limpia la pila con `ret 20`.",
+    "sources": [
+      "Microsoft Learn: Windows API Index (kernel32)",
+      "Irvine Assembly Language for x86 Processors §11.1: Win32 Console Programming"
+    ]
+  },
+  {
+    "id": "concept.env.linux_syscalls",
+    "titleEn": "Linux 64-bit ABI and Syscalls",
+    "titleEs": "ABI de 64 bits de Linux y Llamadas al Sistema (Syscalls)",
+    "category": "ENVIRONMENT",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "concept.proc.calling_conventions"
+    ],
+    "relatedInstructions": [
+      "SYSCALL",
+      "MOV"
+    ],
+    "relatedConcepts": [
+      "concept.proc.calling_conventions"
+    ],
+    "summaryEn": "Linux 64-bit direct kernel syscalls using the SYSCALL instruction, register arguments (RAX, RDI, RSI, RDX, R10), and the 128-byte red zone.",
+    "summaryEs": "Llamadas directas al kernel de Linux de 64 bits con la instrucción SYSCALL, registros de argumentos (RAX, RDI, RSI, RDX, R10) y la zona roja de 128 bytes.",
+    "contentEn": "In 64-bit Linux (`linux-elf64-console`), programs communicate directly with the Linux kernel via the CPU instruction `SYSCALL` (introduced with AMD64):\n\n### 1. Register Passing for Syscalls\n- `RAX`: Syscall number (e.g. `1` for `sys_write`, `60` for `sys_exit`).\n- Arguments: `RDI` (arg1), `RSI` (arg2), `RDX` (arg3), `R10` (arg4), `R8` (arg5), `R9` (arg6).\n- Notice: While standard C functions use `RCX` for the 4th argument, kernel syscalls use `R10` because the CPU hardware instruction `SYSCALL` destroys `RCX` (saving RIP into RCX) and `R11` (saving RFLAGS into R11).\n- Return Value: Stored in `RAX`. Negative values in `-4095..-1` indicate `-errno` error codes.\n\n### 2. Minimal 'Hello World' in Linux 64\n```asm\nmov rax, 1          ; sys_write\nmov rdi, 1          ; stdout\nmov rsi, msg        ; buffer pointer\nmov rdx, 14         ; message length\nsyscall\n\nmov rax, 60         ; sys_exit\nxor rdi, rdi        ; status code 0\nsyscall\n```",
+    "contentEs": "En Linux de 64 bits (`linux-elf64-console`), las aplicaciones interactúan directamente con el kernel mediante la instrucción hardware `SYSCALL`:\n\n### 1. Registros para Llamadas al Sistema (Syscalls)\n- `RAX`: Número de servicio (ej. `1` para `sys_write`, `60` para `sys_exit`).\n- Argumentos: `RDI` (arg1), `RSI` (arg2), `RDX` (arg3), `R10` (arg4), `R8` (arg5), `R9` (arg6).\n- Diferencia crucial: Mientras que una llamada a función C usa `RCX` para el 4.º parámetro, un syscall utiliza `R10` porque la CPU destruye `RCX` (guardando RIP) y `R11` (guardando RFLAGS) al ejecutar la instrucción `SYSCALL`.\n- Valor de retorno: Devuelto en `RAX`. Valores negativos en el rango `[-4095..-1]` corresponden a códigos de error `-errno`.\n\n### 2. Programa Mínimo en Linux 64 bits\n```asm\nmov rax, 1          ; sys_write\nmov rdi, 1          ; descriptor stdout\nmov rsi, msg        ; puntero a la cadena\nmov rdx, 14         ; longitud en bytes\nsyscall\n\nmov rax, 60         ; sys_exit\nxor rdi, rdi        ; codigo 0\nsyscall\n```",
+    "sources": [
+      "System V Application Binary Interface AMD64 Architecture Processor Supplement v1.0 §A.2",
+      "Linux Kernel Documentation: x86-64 System Call Architecture"
+    ]
+  },
+  {
+    "id": "concept.env.third_party_libraries",
+    "titleEn": "Third-Party Libraries and Irvine32 Clarification",
+    "titleEs": "Bibliotecas de Terceros y Aclaración sobre Irvine32",
+    "category": "ENVIRONMENT",
+    "level": "INTERMEDIATE",
+    "prerequisites": [
+      "concept.env.win32_api"
+    ],
+    "relatedInstructions": [
+      "CALL"
+    ],
+    "relatedConcepts": [
+      "concept.env.win32_api"
+    ],
+    "summaryEn": "Clarifying third-party library dependencies (Irvine32, Kip Irvine) as external software NOT bundled or distributed by IDEARM.",
+    "summaryEs": "Aclaración sobre bibliotecas externas de terceros (Irvine32, Kip Irvine) como software ajeno NO distribuido ni incluido por IDEARM.",
+    "contentEn": "In academic assembly coursework, textbook utility libraries such as **Irvine32** (and Irvine16) created by Kip R. Irvine are widely used for simplified I/O routines like `WriteString`, `ReadInt`, `DumpRegs`, and `Clrscr`.\n\n### CRITICAL CLARIFICATION: External Dependency (Acceptance Case 12)\n1. **Irvine32 is a third-party proprietary academic library**: It was created solely for Kip Irvine's textbook and is copyrighted by its author.\n2. **IDEARM DOES NOT DISTRIBUTE IRVINE32**: IDEARM does not ship, bundle, or distribute binary copies or header files of Irvine32 or other third-party libraries.\n3. **Resolving Missing Irvine32 Errors**: If a project uses `INCLUDE Irvine32.inc` or links against `Irvine32.lib`, the student or instructor must install the library externally from the textbook distributor and configure the external include and library search directories in project properties.",
+    "contentEs": "En la docencia universitaria de ensamblador x86 es muy común el uso de bibliotecas pedagógicas auxiliares como **Irvine32** (e Irvine16), desarrolladas por Kip R. Irvine para facilitar operaciones de entrada y salida mediante rutinas como `WriteString`, `ReadInt`, `DumpRegs` y `Clrscr`.\n\n### ACLARACIÓN FUNDAMENTAL: Dependencia Externa (Caso de Aceptación 12)\n1. **Irvine32 es una biblioteca externa de terceros**: Fue creada específicamente como complemento docente del libro de Kip Irvine y cuenta con sus propios derechos de autor.\n2. **IDEARM NO DISTRIBUYE NI INCLUYE IRVINE32**: IDEARM no incluye, empaqueta ni distribuye binarios (`Irvine32.lib`), cabeceras (`Irvine32.inc`) ni código fuente de Irvine32 ni de ninguna otra biblioteca externa ajena a los entornos base.\n3. **Resolución de Errores por Ausencia de Irvine32**: Si un proyecto requiere `INCLUDE Irvine32.inc` o enlaza contra `Irvine32.lib`, el usuario o centro docente debe obtener e instalar la biblioteca de forma independiente y configurar las rutas de inclusión (Include Paths) y librerías externas (Library Paths) en las propiedades del proyecto.",
+    "sources": [
+      "Irvine Assembly Language for x86 Processors §5.3: The Irvine32 and Irvine16 Libraries",
+      "IDEARM Architecture and Compatibility Guide (ADR-014)"
+    ]
+  }
+]

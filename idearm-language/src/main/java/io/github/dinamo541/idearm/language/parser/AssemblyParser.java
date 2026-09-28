@@ -24,11 +24,19 @@ public final class AssemblyParser {
     }
 
     public SourceFileNode parse(String source) {
-        List<Token> tokens = lexer.tokenize(source);
-        return parse(tokens);
+        return parse(lexer.tokenize(source), source == null ? null : source.split("\\R", -1));
     }
 
     public SourceFileNode parse(List<Token> tokens) {
+        return parse(tokens, null);
+    }
+
+    /**
+     * @param lines the source text, one entry per line, or null when only tokens are available. An INCLUDE names a
+     *              file rather than an expression, so its path is read from the line instead of from the tokens,
+     *              which split {@code macros.inc} in three and drop a DOS backslash altogether.
+     */
+    private SourceFileNode parse(List<Token> tokens, String[] lines) {
         List<AstNode> statements = new ArrayList<>();
         List<ProcedureNode> procedures = new ArrayList<>();
         List<LabelNode> labels = new ArrayList<>();
@@ -67,7 +75,7 @@ public final class AssemblyParser {
                 continue;
             }
 
-            parseLine(lineTokens, currentLine, statements, procedures, labels,
+            parseLine(lineTokens, currentLine, lines, statements, procedures, labels,
                     dataDefinitions, constants, segments, includes, instructions,
                     openProcedures, openSegments);
         }
@@ -83,7 +91,46 @@ public final class AssemblyParser {
         );
     }
 
-    private void parseLine(List<Token> line, int lineNum,
+    /**
+     * The file an INCLUDE names. The lexer reads a line as code, so it splits {@code manzana.inc} into three
+     * tokens and drops the backslashes of {@code inc\macros.inc}; the name is therefore taken from the line as
+     * written. Callers that only hand over tokens still get the first one, as before.
+     */
+    private static String includePath(Token argument, Token directive, String[] lines, int lineNum) {
+        String written = writtenArgument(directive, lines, lineNum);
+        String path = written == null || written.isEmpty() ? argument.text() : written;
+        return path.replace("\"", "").replace("'", "");
+    }
+
+    /** What follows a directive on its own line: one name, without a trailing comment and without its quotes. */
+    private static String writtenArgument(Token directive, String[] lines, int lineNum) {
+        if (lines == null || lineNum < 1 || lineNum > lines.length) {
+            return null;
+        }
+        String text = lines[lineNum - 1];
+        int after = directive.column() - 1 + directive.text().length();
+        if (after < 0 || after >= text.length()) {
+            return null;
+        }
+        String rest = text.substring(after);
+        int comment = rest.indexOf(';');
+        rest = (comment < 0 ? rest : rest.substring(0, comment)).strip();
+        if (rest.isEmpty()) {
+            return null;
+        }
+        char quote = rest.charAt(0);
+        if (quote == '"' || quote == '\'') {
+            int close = rest.indexOf(quote, 1);
+            return close > 0 ? rest.substring(1, close) : rest.substring(1);
+        }
+        int end = 0;
+        while (end < rest.length() && !Character.isWhitespace(rest.charAt(end))) {
+            end++;
+        }
+        return rest.substring(0, end);
+    }
+
+    private void parseLine(List<Token> line, int lineNum, String[] lines,
                            List<AstNode> statements,
                            List<ProcedureNode> procedures,
                            List<LabelNode> labels,
@@ -125,7 +172,9 @@ public final class AssemblyParser {
             // .EXIT and .STARTUP generate code (the DOS exit and the DS setup), so they are statements the rules
             // must see, such as "does main end the program?".
             if (dir.equals(".EXIT") || dir.equals(".STARTUP")) {
-                InstructionNode inst = new InstructionNode(dir, extractOperands(line, idx + 1), lineNum, first.column(), null);
+                List<io.github.dinamo541.idearm.language.model.ParsedOperand> parsedOperands = OperandParser.parseOperands(line, idx + 1);
+                List<String> operands = parsedOperands.stream().map(io.github.dinamo541.idearm.language.model.ParsedOperand::rawText).toList();
+                InstructionNode inst = new InstructionNode(dir, operands, lineNum, first.column(), null, parsedOperands);
                 instructions.add(inst);
                 statements.add(inst);
                 return;
@@ -133,8 +182,7 @@ public final class AssemblyParser {
 
             // INCLUDE directive
             if (dir.equals("INCLUDE") && idx + 1 < line.size()) {
-                Token pathTok = line.get(idx + 1);
-                String path = pathTok.text().replace("\"", "").replace("'", "");
+                String path = includePath(line.get(idx + 1), first, lines, lineNum);
                 IncludeNode inc = new IncludeNode(path, lineNum, first.column());
                 includes.add(inc);
                 statements.add(inc);
@@ -191,6 +239,14 @@ public final class AssemblyParser {
             }
         }
 
+        // 4b. Macro definition: "name MACRO [parameters]". The body is not parsed; the name is what the rules need,
+        // because an invocation of it is indistinguishable from a mistyped instruction.
+        if (idx + 1 < line.size() && line.get(idx + 1).isDirective("MACRO")) {
+            MacroNode macro = new MacroNode(first.text(), lineNum, first.column());
+            statements.add(macro);
+            return;
+        }
+
         // 5. Constant definition: "name EQU value" or "name = value"
         if (idx + 2 < line.size()) {
             Token second = line.get(idx + 1);
@@ -229,11 +285,31 @@ public final class AssemblyParser {
         // 7. Instruction: "MNEMONIC [operands]"
         if (first.is(TokenType.INSTRUCTION)) {
             String mnemonic = first.normalized();
-            List<String> operands = extractOperands(line, idx + 1);
-            InstructionNode inst = new InstructionNode(mnemonic, operands, lineNum, first.column(), null);
+            List<io.github.dinamo541.idearm.language.model.ParsedOperand> parsedOperands = OperandParser.parseOperands(line, idx + 1);
+            List<String> operands = parsedOperands.stream().map(io.github.dinamo541.idearm.language.model.ParsedOperand::rawText).toList();
+            InstructionNode inst = new InstructionNode(mnemonic, operands, lineNum, first.column(), null, parsedOperands);
             instructions.add(inst);
             statements.add(inst);
+            return;
         }
+
+        // 8. A word in instruction position that nothing above recognised. Recorded, not judged: it may be a macro
+        // invocation or a symbol defined in another file, so only the rules decide whether it is a mistake.
+        if (first.is(TokenType.IDENTIFIER) && startsUnrecognisedStatement(line, idx)) {
+            statements.add(new UnknownStatementNode(first.text(), lineNum, first.column(), first.length()));
+        }
+    }
+
+    /**
+     * Whether a line starting with this identifier is genuinely unrecognised, rather than a declaration whose
+     * directive this parser does not build a node for, such as {@code buffer LABEL BYTE} or {@code total = }.
+     */
+    private static boolean startsUnrecognisedStatement(List<Token> line, int idx) {
+        if (idx + 1 >= line.size()) {
+            return true;
+        }
+        Token second = line.get(idx + 1);
+        return !second.is(TokenType.DIRECTIVE) && !second.is(TokenType.COLON) && !second.is(TokenType.EQUALS);
     }
 
     private static boolean isDataDirective(Token token) {

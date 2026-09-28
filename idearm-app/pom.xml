@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.dinamo541</groupId>
         <artifactId>idearm-parent</artifactId>
-        <version>1.0.0</version>
+        <version>2.0.0</version>
     </parent>
 
     <artifactId>idearm-app</artifactId>
@@ -98,6 +98,13 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <reuseForks>false</reuseForks>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.7.0</version>
                 <executions>
@@ -122,7 +129,7 @@
                     <jlinkImageName>idearm</jlinkImageName>
                     <options>
                         <!-- JavaFX loads native libraries; without this JDK 25 prints a restricted-access warning -->
-                        <option>--enable-native-access=javafx.graphics</option>
+                        <option>--enable-native-access=javafx.graphics,io.github.dinamo541.idearm.infrastructure</option>
                     </options>
                 </configuration>
                 <executions>

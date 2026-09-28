@@ -1,0 +1,161 @@
+[
+  {
+    "id": "bios.int16.00h",
+    "environment": "BIOS",
+    "vector": "16h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "00h"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "00h",
+        "meaning": "Read Keystroke function selector"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      {
+        "target": "AH",
+        "meaning": "BIOS keyboard scan code"
+      },
+      {
+        "target": "AL",
+        "meaning": "ASCII character (or 00h / E0h if extended key such as F-keys or arrows)"
+      }
+    ],
+    "flagsAndRegisters": "Halts execution until a keystroke is available in the BIOS keyboard buffer (0040:001Eh). Removes the key from the buffer.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Read keystroke from buffer (blocking wait; returns scan code in AH and ASCII in AL).",
+    "summaryEs": "Lee una pulsación de teclado del búfer (espera bloqueante; devuelve scan code en AH y ASCII en AL).",
+    "descriptionEn": "Waits for a keystroke in the BIOS buffer, removes it from the queue, and returns the scan code in AH and ASCII character code in AL. If AL is 00h or E0h, AH contains an extended scan code.",
+    "descriptionEs": "Espera a que haya una tecla en el búfer de la BIOS, la extrae de la cola y devuelve el código de rastreo (scan code) en AH y el carácter ASCII en AL. Si AL es 00h o E0h, AH contiene el código extendido.",
+    "example": "mov ah, 00h\nint 16h        ; AH = scan code, AL = ASCII char",
+    "sources": [
+      "IBM PC Technical Reference BIOS",
+      "Irvine Assembly Language §13.2"
+    ]
+  },
+  {
+    "id": "bios.int16.01h",
+    "environment": "BIOS",
+    "vector": "16h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "01h"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "01h",
+        "meaning": "Check Keystroke Buffer function selector"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      {
+        "target": "ZF",
+        "meaning": "Zero Flag: ZF=1 if keyboard buffer is empty; ZF=0 if a keystroke is waiting"
+      },
+      {
+        "target": "AH",
+        "meaning": "BIOS scan code of waiting key (if ZF=0; key remains in buffer)"
+      },
+      {
+        "target": "AL",
+        "meaning": "ASCII char of waiting key (if ZF=0; key remains in buffer)"
+      }
+    ],
+    "flagsAndRegisters": "Inspects BIOS keyboard buffer head/tail pointers without removing keystroke.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Check keystroke buffer status (non-blocking; returns ZF=0 and key if ready).",
+    "summaryEs": "Comprueba el estado del búfer de teclado (no bloqueante; devuelve ZF=0 y la tecla si está disponible).",
+    "descriptionEn": "Checks whether a keystroke is waiting in the BIOS keyboard buffer. If a key is available, sets ZF=0 and previews AH/AL without removing the key from the buffer. If empty, sets ZF=1.",
+    "descriptionEs": "Comprueba si hay alguna tecla esperando en el búfer de la BIOS. Si hay tecla disponible, pone ZF=0 y adelanta AH/AL sin extraer la tecla del búfer. Si está vacío, pone ZF=1.",
+    "example": "poll_loop:\n    mov ah, 01h\n    int 16h\n    jz  no_key     ; Jump if buffer empty\n    mov ah, 00h\n    int 16h        ; Consume key\nno_key:\n    ; continue processing",
+    "sources": [
+      "IBM PC Technical Reference BIOS",
+      "Irvine Assembly Language §13.2"
+    ]
+  },
+  {
+    "id": "bios.int16.02h",
+    "environment": "BIOS",
+    "vector": "16h",
+    "vectorStatus": "BIOS_STANDARD",
+    "selector": {
+      "register": "AH",
+      "value": "02h"
+    },
+    "sinceVersion": "IBM PC BIOS",
+    "inputs": [
+      {
+        "register": "AH",
+        "value": "02h",
+        "meaning": "Get Shift Flags function selector"
+      }
+    ],
+    "bufferFormat": [],
+    "outputs": [
+      {
+        "target": "AL",
+        "meaning": "Keyboard shift flags byte: Bit 0=Right Shift, Bit 1=Left Shift, Bit 2=Ctrl, Bit 3=Alt, Bit 4=Scroll Lock active, Bit 5=Num Lock active, Bit 6=Caps Lock active, Bit 7=Insert active"
+      }
+    ],
+    "flagsAndRegisters": "Reads BIOS Data Area byte at 0040:0017h without waiting for keypress.",
+    "availability": [
+      {
+        "backend": "emu8086",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      },
+      {
+        "backend": "all",
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
+      }
+    ],
+    "summaryEn": "Get keyboard shift and toggle states (Shift, Ctrl, Alt, CapsLock, NumLock).",
+    "summaryEs": "Obtiene el estado de teclas modificadoras (Shift, Ctrl, Alt, Bloq Mayús, Bloq Núm).",
+    "descriptionEn": "Returns the BIOS keyboard flag byte at 0040:0017h in AL, reporting whether Shift, Ctrl, Alt, or lock toggles are currently active.",
+    "descriptionEs": "Devuelve en AL el byte de estado del teclado en 0040:0017h, informando si Shift, Ctrl, Alt o los bloqueos están activos actualmente.",
+    "example": "mov ah, 02h\nint 16h\ntest al, 00000100b ; Test bit 2 (Ctrl pressed?)\njnz ctrl_pressed",
+    "sources": [
+      "IBM PC Technical Reference BIOS",
+      "Irvine Assembly Language §13.2"
+    ]
+  }
+]

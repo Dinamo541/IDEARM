@@ -28,6 +28,7 @@ public final class OpenRecentDialog extends Stage {
     public OpenRecentDialog(Window owner, WorkbenchViewModel model, Localization localization) {
         this.model = model; this.localization = localization;
         initOwner(owner); initModality(Modality.WINDOW_MODAL); initStyle(StageStyle.UNDECORATED);
+        io.github.dinamo541.idearm.app.ui.BrandLogo.apply(this);
         titleProperty().bind(localization.text("recent.title"));
         filtered = new FilteredList<>(model.getRecentItems().getItems());
         var title = new Label(); title.textProperty().bind(localization.text("recent.title"));
@@ -100,9 +101,8 @@ public final class OpenRecentDialog extends Stage {
         var footerSpace = new Region(); HBox.setHgrow(footerSpace, Priority.ALWAYS);
         var footer = new HBox(hint, footerSpace, clear); footer.setAlignment(Pos.CENTER_LEFT);
         var root = new VBox(10, heading, search, filters, list, message, footer); VBox.setVgrow(list, Priority.ALWAYS);
-        root.getStyleClass().addAll("workbench", "recent-picker");
-        if (owner.getScene().getRoot().getStyleClass().contains("light")) root.getStyleClass().add("light");
-        root.getStylesheets().addAll(owner.getScene().getRoot().getStylesheets());
+        root.getStyleClass().add("recent-picker");
+        io.github.dinamo541.idearm.app.ui.WorkbenchTheme.apply(root, owner);
         setScene(new Scene(root, Math.min(700, owner.getWidth() - 40), 470));
         getScene().setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) { close(); e.consume(); } });
         setOnShown(e -> { setX(owner.getX() + (owner.getWidth() - getWidth()) / 2); setY(owner.getY() + 55); search.requestFocus(); });

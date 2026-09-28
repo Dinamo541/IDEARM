@@ -1,5 +1,7 @@
 package io.github.dinamo541.idearm.app.editor;
 
+import io.github.dinamo541.idearm.domain.diagnostic.Diagnostic;
+import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.scene.Node;
@@ -20,6 +22,15 @@ public interface EditorComponent {
 
     /** Sets the text content and resets dirty status. */
     void setText(String text);
+
+    /**
+     * Marks these diagnostics in the text, underlining the span each one reports; an empty list clears the marks.
+     * A diagnostic whose location has no column is ignored, because there is nothing to underline.
+     */
+    void setDiagnostics(List<Diagnostic> diagnostics);
+
+    /** Runs the handler after every edit, so a caller can debounce work such as validating the document. */
+    void setOnTextChanged(Runnable handler);
 
     /** Navigates the caret to the 1-based line number and scrolls it into view. */
     void goToLine(int lineNumber);
@@ -65,6 +76,9 @@ public interface EditorComponent {
 
     /** Sets the full set of 1-based lines that have active breakpoints. */
     void setBreakpoints(java.util.Set<Integer> lines);
+
+    /** Sets the 1-based lines whose breakpoint is switched off: remembered, but not stopping the program. */
+    void setDisabledBreakpoints(java.util.Set<Integer> lines);
 
     /** Gets the current set of 1-based lines with breakpoints. */
     java.util.Set<Integer> getBreakpoints();

@@ -21,9 +21,11 @@ public final class EditorAreaView extends StackPane {
     private final EditorAreaViewModel viewModel;
     private final Localization localization;
     private final TabPane tabPane;
-    private final Label emptyPlaceholder;
+    private final javafx.scene.control.ScrollPane emptyPlaceholder;
+    private final javafx.beans.property.BooleanProperty minimapVisible = new javafx.beans.property.SimpleBooleanProperty(true);
     private final Map<EditorDocumentViewModel, Tab> tabMap = new HashMap<>();
     private boolean updatingSelection = false;
+    private java.util.function.Consumer<WelcomeView.Action> onWelcomeAction = action -> {};
 
     public EditorAreaView(EditorAreaViewModel viewModel, Localization localization) {
         this.viewModel = viewModel;
@@ -34,13 +36,23 @@ public final class EditorAreaView extends StackPane {
         this.tabPane.getStyleClass().addAll(Styles.DENSE, "editor-tabs");
         getStyleClass().add("editor-area");
 
-        this.emptyPlaceholder = new Label();
-        this.emptyPlaceholder.textProperty().bind(localization.text("editor.emptyPlaceholder"));
-        this.emptyPlaceholder.getStyleClass().addAll(Styles.TEXT_MUTED, Styles.TITLE_4);
+        var welcome = new WelcomeView(localization, action -> onWelcomeAction.accept(action));
+        welcome.setMinWidth(0);
+        var welcomeHost = new StackPane(welcome);
+        welcomeHost.setMinWidth(0);
+        this.emptyPlaceholder = new javafx.scene.control.ScrollPane(welcomeHost);
+        this.emptyPlaceholder.setFitToWidth(true);
+        this.emptyPlaceholder.setFitToHeight(true);
+        this.emptyPlaceholder.setMinSize(0, 0);
+        this.emptyPlaceholder.setHbarPolicy(javafx.scene.control.ScrollPane.ScrollBarPolicy.NEVER);
         StackPane.setAlignment(emptyPlaceholder, Pos.CENTER);
 
         getChildren().addAll(emptyPlaceholder, tabPane);
         updatePlaceholderVisibility();
+        minimapVisible.addListener((obs, before, visible) -> viewModel.getDocuments().forEach(doc -> {
+            if (doc.getEditor() instanceof io.github.dinamo541.idearm.app.editor.RichTextFxEditorComponent editor)
+                editor.setMinimapVisible(visible);
+        }));
 
         // Listen for open/closed document list changes
         viewModel.getDocuments().addListener((ListChangeListener<EditorDocumentViewModel>) change -> {
@@ -58,7 +70,20 @@ public final class EditorAreaView extends StackPane {
                             return folder + file.getFileName();
                         }, doc.filePathProperty()));
                         var content = new javafx.scene.layout.BorderPane(doc.getEditor().getNode());
-                        content.setTop(breadcrumb);
+                        var spacer = new javafx.scene.layout.Region();
+                        javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+                        var mapToggle = new javafx.scene.control.ToggleButton(null,
+                                io.github.dinamo541.idearm.app.ui.WorkbenchIcons.MINIMAP.create());
+                        mapToggle.getStyleClass().addAll("icon-button", "minimap-toggle");
+                        mapToggle.selectedProperty().bindBidirectional(minimapVisible);
+                        mapToggle.accessibleTextProperty().bind(localization.text("editor.minimap"));
+                        io.github.dinamo541.idearm.app.ui.HoverHelp.install(mapToggle, localization, "editor.minimap.help", "");
+                        var trail = new javafx.scene.layout.HBox(8, breadcrumb, spacer, mapToggle);
+                        trail.setAlignment(Pos.CENTER_LEFT);
+                        trail.getStyleClass().add("editor-breadcrumb-bar");
+                        content.setTop(trail);
+                        if (doc.getEditor() instanceof io.github.dinamo541.idearm.app.editor.RichTextFxEditorComponent editor)
+                            editor.setMinimapVisible(minimapVisible.get());
                         tab.setGraphic(ExplorerIcons.file(doc.getFilePath().getFileName().toString()));
                         tab.setContent(content);
                         tab.setUserData(doc);
@@ -72,6 +97,9 @@ public final class EditorAreaView extends StackPane {
                     for (EditorDocumentViewModel doc : change.getRemoved()) {
                         Tab tab = tabMap.remove(doc);
                         if (tab != null) {
+                            var content = (javafx.scene.layout.BorderPane) tab.getContent();
+                            var toggle = (javafx.scene.control.ToggleButton) content.lookup(".minimap-toggle");
+                            if (toggle != null) toggle.selectedProperty().unbindBidirectional(minimapVisible);
                             tabPane.getTabs().remove(tab);
                         }
                     }
@@ -103,6 +131,8 @@ public final class EditorAreaView extends StackPane {
         });
     }
 
+    void setOnWelcomeAction(java.util.function.Consumer<WelcomeView.Action> action) { onWelcomeAction = action; }
+
     public void cycle(int direction) {
         int size = tabPane.getTabs().size();
         if (size == 0) return;
@@ -112,6 +142,8 @@ public final class EditorAreaView extends StackPane {
     }
 
     public void closeActive() { close(viewModel.getActiveDocument()); }
+
+    public javafx.beans.property.BooleanProperty minimapVisibleProperty() { return minimapVisible; }
 
     private void close(EditorDocumentViewModel doc) {
         if (doc == null) return;
@@ -139,6 +171,8 @@ public final class EditorAreaView extends StackPane {
     private void updatePlaceholderVisibility() {
         boolean hasDocs = !viewModel.getDocuments().isEmpty();
         emptyPlaceholder.setVisible(!hasDocs);
+        emptyPlaceholder.setManaged(!hasDocs);
         tabPane.setVisible(hasDocs);
+        tabPane.setManaged(hasDocs);
     }
 }

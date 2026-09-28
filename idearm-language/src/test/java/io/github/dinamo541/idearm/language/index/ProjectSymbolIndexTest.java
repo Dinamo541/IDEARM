@@ -101,4 +101,18 @@ class ProjectSymbolIndexTest {
         index.removeFile("temp.asm");
         assertFalse(index.findDefinition("temp_lbl").isPresent());
     }
+
+    @Test
+    void indexesMacroDefinition() {
+        String code = """
+                MOV MACRO dest, src
+                    push src
+                    pop dest
+                ENDM
+                """;
+        index.updateFile("src/macros.inc", code);
+        Optional<SymbolDefinition> movMacro = index.findDefinition("MOV");
+        assertTrue(movMacro.isPresent());
+        assertEquals(SymbolKind.MACRO, movMacro.get().kind());
+    }
 }

@@ -15,6 +15,7 @@ public final class RegisterItemViewModel {
     private final String name;
     private final StringProperty hexValue = new SimpleStringProperty("0000");
     private final StringProperty decValue = new SimpleStringProperty("0");
+    private final StringProperty binValue = new SimpleStringProperty("0000 0000 0000 0000");
     private final BooleanProperty changed = new SimpleBooleanProperty(false);
 
     public RegisterItemViewModel(String name) {
@@ -46,6 +47,14 @@ public final class RegisterItemViewModel {
         return decValue;
     }
 
+    public String getBinValue() {
+        return binValue.get();
+    }
+
+    public StringProperty binValueProperty() {
+        return binValue;
+    }
+
     public boolean isChanged() {
         return changed.get();
     }
@@ -61,15 +70,21 @@ public final class RegisterItemViewModel {
     public void setValue(long value, int bitWidth) {
         String newHex;
         String newDec;
+        long masked;
+        int bits;
         if (bitWidth >= 64) {
+            masked = value;
+            bits = 64;
             newHex = "%016X".formatted(value);
             newDec = Long.toUnsignedString(value);
         } else if (bitWidth >= 32) {
-            long masked = value & 0xFFFFFFFFL;
+            masked = value & 0xFFFFFFFFL;
+            bits = 32;
             newHex = "%08X".formatted(masked);
             newDec = Long.toUnsignedString(masked);
         } else {
-            long masked = value & 0xFFFFL;
+            masked = value & 0xFFFFL;
+            bits = 16;
             newHex = "%04X".formatted(masked);
             newDec = Long.toString(masked);
         }
@@ -80,5 +95,21 @@ public final class RegisterItemViewModel {
         }
         hexValue.set(newHex);
         decValue.set(newDec);
+        binValue.set(toBinary(masked, bits));
+    }
+
+    /**
+     * The value in binary, in groups of four bits so a student can read a nibble against its hex digit:
+     * {@code 0000 0001 0010 0011}.
+     */
+    static String toBinary(long value, int bits) {
+        var text = new StringBuilder(bits + bits / 4);
+        for (int bit = bits - 1; bit >= 0; bit--) {
+            text.append((value >>> bit) & 1L);
+            if (bit % 4 == 0 && bit > 0) {
+                text.append(' ');
+            }
+        }
+        return text.toString();
     }
 }

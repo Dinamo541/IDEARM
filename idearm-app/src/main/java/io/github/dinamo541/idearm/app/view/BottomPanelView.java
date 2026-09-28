@@ -48,9 +48,8 @@ public final class BottomPanelView extends TabPane {
         // 1. Problems Tab
         this.problemsTable = new TableView<>();
         this.problemsTable.setItems(viewModel.getProblems());
-        this.problemsTable.setPlaceholder(new javafx.scene.control.Label());
-        ((javafx.scene.control.Label) problemsTable.getPlaceholder()).textProperty()
-                .bind(localization.text("panel.problems.empty"));
+        this.problemsTable.setPlaceholder(emptyState("panel.problems.empty", "panel.problems.emptyHint",
+                io.github.dinamo541.idearm.app.ui.WorkbenchIcons.CHECK));
         setupProblemsTable();
 
         var problemsTab = new Tab();
@@ -63,33 +62,34 @@ public final class BottomPanelView extends TabPane {
         // 2. Build Tab
         this.buildArea = new TextArea();
         this.buildArea.setEditable(false);
-        this.buildArea.setStyle("-fx-font-family: 'JetBrains Mono', 'Consolas', monospace; -fx-font-size: 12px;");
+        this.buildArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
         this.buildArea.textProperty().bind(viewModel.buildTextProperty());
         this.buildArea.textProperty().addListener((obs, oldV, newV) -> buildArea.setScrollTop(Double.MAX_VALUE));
 
         var buildTab = new Tab();
         buildTab.textProperty().bind(localization.text("panel.build.title"));
-        buildTab.setContent(buildArea);
+        buildTab.setContent(console(buildArea, "panel.build.empty", "panel.build.emptyHint",
+                io.github.dinamo541.idearm.app.ui.WorkbenchIcons.BUILD));
 
         // 3. Output Tab
         this.outputArea = new TextArea();
         this.outputArea.setEditable(false);
-        this.outputArea.setStyle("-fx-font-family: 'JetBrains Mono', 'Consolas', monospace; -fx-font-size: 12px;");
+        this.outputArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
         this.outputArea.textProperty().bind(viewModel.outputTextProperty());
         this.outputArea.textProperty().addListener((obs, oldV, newV) -> outputArea.setScrollTop(Double.MAX_VALUE));
 
         var outputTab = new Tab();
         outputTab.textProperty().bind(localization.text("panel.output.title"));
-        var outputPane = new javafx.scene.layout.BorderPane(outputArea);
+        var outputPane = new javafx.scene.layout.BorderPane(console(outputArea, "panel.output.empty", "panel.output.emptyHint",
+                io.github.dinamo541.idearm.app.ui.WorkbenchIcons.RUN));
         outputPane.setBottom(createProgramInput());
         outputTab.setContent(outputPane);
 
         // 4. References Tab
         this.referencesTable = new TableView<>();
         this.referencesTable.setItems(viewModel.getReferences());
-        this.referencesTable.setPlaceholder(new javafx.scene.control.Label());
-        ((javafx.scene.control.Label) referencesTable.getPlaceholder()).textProperty()
-                .bind(localization.text("panel.references.empty"));
+        this.referencesTable.setPlaceholder(emptyState("panel.references.empty", "panel.references.emptyHint",
+                io.github.dinamo541.idearm.app.ui.WorkbenchIcons.REFERENCES));
         setupReferencesTable();
 
         var referencesTab = new Tab();
@@ -112,6 +112,12 @@ public final class BottomPanelView extends TabPane {
         terminalTab.setContent(terminalView);
 
         getTabs().addAll(problemsTab, buildTab, outputTab, referencesTab, debugTab, terminalTab);
+        problemsTab.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.PROBLEMS.create());
+        buildTab.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.BUILD.create());
+        outputTab.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.RUN.create());
+        referencesTab.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.REFERENCES.create());
+        debugTab.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.DEBUG.create());
+        terminalTab.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.TERMINAL.create());
 
         // Sync active tab selection
         getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
@@ -151,7 +157,7 @@ public final class BottomPanelView extends TabPane {
      */
     private javafx.scene.Node createProgramInput() {
         var field = new javafx.scene.control.TextField();
-        field.setStyle("-fx-font-family: 'JetBrains Mono', 'Consolas', monospace; -fx-font-size: 12px;");
+        field.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
         field.promptTextProperty().bind(Bindings.createStringBinding(() ->
                         viewModel.programInputProperty().get() == BottomPanelViewModel.ProgramInput.LINE
                                 ? localization.get("output.programInput.line")
@@ -189,11 +195,12 @@ public final class BottomPanelView extends TabPane {
             event.consume();
         });
 
-        var prompt = new javafx.scene.control.Label("❯");
-        prompt.setStyle("-fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
+        var prompt = new javafx.scene.control.Label(null,
+                io.github.dinamo541.idearm.app.ui.WorkbenchIcons.RIGHT.create(14));
+        prompt.getStyleClass().add("terminal-prompt");
         var row = new javafx.scene.layout.HBox(6, prompt, field);
         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        row.setPadding(new javafx.geometry.Insets(4, 6, 6, 6));
+        row.getStyleClass().add("console-input");
         var visible = viewModel.programInputProperty().isNotEqualTo(BottomPanelViewModel.ProgramInput.NONE);
         row.visibleProperty().bind(visible);
         row.managedProperty().bind(visible);
@@ -204,6 +211,30 @@ public final class BottomPanelView extends TabPane {
             }
         });
         return row;
+    }
+
+    private javafx.scene.Node emptyState(String titleKey, String hintKey,
+                                          io.github.dinamo541.idearm.app.ui.WorkbenchIcons icon) {
+        var title = new javafx.scene.control.Label();
+        title.textProperty().bind(localization.text(titleKey));
+        var hint = new javafx.scene.control.Label();
+        hint.textProperty().bind(localization.text(hintKey));
+        hint.getStyleClass().add("empty-description");
+        hint.setWrapText(true);
+        hint.setMaxWidth(420);
+        var box = new javafx.scene.layout.VBox(icon.create(24), title, hint);
+        box.getStyleClass().add("panel-empty");
+        box.setMaxHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+        return box;
+    }
+
+    private javafx.scene.Node console(TextArea area, String titleKey, String hintKey,
+                                       io.github.dinamo541.idearm.app.ui.WorkbenchIcons icon) {
+        var empty = emptyState(titleKey, hintKey, icon);
+        empty.visibleProperty().bind(area.textProperty().isEmpty());
+        empty.managedProperty().bind(empty.visibleProperty());
+        empty.setMouseTransparent(true);
+        return new javafx.scene.layout.StackPane(area, empty);
     }
 
     public TerminalPanelView getTerminalView() {
@@ -325,7 +356,7 @@ public final class BottomPanelView extends TabPane {
                     setStyle("");
                 } else {
                     setText(item);
-                    setStyle("-fx-font-family: 'JetBrains Mono', 'Consolas', monospace; -fx-font-size: 11px;");
+                    setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 11px;");
                 }
             }
         });

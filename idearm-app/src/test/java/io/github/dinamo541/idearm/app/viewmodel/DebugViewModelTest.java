@@ -1,19 +1,132 @@
 package io.github.dinamo541.idearm.app.viewmodel;
 
+import io.github.dinamo541.idearm.domain.debug.Breakpoint;
 import io.github.dinamo541.idearm.domain.debug.CallFrame;
+import io.github.dinamo541.idearm.domain.debug.DebugCapability;
 import io.github.dinamo541.idearm.domain.debug.MemoryView;
+import io.github.dinamo541.idearm.domain.debug.RegisterState;
 import io.github.dinamo541.idearm.domain.execution.ExitInfo;
 import io.github.dinamo541.idearm.domain.execution.SessionState;
 import io.github.dinamo541.idearm.domain.port.DebugSession;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class DebugViewModelTest {
+
+    /** A session that records what it was asked to do and declares the capabilities it is given. */
+    private static final class RecordingSession implements DebugSession {
+        private final Set<DebugCapability> capabilities;
+        private final List<String> calls = new ArrayList<>();
+        private List<Breakpoint> breakpoints = List.of();
+
+        RecordingSession(Set<DebugCapability> capabilities) {
+            this.capabilities = capabilities;
+        }
+
+        @Override public CompletableFuture<ExitInfo> exit() { return new CompletableFuture<>(); }
+        @Override public SessionState state() { return SessionState.RUNNING; }
+        @Override public void stop() { calls.add("stop"); }
+        @Override public Set<DebugCapability> capabilities() { return capabilities; }
+        @Override public void resume() { calls.add("resume"); }
+        @Override public void stepOver() { calls.add("stepOver"); }
+        @Override public void stepInto() { calls.add("stepInto"); }
+        @Override public void stepOut() { calls.add("stepOut"); }
+        @Override public void pause() { calls.add("pause"); }
+        @Override public void setBreakpoints(List<Breakpoint> updated) { this.breakpoints = updated; }
+        @Override public void close() { }
+    }
+
+    @Test
+    void everyDebugControlReachesTheSession() {
+        DebugViewModel vm = new DebugViewModel();
+        var session = new RecordingSession(EnumSet.allOf(DebugCapability.class));
+        vm.attachSession(session);
+
+        vm.resume();
+        vm.stepOver();
+        vm.stepInto();
+        vm.stepOut();
+        vm.pause();
+        vm.stop();
+
+        assertEquals(List.of("resume", "stepOver", "stepInto", "stepOut", "pause", "stop"), session.calls);
+    }
+
+    @Test
+    void aLaunchOnlyDebuggerSwitchesTheControlsOff() {
+        DebugViewModel vm = new DebugViewModel();
+
+        // Turbo Debugger in a DOSBox window: it runs the program and reports nothing back.
+        vm.attachSession(new RecordingSession(Set.of()));
+        assertFalse(vm.integratedProperty().get(), "The panels have nothing to show");
+        assertFalse(vm.canStepProperty().get());
+        assertFalse(vm.canPauseProperty().get());
+        assertFalse(vm.canInspectProperty().get());
+
+        // The built-in emulator drives the program itself, so the panels work.
+        vm.attachSession(new RecordingSession(EnumSet.of(DebugCapability.STEP, DebugCapability.REGISTERS,
+                DebugCapability.PAUSE)));
+        assertTrue(vm.integratedProperty().get());
+        assertTrue(vm.canStepProperty().get());
+        assertTrue(vm.canPauseProperty().get());
+        assertTrue(vm.canInspectProperty().get());
+        assertFalse(vm.canWatchProperty().get(), "This session did not declare watches");
+
+        vm.detachSession();
+        assertFalse(vm.canStepProperty().get(), "Nothing is offered once the session is gone");
+    }
+
+    @Test
+    void breakpointsChangedDuringAPauseReachTheRunningSession() {
+        DebugViewModel vm = new DebugViewModel();
+        var session = new RecordingSession(EnumSet.of(DebugCapability.BREAKPOINTS));
+        vm.attachSession(session);
+
+        var current = List.of(new Breakpoint("src/main.asm", 12, true));
+        vm.pushBreakpoints(current);
+
+        assertEquals(current, session.breakpoints);
+    }
+
+    @Test
+    void anUnreadableWatchIsMarkedForTheViewToExplain() {
+        DebugViewModel vm = new DebugViewModel();
+        vm.attachSession(new RecordingSession(EnumSet.of(DebugCapability.WATCHES)));
+
+        // evaluateExpression is the port default here: this debugger cannot evaluate anything.
+        vm.addWatch("message");
+
+        var watch = vm.getWatches().get(0);
+        assertTrue(watch.isError(), "The view shows the reason in the user's language, not a made-up marker");
+        assertEquals("", watch.getValue());
+    }
+
+    @Test
+    void aDosRegisterReadsInHexDecimalAndBinary() {
+        DebugViewModel vm = new DebugViewModel();
+        var state = new RegisterState(0x0A41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Map.of());
+
+        vm.updateRegisters(state);
+
+        var ax = vm.getRegisterList().stream()
+                .filter(register -> register.getName().equals("AX"))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("0A41", ax.getHexValue());
+        assertEquals("2625", ax.getDecValue());
+        // Grouped in nibbles, so each group reads against its hex digit: 0=0000, A=1010, 4=0100, 1=0001.
+        assertEquals("0000 1010 0100 0001", ax.getBinValue());
+        assertTrue(ax.isChanged(), "The value moved away from zero at this stop");
+    }
 
     @Test
     void managesWatchExpressions() {
@@ -77,8 +190,10 @@ class DebugViewModelTest {
 
         assertFalse(vm.memoryDumpTextProperty().get().isBlank());
         assertEquals(1, vm.getStackLines().size());
-        assertTrue(vm.getStackLines().get(0).contains("main"));
-        assertTrue(vm.getStackLines().get(0).contains("src/main.asm:15"));
+        assertTrue(vm.getStackLines().get(0).getText().contains("main"));
+        assertTrue(vm.getStackLines().get(0).getText().contains("src/main.asm:15"));
+        // A frame that knows its source line can be opened from the panel.
+        assertTrue(vm.getStackLines().get(0).isNavigable());
     }
 
     @Test

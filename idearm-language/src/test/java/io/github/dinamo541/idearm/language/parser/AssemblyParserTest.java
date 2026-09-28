@@ -1,6 +1,7 @@
 package io.github.dinamo541.idearm.language.parser;
 
 import io.github.dinamo541.idearm.language.model.*;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -8,6 +9,27 @@ import static org.junit.jupiter.api.Assertions.*;
 class AssemblyParserTest {
 
     private final AssemblyParser parser = new AssemblyParser();
+
+    /**
+     * The lexer reads a line as code, so it splits a file name on its dot and drops DOS backslashes; an INCLUDE
+     * therefore has to keep the name as the line writes it, or nothing can resolve the file.
+     */
+    @Test
+    void parsesTheWholeFileNameOfAnInclude() {
+        String code = """
+                .DATA
+                    INCLUDE manzana.inc
+                    INCLUDE inc\\macros.inc      ; DOS folders use backslashes
+                    INCLUDE "sub/other.inc"
+                .CODE
+                """;
+
+        SourceFileNode ast = parser.parse(code);
+
+        assertEquals(List.of("manzana.inc", "inc\\macros.inc", "sub/other.inc"),
+                ast.includes().stream().map(IncludeNode::path).toList());
+        assertEquals(2, ast.includes().getFirst().line());
+    }
 
     @Test
     void parsesProceduresAndLabels() {
@@ -79,5 +101,57 @@ class AssemblyParserTest {
         assertEquals(1, ast.segments().size());
         assertEquals("CODE", ast.segments().get(0).name());
         assertEquals(1, ast.labels().size());
+    }
+
+    @Test
+    void recordsAMacroDefinition() {
+        SourceFileNode ast = parser.parse("""
+                print_str macro texto
+                  mov ah, 9
+                endm
+                """);
+
+        List<MacroNode> macros = ast.statements().stream()
+                .filter(MacroNode.class::isInstance)
+                .map(MacroNode.class::cast)
+                .toList();
+        assertEquals(1, macros.size());
+        assertEquals("print_str", macros.getFirst().name());
+    }
+
+    @Test
+    void recordsAWordItDoesNotRecogniseInInstructionPosition() {
+        // This line used to be dropped without a trace, which left no way for a rule to see the mistake.
+        SourceFileNode ast = parser.parse("  MUV bx, 1\n");
+
+        List<UnknownStatementNode> unknown = ast.statements().stream()
+                .filter(UnknownStatementNode.class::isInstance)
+                .map(UnknownStatementNode.class::cast)
+                .toList();
+        assertEquals(1, unknown.size());
+        assertEquals("MUV", unknown.getFirst().word());
+        assertEquals(1, unknown.getFirst().line());
+        assertEquals(3, unknown.getFirst().column());
+        assertEquals(3, unknown.getFirst().length());
+    }
+
+    @Test
+    void recordsNothingUnknownForLinesItAlreadyUnderstood() {
+        SourceFileNode ast = parser.parse("""
+                .model small
+                .data
+                msg db 'hola$'
+                count equ 10
+                buffer label byte
+                .code
+                main proc
+                start:
+                  mov ax, @data
+                  jmp start
+                main endp
+                end main
+                """);
+
+        assertTrue(ast.statements().stream().noneMatch(UnknownStatementNode.class::isInstance));
     }
 }

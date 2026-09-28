@@ -86,4 +86,27 @@ class BottomPanelViewModelTest {
         vm.clearDiagnostics();
         assertTrue(vm.getProblems().isEmpty());
     }
+
+    @Test
+    void keepsBuildProblemsAndLiveProblemsApart() {
+        var vm = new BottomPanelViewModel();
+        Diagnostic fromTheAssembler = new Diagnostic(Severity.ERROR, "nasm.error", "symbol not defined",
+                new Location("main.asm", 10, null), "nasm", "main.asm:10: error: symbol not defined", List.of());
+        Diagnostic fromTyping = new Diagnostic(Severity.WARNING, "lint.unknown-instruction", "No instruction is called MUV.",
+                new Location("main.asm", 3, 3, 3), "idearm-linter", "MUV", List.of("MUV"));
+
+        vm.setDiagnostics(List.of(fromTheAssembler), null);
+        vm.setLiveDiagnostics(List.of(fromTyping), null);
+
+        assertEquals(2, vm.getProblems().size(), "a validation pass must not erase what the build reported");
+        assertEquals("nasm.error", vm.getProblems().get(0).getCode(), "build problems stay first");
+
+        // A later pass replaces only its own half.
+        vm.setLiveDiagnostics(List.of(), null);
+        assertEquals(1, vm.getProblems().size());
+        assertEquals("nasm.error", vm.getProblems().getFirst().getCode());
+
+        vm.clearDiagnostics();
+        assertTrue(vm.getProblems().isEmpty());
+    }
 }

@@ -19,4 +19,12 @@ public final class DosArguments {
         }
         return drive + ":\\" + normalized.replace('/', '\\').toUpperCase(Locale.ROOT);
     }
+
+    /**
+     * A folder to search, where the project root is spelled {@code "."} and becomes the drive's own root.
+     * Staging mirrors the project tree on the drive, so every other folder converts like any other path.
+     */
+    public static String directory(char drive, String logical) {
+        return ".".equals(logical) ? drive + ":\\" : path(drive, logical);
+    }
 }

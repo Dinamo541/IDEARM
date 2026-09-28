@@ -29,6 +29,12 @@ AtlantaFX 2.1.0
   License: MIT
   https://github.com/mkpaz/atlantafx
 
+Lucide icons 1.48.0 (bundled transparent PNG resources)
+  License: ISC; Feather-derived artwork under MIT
+  https://github.com/lucide-icons/lucide/tree/1.48.0
+  Full notices: io/github/dinamo541/idearm/app/icons/lucide/LICENSE inside idearm-app
+  Source URLs and SHA-256 hashes: icons/lucide/manifest.json beside the PNGs
+
 Jackson (jackson-core, jackson-databind, jackson-annotations, jackson-dataformat-toml) 2.18.6
   License: Apache License, version 2.0; each jar carries its LICENSE and NOTICE files in META-INF
   https://github.com/FasterXML/jackson

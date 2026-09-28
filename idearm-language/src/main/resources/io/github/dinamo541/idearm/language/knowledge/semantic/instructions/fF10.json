@@ -1,0 +1,638 @@
+[
+  {
+    "id": "x86.instr.push",
+    "mnemonic": "PUSH",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "PUSH reg16",
+      "PUSH mem16",
+      "PUSH segreg",
+      "PUSH imm16 (80186+)",
+      "PUSH reg64 (x86-64)"
+    ],
+    "example": "push ax\npush dx",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:PUSH",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.push#form.1",
+        "text": "PUSH reg16",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.push#form.2",
+        "text": "PUSH mem16",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.push#form.3",
+        "text": "PUSH segreg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.push#form.4",
+        "text": "PUSH imm16 (80186+)",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.push#form.5",
+        "text": "PUSH reg64 (x86-64)",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.pop",
+    "mnemonic": "POP",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "POP reg16",
+      "POP mem16",
+      "POP segreg",
+      "POP reg64 (x86-64)"
+    ],
+    "example": "pop dx\npop ax",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:POP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.pop#form.1",
+        "text": "POP reg16",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.pop#form.2",
+        "text": "POP mem16",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.pop#form.3",
+        "text": "POP segreg",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.pop#form.4",
+        "text": "POP reg64 (x86-64)",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.pusha",
+    "mnemonic": "PUSHA",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80186",
+    "invalidModes": ["LONG"],
+    "syntaxVariants": [
+      "PUSHA"
+    ],
+    "example": "pusha",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:PUSHA",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.pusha#form.1",
+        "text": "PUSHA",
+        "minCpu": "80186",
+        "requirement": {
+          "minGeneration": "80186",
+          "invalidModes": ["LONG"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.popa",
+    "mnemonic": "POPA",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80186",
+    "invalidModes": ["LONG"],
+    "syntaxVariants": [
+      "POPA"
+    ],
+    "example": "popa",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:POPA",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.popa#form.1",
+        "text": "POPA",
+        "minCpu": "80186",
+        "requirement": {
+          "minGeneration": "80186",
+          "invalidModes": ["LONG"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.pushad",
+    "mnemonic": "PUSHAD",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "invalidModes": ["LONG"],
+    "syntaxVariants": [
+      "PUSHAD"
+    ],
+    "example": "pushad",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:PUSHAD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.pushad#form.1",
+        "text": "PUSHAD",
+        "minCpu": "80386",
+        "requirement": {
+          "minGeneration": "80386",
+          "invalidModes": ["LONG"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.popad",
+    "mnemonic": "POPAD",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "invalidModes": ["LONG"],
+    "syntaxVariants": [
+      "POPAD"
+    ],
+    "example": "popad",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:POPAD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.popad#form.1",
+        "text": "POPAD",
+        "minCpu": "80386",
+        "requirement": {
+          "minGeneration": "80386",
+          "invalidModes": ["LONG"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.pushf",
+    "mnemonic": "PUSHF",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "PUSHF"
+    ],
+    "example": "pushf",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:PUSHF",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.pushf#form.1",
+        "text": "PUSHF",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.popf",
+    "mnemonic": "POPF",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "POPF"
+    ],
+    "example": "popf",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "MODIFIED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "MODIFIED",
+      "A": "MODIFIED",
+      "T": "MODIFIED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:POPF",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.popf#form.1",
+        "text": "POPF",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.pushfd",
+    "mnemonic": "PUSHFD",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "PUSHFD"
+    ],
+    "example": "pushfd",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:PUSHFD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.pushfd#form.1",
+        "text": "PUSHFD",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.popfd",
+    "mnemonic": "POPFD",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "POPFD"
+    ],
+    "example": "popfd",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "MODIFIED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "MODIFIED",
+      "A": "MODIFIED",
+      "T": "MODIFIED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:POPFD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.popfd#form.1",
+        "text": "POPFD",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.pushfq",
+    "mnemonic": "PUSHFQ",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "x86-64",
+    "syntaxVariants": [
+      "PUSHFQ"
+    ],
+    "example": "pushfq",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:PUSHFQ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.pushfq#form.1",
+        "text": "PUSHFQ",
+        "minCpu": "x86-64"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.popfq",
+    "mnemonic": "POPFQ",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "ADVANCED",
+    "minCpu": "x86-64",
+    "syntaxVariants": [
+      "POPFQ"
+    ],
+    "example": "popfq",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "MODIFIED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "MODIFIED",
+      "A": "MODIFIED",
+      "T": "MODIFIED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:POPFQ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.popfq#form.1",
+        "text": "POPFQ",
+        "minCpu": "x86-64"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.enter",
+    "mnemonic": "ENTER",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80186",
+    "syntaxVariants": [
+      "ENTER imm16, imm8"
+    ],
+    "example": "enter 8, 0",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:ENTER",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.enter#form.1",
+        "text": "ENTER imm16, imm8",
+        "minCpu": "80186"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.leave",
+    "mnemonic": "LEAVE",
+    "kind": "INSTRUCTION",
+    "family": "F-10",
+    "category": "STACK_PROCEDURES",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80186",
+    "syntaxVariants": [
+      "LEAVE"
+    ],
+    "example": "leave\nret",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:LEAVE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.leave#form.1",
+        "text": "LEAVE",
+        "minCpu": "80186"
+      }
+    ]
+  }
+]

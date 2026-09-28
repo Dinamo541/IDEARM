@@ -1,0 +1,128 @@
+[
+  {
+    "id": "syntax.tasm.dir.ideal",
+    "token": "IDEAL",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.tasm.dir.masm"],
+    "summaryEn": "Switch to Turbo Assembler IDEAL syntax mode",
+    "summaryEs": "Cambia al modo de sintaxis IDEAL de Turbo Assembler",
+    "descriptionEn": "Switches TASM from standard MASM compatibility mode to Borland's strict IDEAL mode, requiring bracketed indirection for all memory references and clearer operator syntax.",
+    "descriptionEs": "Cambia TASM del modo de compatibilidad MASM al modo estricto IDEAL de Borland, exigiendo corchetes para accesos a memoria y una sintaxis más consistente.",
+    "example": "IDEAL\nMODEL small\nDATASEG\nCODESEG\nSTART:",
+    "sources": ["src.irvine.5e-es#3.1:56"]
+  },
+  {
+    "id": "syntax.tasm.dir.masm",
+    "token": "MASM",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.tasm.dir.ideal"],
+    "summaryEn": "Switch to TASM standard MASM compatibility mode",
+    "summaryEs": "Cambia al modo de compatibilidad MASM en TASM",
+    "descriptionEn": "Reverts TASM to Microsoft MASM compatibility syntax from IDEAL mode.",
+    "descriptionEs": "Devuelve TASM a la sintaxis estándar de compatibilidad con Microsoft MASM.",
+    "example": "MASM",
+    "sources": ["src.irvine.5e-es#3.1:56"]
+  },
+  {
+    "id": "syntax.tasm.dir.p386",
+    "token": "P386",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Enable 80386 protected-mode and 32-bit instructions (TASM directive)",
+    "summaryEs": "Habilita instrucciones de 32 bits y modo protegido del 80386 (directiva TASM)",
+    "descriptionEn": "TASM equivalent of .386P, enabling 80386 instructions including privileged operations.",
+    "descriptionEs": "Equivalente en TASM a .386P, habilita instrucciones del 80386 incluyendo operaciones con privilegio.",
+    "example": "P386",
+    "sources": ["src.irvine.5e-es#3.1:56"]
+  },
+  {
+    "id": "syntax.tasm.dir.p486",
+    "token": "P486",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.tasm.dir.p386"],
+    "summaryEn": "Enable 80486 instructions in TASM",
+    "summaryEs": "Habilita instrucciones del 80486 en TASM",
+    "descriptionEn": "TASM directive enabling 80486 real and protected mode instructions (equivalent to .486P).",
+    "descriptionEs": "Directiva de TASM que habilita instrucciones del 80486 en modo real y protegido (equivalente a .486P).",
+    "example": "P486",
+    "sources": ["src.irvine.5e-es#3.1:56"]
+  },
+  {
+    "id": "syntax.tasm.dir.p586",
+    "token": "P586",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": ["syntax.tasm.dir.p486"],
+    "summaryEn": "Enable Pentium (586) instructions in TASM",
+    "summaryEs": "Habilita instrucciones de Pentium (586) en TASM",
+    "descriptionEn": "TASM directive enabling Pentium processor instructions (equivalent to .586P).",
+    "descriptionEs": "Directiva de TASM que habilita instrucciones del procesador Pentium (equivalente a .586P).",
+    "example": "P586",
+    "sources": ["src.irvine.5e-es#3.1:56"]
+  },
+  {
+    "id": "syntax.tasm.dir.locals",
+    "token": "LOCALS",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION", "PROCEDURE"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Enable automatic local symbol prefixing in TASM",
+    "summaryEs": "Habilita prefijo automático de símbolos locales en TASM",
+    "descriptionEn": "Enables local symbols prefixed with '@@' within procedures. Local symbols are scoped to the current procedure and do not conflict across different procedures.",
+    "descriptionEs": "Habilita el uso de símbolos locales precedidos de '@@' dentro de procedimientos. Los símbolos son locales al procedimiento actual y no entran en conflicto entre procedimientos.",
+    "example": "LOCALS\nmiProc PROC\n@@bucle:\n    loop @@bucle\n    ret\nmiProc ENDP",
+    "sources": ["src.irvine.5e-es#3.1:56"]
+  },
+  {
+    "id": "syntax.tasm.dir.quirks",
+    "token": "QUIRKS",
+    "syntaxClass": "DIRECTIVE",
+    "dialects": [
+      { "dialect": "TASM", "version": "4.1", "assemblable": true }
+    ],
+    "contexts": ["CONFIGURATION"],
+    "notation": false,
+    "assemblable": true,
+    "contrastWith": [],
+    "summaryEn": "Enable MASM compatibility quirks in TASM",
+    "summaryEs": "Habilita peculiaridades de compatibilidad con MASM en TASM",
+    "descriptionEn": "Enables TASM emulation of minor idiosyncrasies and behavioral quirks present in Microsoft MASM.",
+    "descriptionEs": "Habilita en TASM la emulación de peculiaridades y comportamientos específicos de Microsoft MASM.",
+    "example": "QUIRKS",
+    "sources": ["src.irvine.5e-es#3.1:56"]
+  }
+]

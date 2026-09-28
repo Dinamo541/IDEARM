@@ -1,33 +1,57 @@
 package io.github.dinamo541.idearm.app.ui;
 
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
-import javafx.scene.paint.*;
-import javafx.scene.shape.SVGPath;
-import javafx.scene.transform.Scale;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.collections.ListChangeListener;
+import java.util.List;
+import java.util.Objects;
+import javafx.scene.paint.Color;
+import javafx.scene.image.ImageView;
 
-/** IDEARM's original assembly monogram. Keep geometry in sync with branding/idearm.svg. */
+/** IDEARM's original brand, loaded from its bundled transparent PNG at every UI location. */
 public final class BrandLogo {
     private BrandLogo() {}
+    private static final String RESOURCE = Objects.requireNonNull(BrandLogo.class.getResource(
+            "/io/github/dinamo541/idearm/app/branding/idearm.png")).toExternalForm();
+    private static final Image LOGO = new Image(RESOURCE);
+    private static List<Image> icons;
+    private static boolean installed;
+
+    /** Load real image resources, without relying on a layout/snapshot pulse during startup. */
+    public static void apply(Stage stage) {
+        if (icons == null) {
+            icons = java.util.stream.IntStream.of(16, 24, 32, 48, 64, 128, 256)
+                    .mapToObj(size -> new Image(RESOURCE, size, size, true, true)).toList();
+        }
+        stage.getIcons().setAll(icons);
+    }
+
+    /** Includes JavaFX Alert/TextInputDialog windows and future secondary stages. Popups have no OS icon. */
+    public static void install() {
+        if (installed) return;
+        installed = true;
+        Window.getWindows().addListener((ListChangeListener<Window>) change -> {
+            while (change.next()) for (Window window : change.getAddedSubList()) {
+                if (window instanceof Stage stage) apply(stage);
+            }
+        });
+        for (Window window : Window.getWindows()) if (window instanceof Stage stage) apply(stage);
+    }
     public static Node create(double size) {
-        var edge = path("M32 2L58 17V47L32 62L6 47V17Z", new LinearGradient(0, 0, 1, 1, true,
-                CycleMethod.NO_CYCLE, new Stop(0, Color.web("#52d6ef")), new Stop(1, Color.web("#3976f6"))));
-        var core = path("M32 7L53 20V44L32 57L11 44V20Z", Color.web("#101b2d"));
-        var monogram = path("M20 44L29 20H35L44 44H37L35 38H28L26 44Z M30 32H33L31.5 26Z", Color.web("#79efd2"));
-        monogram.setFillRule(javafx.scene.shape.FillRule.EVEN_ODD);
-        var code = path("M19 24L14 31L19 38 M45 24L50 31L45 38", Color.TRANSPARENT);
-        code.setStroke(Color.web("#52c6ff")); code.setStrokeWidth(2);
-        var group = new Group(edge, core, monogram, code);
-        group.getTransforms().add(new Scale(size / 64, size / 64));
-        var wrapper = new javafx.scene.layout.Pane(group);
+        var image = new ImageView(LOGO);
+        image.setFitWidth(size);
+        image.setFitHeight(size);
+        image.setPreserveRatio(true);
+        image.setSmooth(true);
+        image.setMouseTransparent(true);
+        var wrapper = new javafx.scene.layout.Pane(image);
         wrapper.setMinSize(size, size); wrapper.setPrefSize(size, size); wrapper.setMaxSize(size, size);
         wrapper.setAccessibleText("IDEARM");
         return wrapper;
-    }
-    private static SVGPath path(String content, Paint fill) {
-        var path = new SVGPath(); path.setContent(content); path.setFill(fill); return path;
     }
     public static WritableImage image(int size) {
         var options = new SnapshotParameters(); options.setFill(Color.TRANSPARENT);

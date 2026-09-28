@@ -39,6 +39,24 @@ public record FlagSummary(
         );
     }
 
+    /**
+     * True if at least one flag is explicitly marked as MODIFIED.
+     */
+    public boolean isAnyModified() {
+        return o == FlagEffect.MODIFIED || d == FlagEffect.MODIFIED || i == FlagEffect.MODIFIED
+                || t == FlagEffect.MODIFIED || s == FlagEffect.MODIFIED || z == FlagEffect.MODIFIED
+                || a == FlagEffect.MODIFIED || p == FlagEffect.MODIFIED || c == FlagEffect.MODIFIED;
+    }
+
+    /**
+     * True if at least one flag is affected (MODIFIED, CLEARED, SET, or UNDEFINED).
+     */
+    public boolean isAnyAffected() {
+        return o != FlagEffect.UNAFFECTED || d != FlagEffect.UNAFFECTED || i != FlagEffect.UNAFFECTED
+                || t != FlagEffect.UNAFFECTED || s != FlagEffect.UNAFFECTED || z != FlagEffect.UNAFFECTED
+                || a != FlagEffect.UNAFFECTED || p != FlagEffect.UNAFFECTED || c != FlagEffect.UNAFFECTED;
+    }
+
     public String formatTable() {
         return "O D I T S Z A P C\n" +
                 o.symbol() + " " + d.symbol() + " " + i.symbol() + " " +

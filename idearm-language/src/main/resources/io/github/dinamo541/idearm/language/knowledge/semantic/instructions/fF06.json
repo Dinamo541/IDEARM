@@ -1,0 +1,338 @@
+[
+  {
+    "id": "x86.instr.bsf",
+    "mnemonic": "BSF",
+    "kind": "INSTRUCTION",
+    "family": "F-06",
+    "category": "BIT_MANIPULATION",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "BSF reg16, reg16",
+      "BSF reg16, mem16",
+      "BSF reg32, reg32",
+      "BSF reg64, reg64"
+    ],
+    "example": "bsf eax, ebx",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:BSF",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.bsf#form.1",
+        "text": "BSF reg16, reg16",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bsf#form.2",
+        "text": "BSF reg16, mem16",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bsf#form.3",
+        "text": "BSF reg32, reg32",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bsf#form.4",
+        "text": "BSF reg64, reg64",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.bsr",
+    "mnemonic": "BSR",
+    "kind": "INSTRUCTION",
+    "family": "F-06",
+    "category": "BIT_MANIPULATION",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "BSR reg16, reg16",
+      "BSR reg16, mem16",
+      "BSR reg32, reg32",
+      "BSR reg64, reg64"
+    ],
+    "example": "bsr eax, ebx",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "MODIFIED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:BSR",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.bsr#form.1",
+        "text": "BSR reg16, reg16",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bsr#form.2",
+        "text": "BSR reg16, mem16",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bsr#form.3",
+        "text": "BSR reg32, reg32",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bsr#form.4",
+        "text": "BSR reg64, reg64",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.bt",
+    "mnemonic": "BT",
+    "kind": "INSTRUCTION",
+    "family": "F-06",
+    "category": "BIT_MANIPULATION",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "BT reg16, imm8",
+      "BT reg16, reg16",
+      "BT reg32, imm8",
+      "BT reg64, imm8"
+    ],
+    "example": "bt eax, 5\njc bit_activo",
+    "flags": {
+      "P": "UNDEFINED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "UNDEFINED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:BT",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.bt#form.1",
+        "text": "BT reg16, imm8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bt#form.2",
+        "text": "BT reg16, reg16",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bt#form.3",
+        "text": "BT reg32, imm8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bt#form.4",
+        "text": "BT reg64, imm8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.btc",
+    "mnemonic": "BTC",
+    "kind": "INSTRUCTION",
+    "family": "F-06",
+    "category": "BIT_MANIPULATION",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "BTC reg16, imm8",
+      "BTC reg16, reg16",
+      "BTC reg32, imm8"
+    ],
+    "example": "btc eax, 3",
+    "flags": {
+      "P": "UNDEFINED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "UNDEFINED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:BTC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.btc#form.1",
+        "text": "BTC reg16, imm8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.btc#form.2",
+        "text": "BTC reg16, reg16",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.btc#form.3",
+        "text": "BTC reg32, imm8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.btr",
+    "mnemonic": "BTR",
+    "kind": "INSTRUCTION",
+    "family": "F-06",
+    "category": "BIT_MANIPULATION",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "BTR reg16, imm8",
+      "BTR reg16, reg16",
+      "BTR reg32, imm8"
+    ],
+    "example": "btr eax, 3",
+    "flags": {
+      "P": "UNDEFINED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "UNDEFINED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:BTR",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.btr#form.1",
+        "text": "BTR reg16, imm8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.btr#form.2",
+        "text": "BTR reg16, reg16",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.btr#form.3",
+        "text": "BTR reg32, imm8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.bts",
+    "mnemonic": "BTS",
+    "kind": "INSTRUCTION",
+    "family": "F-06",
+    "category": "BIT_MANIPULATION",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "BTS reg16, imm8",
+      "BTS reg16, reg16",
+      "BTS reg32, imm8"
+    ],
+    "example": "bts eax, 3",
+    "flags": {
+      "P": "UNDEFINED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "UNDEFINED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:BTS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.bts#form.1",
+        "text": "BTS reg16, imm8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bts#form.2",
+        "text": "BTS reg16, reg16",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.bts#form.3",
+        "text": "BTS reg32, imm8",
+        "minCpu": "80386"
+      }
+    ]
+  }
+]

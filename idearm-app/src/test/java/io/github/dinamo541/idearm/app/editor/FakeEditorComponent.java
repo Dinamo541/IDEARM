@@ -2,6 +2,7 @@ package io.github.dinamo541.idearm.app.editor;
 
 import io.github.dinamo541.idearm.application.editor.CompletionItem;
 import io.github.dinamo541.idearm.application.editor.HoverInfo;
+import io.github.dinamo541.idearm.domain.diagnostic.Diagnostic;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
@@ -17,6 +18,9 @@ import java.util.function.Function;
 public final class FakeEditorComponent implements EditorComponent {
 
     private String text = "";
+    private List<Diagnostic> diagnostics = List.of();
+    private int diagnosticsSetCount = 0;
+    private Runnable textChangedHandler;
     private final BooleanProperty modified = new SimpleBooleanProperty(false);
     private final ReadOnlyIntegerWrapper caretLine = new ReadOnlyIntegerWrapper(1);
     private final ReadOnlyIntegerWrapper caretColumn = new ReadOnlyIntegerWrapper(1);
@@ -40,6 +44,30 @@ public final class FakeEditorComponent implements EditorComponent {
     public void setText(String text) {
         this.text = text != null ? text : "";
         this.modified.set(false);
+        if (textChangedHandler != null) {
+            textChangedHandler.run();
+        }
+    }
+
+    @Override
+    public void setDiagnostics(List<Diagnostic> diagnostics) {
+        this.diagnostics = diagnostics != null ? List.copyOf(diagnostics) : List.of();
+        this.diagnosticsSetCount++;
+    }
+
+    @Override
+    public void setOnTextChanged(Runnable handler) {
+        this.textChangedHandler = handler;
+    }
+
+    /** The diagnostics the workbench last published to this editor. */
+    public List<Diagnostic> getDiagnostics() {
+        return diagnostics;
+    }
+
+    /** How many times diagnostics were published, which is what a debounce test counts. */
+    public int getDiagnosticsSetCount() {
+        return diagnosticsSetCount;
     }
 
     @Override
@@ -127,6 +155,7 @@ public final class FakeEditorComponent implements EditorComponent {
     }
 
     private final java.util.Set<Integer> breakpoints = new java.util.HashSet<>();
+    private final java.util.Set<Integer> disabledBreakpoints = new java.util.HashSet<>();
     private Consumer<Integer> breakpointToggledHandler;
     private Integer executionLine;
 
@@ -140,6 +169,19 @@ public final class FakeEditorComponent implements EditorComponent {
         if (breakpointToggledHandler != null) {
             breakpointToggledHandler.accept(line);
         }
+    }
+
+    @Override
+    public void setDisabledBreakpoints(java.util.Set<Integer> lines) {
+        disabledBreakpoints.clear();
+        if (lines != null) {
+            disabledBreakpoints.addAll(lines);
+        }
+    }
+
+    /** The lines whose breakpoint is switched off, as the workbench last published them. */
+    public java.util.Set<Integer> getDisabledBreakpoints() {
+        return java.util.Collections.unmodifiableSet(disabledBreakpoints);
     }
 
     @Override

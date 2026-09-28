@@ -24,7 +24,13 @@ with window controls, and an original logo. The JavaFX app preserves its existin
   Save All / Don't Save / Cancel. Do not manually hide after dispatch; JavaFX owns the default handler.
 - Use original vector icons and shared `HoverHelp` (450 ms delay, translated text and accessible names).
 - Use an original hexagonal Assembly A/code-bracket mark. Keep SVG and `BrandLogo` geometry synchronized;
-  render PNG with JavaFX and embed its 256 px version in ICO for jpackage. No dependencies were added.
+  render PNG with JavaFX and embed all seven sizes (16–256 px) in ICO for both jpackage launchers.
+  Window icons load the PNG resource, including secondary stages and alerts. No dependencies were added.
+- Keep normal window bounds and maximization in the user data directory's `window.properties`. Clamp restored
+  geometry to connected monitors' visual bounds. Never persist minimized or full-screen mode. Invalid settings
+  fall back to a centered window. This is presentation-only state and contains no project or editor data.
+- Expose full screen through View, the command palette and a title-bar button. Ctrl+Alt+F11 always toggles it;
+  F11 retains its existing context-sensitive debugging behavior, and Esc exits through JavaFX's native handler.
 
 ## Consequences and limits
 

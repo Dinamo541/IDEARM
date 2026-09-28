@@ -81,8 +81,22 @@ Cut/copy/paste shortcuts in text fields and the terminal retain those controls' 
 | Ctrl+Shift+M / Ctrl+Shift+U / Ctrl+Shift+D | Show Problems / Output / Debugger |
 | Ctrl+backtick | Show terminal |
 | Ctrl+Shift+P / F1 | Command palette |
+| Shift+F1 | Academic assistance: Assembly mnemonics dictionary |
 | Ctrl+Shift+B / F7 | Build project |
 | F11 | Full screen outside a debug session; Step Into during debugging |
+| Ctrl+Alt+F11 | Toggle full screen, including during debugging |
+| Esc | Exit full screen |
+
+Full screen is also available from **View → Full Screen**, the command palette, and the four-corner button
+beside Minimize. In full screen the Restore button exits full screen; the prior maximized state is preserved.
+Double-click empty title space to maximize/restore, drag it to move the window, or drag it to a monitor's top
+edge to maximize. Right-click empty title space or press Alt+Space for the window menu.
+
+IDEARM remembers normal position, size and maximization in `window.properties` in the user data directory
+(`%APPDATA%/IDEARM` on Windows, `~/.idearm` otherwise; `IDEARM_USER_DATA_DIR` overrides it). On restart, it
+fits the saved window to an available monitor's usable area, including DPI changes or a disconnected screen.
+Minimization and full screen are temporary and are not restored at startup. Close, Alt+F4 and File → Exit
+all allow cancelling when there are unsaved changes.
 
 Existing F5, Ctrl+F5, Shift+F5, F9, F10, and Shift+F11 debug/run bindings remain.
 IDEARM retains project-specific Ctrl+N (create file in explorer), Ctrl+Shift+N (new project), and Shift+F7
@@ -109,6 +123,12 @@ Reference: [VS Code's Windows shortcut sheet](https://code.visualstudio.com/shor
   close with unsaved changes. It captures both themes, exports the logo and creates fixtures under its output
   directory. Original buffers and retrievable clipboard formats are restored; no example source edits are saved.
   Check for both `VISUAL SMOKE: ... PASS` and `EXPERIENCE SMOKE: ... PASS`, and no `FAILED` log lines.
+- `IDEARM_DESIGN_SMOKE=<output folder>` captures all major application surfaces, including form windows,
+  dictionary, completion and hover popups, in dark English and light Spanish. It also renders compact layouts
+  and checks theme changes with the dictionary still open. Use isolated `IDEARM_USER_DATA_DIR` and an example
+  selected through `IDEARM_SMOKE_PROJECT`; no build or program execution is performed.
+- The visual-system conventions and theme propagation are recorded in
+  [ADR-012](adr/ADR-012-workbench-visual-system.md).
 - Local verification artifacts are in the ignored `scratch/workbench-review/` folder.
 
 Next useful refinements: configurable keybindings, a project-wide Ctrl+P picker, regex search, and multi-cursor

@@ -79,4 +79,70 @@ class AssemblySyntaxHighlighterTest {
         assertEquals(1, spans.getSpanCount());
         assertTrue(spans.getStyleSpan(0).getStyle().isEmpty());
     }
+
+    @Test
+    void coloursEveryInstructionTheCatalogKnows() {
+        // These come from the catalog rather than a list of its own (ADR-011), so they used to render as plain text
+        // while the linter considered them perfectly valid.
+        for (String mnemonic : new String[] {"BSWAP", "MOVZX", "XADD", "CPUID"}) {
+            StyleSpans<Collection<String>> spans = AssemblySyntaxHighlighter.computeHighlighting(mnemonic + " eax");
+
+            assertTrue(spans.getStyleSpan(0).getStyle().contains("instruction"), mnemonic + " should be coloured");
+            assertEquals(mnemonic.length(), spans.getStyleSpan(0).getLength());
+        }
+    }
+
+    @Test
+    void leavesAMistypedMnemonicUncoloured() {
+        StyleSpans<Collection<String>> spans = AssemblySyntaxHighlighter.computeHighlighting("MUV ax, 1");
+
+        assertTrue(spans.getStyleSpan(0).getStyle().isEmpty(), "a word no instruction is called is not an instruction");
+    }
+
+    @Test
+    void dialectDiscriminationForSectionAndMacro() {
+        // In dos-exe-16 (TASM/MASM), "section" should NOT be coloured as a directive
+        StyleSpans<Collection<String>> dosSpans = AssemblySyntaxHighlighter.computeHighlighting(
+                "section .text", io.github.dinamo541.idearm.language.knowledge.Dialect.TASM);
+        assertTrue(dosSpans.getStyleSpan(0).getStyle().isEmpty(),
+                "In TASM/MASM, 'section' is not a directive and should not be coloured as one");
+
+        // In win-pe64-console (NASM), "section" MUST be coloured as a directive
+        StyleSpans<Collection<String>> nasmSpans = AssemblySyntaxHighlighter.computeHighlighting(
+                "section .text", io.github.dinamo541.idearm.language.knowledge.Dialect.NASM);
+        assertTrue(nasmSpans.getStyleSpan(0).getStyle().contains("directive"),
+                "In NASM, 'section' must be coloured as directive");
+
+        // NASM preprocessor %macro
+        StyleSpans<Collection<String>> macroSpans = AssemblySyntaxHighlighter.computeHighlighting(
+                "%macro foo 1", io.github.dinamo541.idearm.language.knowledge.Dialect.NASM);
+        assertTrue(macroSpans.getStyleSpan(0).getStyle().contains("directive"),
+                "In NASM, '%macro' must be coloured as directive");
+    }
+
+    /** The highlighter checked comments first, so a semicolon inside a string started a comment. */
+    @Test
+    void aSemicolonInsideAStringIsNotAComment() {
+        String line = "MOV AL, ';'";
+        for (StyleSpan<Collection<String>> span : AssemblySyntaxHighlighter.computeHighlighting(line)) {
+            assertTrue(!span.getStyle().contains("comment"), "no comment in " + line);
+        }
+    }
+
+    @Test
+    void anUnterminatedStringRunsToTheEndOfTheLineAsInTheLexer() {
+        String line = "DB 'it;s";
+        var spans = AssemblySyntaxHighlighter.computeHighlighting(line);
+        var last = spans.getStyleSpan(spans.getSpanCount() - 1);
+        assertTrue(last.getStyle().contains("string"), last.toString());
+        assertEquals("'it;s".length(), last.getLength());
+    }
+
+    @Test
+    void processorDirectivesOfLaterCpusAreDirectives() {
+        for (String directive : new String[] {".486", ".586", ".686"}) {
+            var span = AssemblySyntaxHighlighter.computeHighlighting(directive).getStyleSpan(0);
+            assertTrue(span.getStyle().contains("directive"), directive);
+        }
+    }
 }

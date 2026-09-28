@@ -1,0 +1,910 @@
+[
+  {
+    "id": "x86.instr.shl",
+    "mnemonic": "SHL",
+    "kind": "INSTRUCTION",
+    "family": "F-05",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "SHL reg, 1",
+      "SHL mem, 1",
+      "SHL reg, CL",
+      "SHL mem, CL",
+      "SHL reg, imm8 (80186+)",
+      "SHL mem, imm8 (80186+)",
+      "SAL reg, 1",
+      "SAL mem, 1",
+      "SAL reg, CL",
+      "SAL mem, CL",
+      "SAL reg, imm8 (80186+)",
+      "SAL mem, imm8 (80186+)"
+    ],
+    "example": "; Desplazamiento logico/aritmetico a la izquierda: multiplicacion por 2\n; Estado inicial: AX = 0005h, CF = 0, OF = 0\nmov ax, 5\nshl ax, 1\n; Estado final: AX = 000Ah, CF = 0, OF = 0, ZF = 0, SF = 0\n; Verificacion: ASSEMBLED",
+    "flags": {
+      "O": "MODIFIED",
+      "D": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED",
+      "Z": "MODIFIED",
+      "A": "UNDEFINED",
+      "P": "MODIFIED",
+      "C": "MODIFIED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SHL",
+        "dialect": "COMMON",
+        "name": "SAL"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SHL/SAL",
+      "src.irvine.5e-es#cap7:desplazamientos"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "pitfalls": [
+      "En el 8086 puro, desplazar por un inmediato distinto de 1 es ilegal; la cuenta debe cargarse en el registro CL.",
+      "Si la cuenta de desplazamiento es 0, ninguna bandera del registro de estado se modifica.",
+      "Si la cuenta es mayor a 1, la bandera de desbordamiento (OF) queda indefinida; no debe evaluarse con JO/JNO.",
+      "La bandera de ajuste auxiliar (AF) queda siempre indefinida tras cualquier operacion de desplazamiento.",
+      "A partir del procesador 80286, la arquitectura trunca la cuenta de desplazamiento a 5 bits (modulo 32)."
+    ],
+    "counterExamples": [
+      "shl ax, 2 ; Error en 8086 puro: solo se admite cuenta inmediata de 1; use CL para cuentas variables o mayores.",
+      "shl ax, cl ; Si CL vale 0, las banderas no reflejan el valor actual de AX, permanecen inalteradas."
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.shl#form.1",
+        "text": "SHL reg, 1",
+        "minCpu": "8086",
+        "operationPlain": "SHL reg, 1",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "note": "recibe el bit mas significativo desplazado fuera" },
+          { "flag": "OF", "effect": "MODIFIED", "condition": "count == 1", "note": "OF = (MSB resultado) XOR CF" },
+          { "flag": "SF", "effect": "MODIFIED" },
+          { "flag": "ZF", "effect": "MODIFIED" },
+          { "flag": "PF", "effect": "MODIFIED" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shl#form.2",
+        "text": "SHL reg, CL",
+        "minCpu": "8086",
+        "operationPlain": "SHL reg, CL",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0", "note": "recibe el ultimo bit desplazado fuera" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1", "note": "indefinido para desplazamientos mayores a 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shl#form.3",
+        "text": "SHL mem, 1",
+        "minCpu": "8086",
+        "operationPlain": "SHL mem, 1",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "note": "recibe el bit mas significativo desplazado fuera" },
+          { "flag": "OF", "effect": "MODIFIED", "condition": "count == 1", "note": "OF = (MSB resultado) XOR CF" },
+          { "flag": "SF", "effect": "MODIFIED" },
+          { "flag": "ZF", "effect": "MODIFIED" },
+          { "flag": "PF", "effect": "MODIFIED" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shl#form.4",
+        "text": "SHL mem, CL",
+        "minCpu": "8086",
+        "operationPlain": "SHL mem, CL",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0", "note": "recibe el ultimo bit desplazado fuera" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shl#form.5",
+        "text": "SHL reg, imm8",
+        "minCpu": "80186",
+        "operationPlain": "SHL reg, imm8",
+        "requirement": { "minGeneration": "80186" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shl#form.6",
+        "text": "SHL mem, imm8",
+        "minCpu": "80186",
+        "operationPlain": "SHL mem, imm8",
+        "requirement": { "minGeneration": "80186" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.shr",
+    "mnemonic": "SHR",
+    "kind": "INSTRUCTION",
+    "family": "F-05",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "SHR reg, 1",
+      "SHR mem, 1",
+      "SHR reg, CL",
+      "SHR mem, CL",
+      "SHR reg, imm8 (80186+)",
+      "SHR mem, imm8 (80186+)"
+    ],
+    "example": "; Desplazamiento logico a la derecha: division sin signo entre 2\n; Estado inicial: AX = 000Ah (10 decimal), CF = 0, OF = 0\nmov ax, 10\nshr ax, 1\n; Estado final: AX = 0005h (5 decimal), CF = 0, OF = 0, ZF = 0, SF = 0\n; Verificacion: ASSEMBLED",
+    "flags": {
+      "O": "MODIFIED",
+      "D": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED",
+      "Z": "MODIFIED",
+      "A": "UNDEFINED",
+      "P": "MODIFIED",
+      "C": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SHR",
+      "src.irvine.5e-es#cap7:desplazamientos"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "pitfalls": [
+      "SHR inserta siempre ceros por la izquierda (desplazamiento logico); no conserva el signo en numeros negativos.",
+      "Para division entera de numeros con signo debe emplearse SAR, no SHR.",
+      "Si la cuenta es 0, las banderas permanecen inalteradas.",
+      "Si la cuenta es mayor a 1, OF queda indefinida; cuando la cuenta es 1, OF recibe el bit mas significativo original del operando."
+    ],
+    "counterExamples": [
+      "mov ax, -4\nshr ax, 1 ; AX = 7FFEh (32766 positivo), se perdio el signo negativo. Debe usarse SAR para preservar signo."
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.shr#form.1",
+        "text": "SHR reg, 1",
+        "minCpu": "8086",
+        "operationPlain": "SHR reg, 1",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "note": "recibe el bit 0 desplazado fuera" },
+          { "flag": "OF", "effect": "MODIFIED", "condition": "count == 1", "note": "OF recibe el MSB del operando original" },
+          { "flag": "SF", "effect": "CLEARED", "note": "siempre 0 porque el bit superior queda en cero" },
+          { "flag": "ZF", "effect": "MODIFIED" },
+          { "flag": "PF", "effect": "MODIFIED" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shr#form.2",
+        "text": "SHR mem, 1",
+        "minCpu": "8086",
+        "operationPlain": "SHR mem, 1",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED" },
+          { "flag": "OF", "effect": "MODIFIED", "condition": "count == 1" },
+          { "flag": "SF", "effect": "CLEARED" },
+          { "flag": "ZF", "effect": "MODIFIED" },
+          { "flag": "PF", "effect": "MODIFIED" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shr#form.3",
+        "text": "SHR reg, CL",
+        "minCpu": "8086",
+        "operationPlain": "SHR reg, CL",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "CLEARED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shr#form.4",
+        "text": "SHR reg, imm8",
+        "minCpu": "80186",
+        "operationPlain": "SHR reg, imm8",
+        "requirement": { "minGeneration": "80186" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "CLEARED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sar",
+    "mnemonic": "SAR",
+    "kind": "INSTRUCTION",
+    "family": "F-05",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "SAR reg, 1",
+      "SAR mem, 1",
+      "SAR reg, CL",
+      "SAR mem, CL",
+      "SAR reg, imm8 (80186+)",
+      "SAR mem, imm8 (80186+)"
+    ],
+    "example": "; Desplazamiento aritmetico a la derecha: division con signo entre 2\n; Estado inicial: AX = FFF4h (-12 decimal), CF = 0\nmov ax, -12\nsar ax, 1\n; Estado final: AX = FFFAh (-6 decimal), CF = 0, OF = 0, SF = 1, ZF = 0\n; Verificacion: ASSEMBLED",
+    "flags": {
+      "O": "MODIFIED",
+      "D": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED",
+      "Z": "MODIFIED",
+      "A": "UNDEFINED",
+      "P": "MODIFIED",
+      "C": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SAR",
+      "src.irvine.5e-es#cap7:desplazamientos"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "pitfalls": [
+      "SAR redondea hacia menos infinito (piso), mientras que IDIV trunca hacia cero. Por ejemplo, SAR -5, 1 da -3 con CF=1, mientras IDIV produce cociente -2.",
+      "Para numeros negativos impares, si se requiere division truncada identica a C/Java, debe sumarse 1 antes de desplazar.",
+      "Para cuenta = 1, OF se pone siempre a 0 porque el bit de signo no cambia jamas.",
+      "Para cuenta > 1, OF queda indefinido."
+    ],
+    "counterExamples": [
+      "mov al, -5 ; AL = FBh (-5 decimal)\nsar al, 1  ; AL = FDh (-3 decimal, no -2). Redondeo hacia menos infinito."
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sar#form.1",
+        "text": "SAR reg, 1",
+        "minCpu": "8086",
+        "operationPlain": "SAR reg, 1",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "note": "recibe el bit 0 desplazado fuera" },
+          { "flag": "OF", "effect": "CLEARED", "condition": "count == 1", "note": "OF se pone a 0 porque el signo nunca cambia" },
+          { "flag": "SF", "effect": "MODIFIED", "note": "preserva el bit de signo" },
+          { "flag": "ZF", "effect": "MODIFIED" },
+          { "flag": "PF", "effect": "MODIFIED" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.sar#form.2",
+        "text": "SAR mem, 1",
+        "minCpu": "8086",
+        "operationPlain": "SAR mem, 1",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED" },
+          { "flag": "OF", "effect": "CLEARED", "condition": "count == 1" },
+          { "flag": "SF", "effect": "MODIFIED" },
+          { "flag": "ZF", "effect": "MODIFIED" },
+          { "flag": "PF", "effect": "MODIFIED" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.sar#form.3",
+        "text": "SAR reg, CL",
+        "minCpu": "8086",
+        "operationPlain": "SAR reg, CL",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.sar#form.4",
+        "text": "SAR reg, imm8",
+        "minCpu": "80186",
+        "operationPlain": "SAR reg, imm8",
+        "requirement": { "minGeneration": "80186" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.rol",
+    "mnemonic": "ROL",
+    "kind": "INSTRUCTION",
+    "family": "F-05",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "ROL reg, 1",
+      "ROL mem, 1",
+      "ROL reg, CL",
+      "ROL mem, CL",
+      "ROL reg, imm8 (80186+)",
+      "ROL mem, imm8 (80186+)"
+    ],
+    "example": "; Rotacion circular a la izquierda: el bit mas alto pasa al bit 0 y a CF\n; Estado inicial: AL = 85h (1000_0101b), CF = 0\nmov al, 85h\nrol al, 1\n; Estado final: AL = 0Bh (0000_1011b), CF = 1, OF = 1\n; Verificacion: ASSEMBLED",
+    "flags": {
+      "O": "MODIFIED",
+      "D": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "P": "UNAFFECTED",
+      "C": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:ROL",
+      "src.irvine.5e-es#cap7:rotaciones"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "pitfalls": [
+      "ROL NO modifica SF, ZF, AF ni PF; solamente afecta a CF y condicionalmente a OF.",
+      "OF solo esta definido si la cuenta es exactamente 1; para cuentas mayores queda indefinido."
+    ],
+    "counterExamples": [],
+    "forms": [
+      {
+        "id": "x86.instr.rol#form.1",
+        "text": "ROL reg, 1",
+        "minCpu": "8086",
+        "operationPlain": "ROL reg, 1",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "note": "recibe el bit rotado fuera del MSB" },
+          { "flag": "OF", "effect": "MODIFIED", "condition": "count == 1", "note": "OF = (MSB resultado) XOR CF" }
+        ]
+      },
+      {
+        "id": "x86.instr.rol#form.2",
+        "text": "ROL reg, CL",
+        "minCpu": "8086",
+        "operationPlain": "ROL reg, CL",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" }
+        ]
+      },
+      {
+        "id": "x86.instr.rol#form.3",
+        "text": "ROL reg, imm8",
+        "minCpu": "80186",
+        "operationPlain": "ROL reg, imm8",
+        "requirement": { "minGeneration": "80186" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.ror",
+    "mnemonic": "ROR",
+    "kind": "INSTRUCTION",
+    "family": "F-05",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "ROR reg, 1",
+      "ROR mem, 1",
+      "ROR reg, CL",
+      "ROR mem, CL",
+      "ROR reg, imm8 (80186+)",
+      "ROR mem, imm8 (80186+)"
+    ],
+    "example": "; Rotacion circular a la derecha: el bit 0 pasa al bit superior y a CF\n; Estado inicial: AL = 85h (1000_0101b), CF = 0\nmov al, 85h\nror al, 1\n; Estado final: AL = C2h (1100_0010b), CF = 1, OF = 0\n; Verificacion: ASSEMBLED",
+    "flags": {
+      "O": "MODIFIED",
+      "D": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "P": "UNAFFECTED",
+      "C": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:ROR",
+      "src.irvine.5e-es#cap7:rotaciones"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "pitfalls": [
+      "ROR NO modifica SF, ZF, AF ni PF; solamente afecta a CF y OF.",
+      "OF queda indefinido si la cuenta es mayor a 1."
+    ],
+    "counterExamples": [],
+    "forms": [
+      {
+        "id": "x86.instr.ror#form.1",
+        "text": "ROR reg, 1",
+        "minCpu": "8086",
+        "operationPlain": "ROR reg, 1",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "note": "recibe el bit 0 rotado fuera" },
+          { "flag": "OF", "effect": "MODIFIED", "condition": "count == 1", "note": "OF = (MSB resultado) XOR (segundo MSB)" }
+        ]
+      },
+      {
+        "id": "x86.instr.ror#form.2",
+        "text": "ROR reg, CL",
+        "minCpu": "8086",
+        "operationPlain": "ROR reg, CL",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" }
+        ]
+      },
+      {
+        "id": "x86.instr.ror#form.3",
+        "text": "ROR reg, imm8",
+        "minCpu": "80186",
+        "operationPlain": "ROR reg, imm8",
+        "requirement": { "minGeneration": "80186" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.rcl",
+    "mnemonic": "RCL",
+    "kind": "INSTRUCTION",
+    "family": "F-05",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "RCL reg, 1",
+      "RCL mem, 1",
+      "RCL reg, CL",
+      "RCL mem, CL",
+      "RCL reg, imm8 (80186+)",
+      "RCL mem, imm8 (80186+)"
+    ],
+    "example": "; Rotacion a la izquierda a traves del acarreo (CF)\n; Estado inicial: AL = 80h (1000_0000b), CF = 1\nstc\nmov al, 80h\nrcl al, 1\n; Estado final: AL = 01h (0000_0001b, viejo CF entro por bit 0), CF = 1\n; Verificacion: ASSEMBLED",
+    "flags": {
+      "O": "MODIFIED",
+      "D": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "P": "UNAFFECTED",
+      "C": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:RCL",
+      "src.irvine.5e-es#cap7:rotaciones"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "pitfalls": [
+      "RCL rota a traves del flag de acarreo (CF actua como bit adicional: ciclo de 9 bits en byte, 17 bits en word).",
+      "Si CF no se inicializa deliberadamente antes de RCL (con CLC o STC), su valor previo alterara el resultado."
+    ],
+    "counterExamples": [],
+    "forms": [
+      {
+        "id": "x86.instr.rcl#form.1",
+        "text": "RCL reg, 1",
+        "minCpu": "8086",
+        "operationPlain": "RCL reg, 1",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "note": "recibe el bit que sale del MSB; el viejo CF entra por bit 0" },
+          { "flag": "OF", "effect": "MODIFIED", "condition": "count == 1", "note": "OF = (MSB resultado) XOR CF" }
+        ]
+      },
+      {
+        "id": "x86.instr.rcl#form.2",
+        "text": "RCL reg, CL",
+        "minCpu": "8086",
+        "operationPlain": "RCL reg, CL",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" }
+        ]
+      },
+      {
+        "id": "x86.instr.rcl#form.3",
+        "text": "RCL reg, imm8",
+        "minCpu": "80186",
+        "operationPlain": "RCL reg, imm8",
+        "requirement": { "minGeneration": "80186" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.rcr",
+    "mnemonic": "RCR",
+    "kind": "INSTRUCTION",
+    "family": "F-05",
+    "category": "LOGIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "RCR reg, 1",
+      "RCR mem, 1",
+      "RCR reg, CL",
+      "RCR mem, CL",
+      "RCR reg, imm8 (80186+)",
+      "RCR mem, imm8 (80186+)"
+    ],
+    "example": "; Rotacion a la derecha a traves del acarreo (CF)\n; Estado inicial: AL = 01h (0000_0001b), CF = 1\nstc\nmov al, 01h\nrcr al, 1\n; Estado final: AL = 80h (1000_0000b, viejo CF entro por bit 7), CF = 1\n; Verificacion: ASSEMBLED",
+    "flags": {
+      "O": "MODIFIED",
+      "D": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "P": "UNAFFECTED",
+      "C": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:RCR",
+      "src.irvine.5e-es#cap7:rotaciones"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "pitfalls": [
+      "RCR rota a la derecha a traves de CF: el bit 0 entra a CF, y el antiguo CF entra por el bit mas alto.",
+      "SF, ZF, AF, PF NO se modifican."
+    ],
+    "counterExamples": [],
+    "forms": [
+      {
+        "id": "x86.instr.rcr#form.1",
+        "text": "RCR reg, 1",
+        "minCpu": "8086",
+        "operationPlain": "RCR reg, 1",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "note": "recibe el bit que sale de bit 0; el viejo CF entra por el MSB" },
+          { "flag": "OF", "effect": "MODIFIED", "condition": "count == 1", "note": "OF = (MSB resultado) XOR (segundo MSB)" }
+        ]
+      },
+      {
+        "id": "x86.instr.rcr#form.2",
+        "text": "RCR reg, CL",
+        "minCpu": "8086",
+        "operationPlain": "RCR reg, CL",
+        "requirement": { "minGeneration": "8086" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" }
+        ]
+      },
+      {
+        "id": "x86.instr.rcr#form.3",
+        "text": "RCR reg, imm8",
+        "minCpu": "80186",
+        "operationPlain": "RCR reg, imm8",
+        "requirement": { "minGeneration": "80186" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.shld",
+    "mnemonic": "SHLD",
+    "kind": "INSTRUCTION",
+    "family": "F-05",
+    "category": "LOGIC",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SHLD reg16, reg16, imm8",
+      "SHLD mem16, reg16, imm8",
+      "SHLD reg16, reg16, CL",
+      "SHLD mem16, reg16, CL",
+      "SHLD reg32, reg32, imm8",
+      "SHLD mem32, reg32, imm8",
+      "SHLD reg32, reg32, CL",
+      "SHLD mem32, reg32, CL"
+    ],
+    "example": "; Desplazamiento a la izquierda de doble precision (80386+)\n; Estado inicial: AX = 1234h, BX = 5678h, CF = 0\nmov ax, 1234h\nmov bx, 5678h\nshld ax, bx, 4\n; Estado final: AX = 2345h, BX = 5678h (BX inalterado), CF = 0\n; Verificacion: ASSEMBLED",
+    "flags": {
+      "O": "MODIFIED",
+      "D": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED",
+      "Z": "MODIFIED",
+      "A": "UNDEFINED",
+      "P": "MODIFIED",
+      "C": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SHLD",
+      "src.irvine.5e-es#cap7:desplazamientos"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "pitfalls": [
+      "SHLD exige procesador 80386 o superior.",
+      "El registro fuente (segundo operando) NO se modifica; solo aporta bits para rellenar los bits bajos del destino.",
+      "Si la cuenta es mayor o igual que el tamano del operando, el resultado en el destino queda indefinido en arquitectura Intel."
+    ],
+    "counterExamples": [],
+    "forms": [
+      {
+        "id": "x86.instr.shld#form.1",
+        "text": "SHLD reg16, reg16, imm8",
+        "minCpu": "80386",
+        "operationPlain": "SHLD r16, r16, imm8",
+        "requirement": { "minGeneration": "80386" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shld#form.2",
+        "text": "SHLD reg16, reg16, CL",
+        "minCpu": "80386",
+        "operationPlain": "SHLD r16, r16, CL",
+        "requirement": { "minGeneration": "80386" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shld#form.3",
+        "text": "SHLD reg32, reg32, imm8",
+        "minCpu": "80386",
+        "operationPlain": "SHLD r32, r32, imm8",
+        "requirement": { "minGeneration": "80386" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shld#form.4",
+        "text": "SHLD reg32, reg32, CL",
+        "minCpu": "80386",
+        "operationPlain": "SHLD r32, r32, CL",
+        "requirement": { "minGeneration": "80386" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.shrd",
+    "mnemonic": "SHRD",
+    "kind": "INSTRUCTION",
+    "family": "F-05",
+    "category": "LOGIC",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SHRD reg16, reg16, imm8",
+      "SHRD mem16, reg16, imm8",
+      "SHRD reg16, reg16, CL",
+      "SHRD mem16, reg16, CL",
+      "SHRD reg32, reg32, imm8",
+      "SHRD mem32, reg32, imm8",
+      "SHRD reg32, reg32, CL",
+      "SHRD mem32, reg32, CL"
+    ],
+    "example": "; Desplazamiento a la derecha de doble precision (80386+)\n; Estado inicial: AX = 1234h, BX = 5678h, CF = 0\nmov ax, 1234h\nmov bx, 5678h\nshrd ax, bx, 4\n; Estado final: AX = 8123h, BX = 5678h (BX inalterado), CF = 0, ZF = 0, SF = 1\n; Verificacion: ASSEMBLED",
+    "flags": {
+      "O": "MODIFIED",
+      "D": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED",
+      "Z": "MODIFIED",
+      "A": "UNDEFINED",
+      "P": "MODIFIED",
+      "C": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SHRD",
+      "src.irvine.5e-es#cap7:desplazamientos"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "pitfalls": [
+      "SHRD exige 80386 o superior.",
+      "El registro fuente no se modifica.",
+      "Si la cuenta es >= tamano del operando, el resultado queda indefinido."
+    ],
+    "counterExamples": [],
+    "forms": [
+      {
+        "id": "x86.instr.shrd#form.1",
+        "text": "SHRD reg16, reg16, imm8",
+        "minCpu": "80386",
+        "operationPlain": "SHRD r16, r16, imm8",
+        "requirement": { "minGeneration": "80386" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shrd#form.2",
+        "text": "SHRD reg16, reg16, CL",
+        "minCpu": "80386",
+        "operationPlain": "SHRD r16, r16, CL",
+        "requirement": { "minGeneration": "80386" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shrd#form.3",
+        "text": "SHRD reg32, reg32, imm8",
+        "minCpu": "80386",
+        "operationPlain": "SHRD r32, r32, imm8",
+        "requirement": { "minGeneration": "80386" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      },
+      {
+        "id": "x86.instr.shrd#form.4",
+        "text": "SHRD reg32, reg32, CL",
+        "minCpu": "80386",
+        "operationPlain": "SHRD r32, r32, CL",
+        "requirement": { "minGeneration": "80386" },
+        "flags": [
+          { "flag": "CF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "OF", "effect": "UNDEFINED", "condition": "count > 1" },
+          { "flag": "SF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "ZF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "PF", "effect": "MODIFIED", "condition": "count > 0" },
+          { "flag": "AF", "effect": "UNDEFINED" }
+        ]
+      }
+    ]
+  }
+]

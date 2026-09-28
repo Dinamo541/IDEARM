@@ -14,6 +14,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class NasmToolchainTest {
 
+    /** The plan spells the project root {@code "."}, and the native runner works from the project folder. */
+    @Test
+    void searchesTheProjectRootAndEveryOtherFolderOnTheSearchPath() {
+        NasmAssemblerAdapter adapter = new NasmAssemblerAdapter();
+        AssembleRequest request = new AssembleRequest("main.asm", "obj/main.obj", null, false, "x86-64",
+                List.of(".", "src", "inc/mac"), TargetProfileCatalog.WIN_PE64_CONSOLE);
+
+        List<String> args = adapter.assemble(request).arguments();
+
+        assertTrue(args.contains("-I./"));
+        assertTrue(args.contains("-Isrc/"));
+        assertTrue(args.contains("-Iinc/mac/"));
+    }
+
     @Test
     void generatesNasmWin64AssembleInvocation() {
         NasmAssemblerAdapter adapter = new NasmAssemblerAdapter();

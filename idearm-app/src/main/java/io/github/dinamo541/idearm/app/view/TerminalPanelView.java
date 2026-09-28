@@ -36,10 +36,11 @@ public final class TerminalPanelView extends BorderPane {
     }
 
     private void buildUi() {
+        getStyleClass().add("terminal-panel");
         // Output Area
         terminalArea.setEditable(false);
         terminalArea.setWrapText(true);
-        terminalArea.setStyle("-fx-font-family: 'JetBrains Mono', 'Consolas', monospace; -fx-font-size: 12px;");
+        terminalArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
         if (viewModel != null) {
             terminalArea.textProperty().bind(viewModel.terminalTextProperty());
             terminalArea.textProperty().addListener((obs, oldV, newV) -> terminalArea.setScrollTop(Double.MAX_VALUE));
@@ -49,10 +50,11 @@ public final class TerminalPanelView extends BorderPane {
         // Header toolbar with clear, restart, and status
         HBox headerBar = new HBox(8);
         headerBar.setAlignment(Pos.CENTER_LEFT);
-        headerBar.setPadding(new Insets(4, 8, 4, 8));
+        headerBar.getStyleClass().add("panel-toolbar");
 
         Label dirLabel = new Label();
         dirLabel.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.TEXT_MUTED);
+        dirLabel.setMinWidth(0);
         if (viewModel != null) {
             dirLabel.textProperty().bind(viewModel.workingDirectoryProperty());
         }
@@ -64,7 +66,7 @@ public final class TerminalPanelView extends BorderPane {
         restartBtn.textProperty().bind(localization.text("terminal.restart"));
         io.github.dinamo541.idearm.app.ui.HoverHelp.install(restartBtn, localization, "terminal.restart.tooltip", "");
         restartBtn.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.RESTART.create());
-        restartBtn.getStyleClass().addAll(Styles.BUTTON_OUTLINED, Styles.SMALL);
+        restartBtn.getStyleClass().add("subtle-button");
         if (viewModel != null) {
             restartBtn.setOnAction(e -> viewModel.restart());
         }
@@ -73,13 +75,13 @@ public final class TerminalPanelView extends BorderPane {
         clearBtn.textProperty().bind(localization.text("terminal.clear"));
         io.github.dinamo541.idearm.app.ui.HoverHelp.install(clearBtn, localization, "terminal.clear.tooltip", "");
         clearBtn.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.CLEAR.create());
-        clearBtn.getStyleClass().addAll(Styles.BUTTON_OUTLINED, Styles.SMALL);
+        clearBtn.getStyleClass().add("subtle-button");
         if (viewModel != null) {
             clearBtn.setOnAction(e -> viewModel.clear());
         }
 
         Label statusBadge = new Label();
-        statusBadge.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.ROUNDED);
+        statusBadge.getStyleClass().addAll(Styles.TEXT_SMALL, "terminal-badge");
         statusBadge.setPadding(new Insets(2, 6, 2, 6));
         if (viewModel != null) {
             statusBadge.textProperty().bind(Bindings.createStringBinding(
@@ -90,7 +92,7 @@ public final class TerminalPanelView extends BorderPane {
             ));
             statusBadge.styleProperty().bind(Bindings.createStringBinding(
                     () -> viewModel.isRunning()
-                            ? "-fx-background-color: -color-success-emphasis; -fx-text-fill: -color-fg-emphasis; -fx-font-weight: bold;"
+                            ? "-fx-background-color: -color-success-subtle; -fx-text-fill: -color-success-fg;"
                             : "-fx-background-color: -color-bg-subtle; -fx-text-fill: -color-fg-muted;",
                     viewModel.runningProperty()
             ));
@@ -102,13 +104,13 @@ public final class TerminalPanelView extends BorderPane {
         // Input row
         HBox inputRow = new HBox(6);
         inputRow.setAlignment(Pos.CENTER_LEFT);
-        inputRow.setPadding(new Insets(4, 6, 6, 6));
+        inputRow.getStyleClass().add("console-input");
 
-        Label promptSymbol = new Label("❯");
-        promptSymbol.setStyle("-fx-font-weight: bold; -fx-text-fill: -color-accent-emphasis;");
+        Label promptSymbol = new Label(null, io.github.dinamo541.idearm.app.ui.WorkbenchIcons.RIGHT.create(14));
+        promptSymbol.getStyleClass().add("terminal-prompt");
 
         inputField.promptTextProperty().bind(localization.text("terminal.input.placeholder"));
-        inputField.setStyle("-fx-font-family: 'JetBrains Mono', 'Consolas', monospace; -fx-font-size: 12px;");
+        inputField.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
         HBox.setHgrow(inputField, Priority.ALWAYS);
 
         inputField.setOnKeyPressed(event -> {

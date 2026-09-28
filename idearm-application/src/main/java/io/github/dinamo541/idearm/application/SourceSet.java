@@ -25,8 +25,8 @@ import java.util.TreeSet;
 final class SourceSet {
 
     /** Folders that never hold sources; walking them would be slow and could match generated copies. */
-    private static final Set<String> SKIPPED = Set.of("build", "dist", ".idearm", ".git", ".vscode", "target");
-    private static final int MAX_DEPTH = 16;
+    static final Set<String> SKIPPED = Set.of("build", "dist", ".idearm", ".git", ".vscode", "target");
+    static final int MAX_DEPTH = 16;
 
     private SourceSet() {
     }
@@ -64,7 +64,8 @@ final class SourceSet {
                 project.resources(), project.build(), project.run(), project.debug(), project.dist());
     }
 
-    private static boolean isPattern(String value) {
+    /** A glob already covers whatever it matches, so the entry never has to be listed beside it. */
+    static boolean isPattern(String value) {
         return value.indexOf('*') >= 0 || value.indexOf('?') >= 0 || value.indexOf('[') >= 0;
     }
 

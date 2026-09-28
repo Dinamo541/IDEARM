@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.dinamo541.idearm.domain.DomainException;
+import io.github.dinamo541.idearm.domain.model.DebugConfiguration;
 import io.github.dinamo541.idearm.domain.model.Project;
 import io.github.dinamo541.idearm.domain.port.ProjectRepository;
 import java.io.IOException;
@@ -104,6 +105,45 @@ class CreateProjectTest {
         CreateProject useCase = new CreateProject(repo);
         assertThrows(DomainException.class, () ->
                 useCase.execute(tempDir, "ExistingProj", "dos-exe-16", "8086", "borland-tasm", ">=3.2"));
+    }
+
+    /**
+     * A DOS project must be debuggable the moment it is created. Turbo Debugger and CodeView are proprietary tools
+     * most students do not have, and with them the IDE can neither step nor read registers, so the built-in
+     * emulator is the default (decision D1).
+     */
+    @Test
+    void aNewDosProjectIsDebuggedByTheBuiltInEmulator() {
+        Map<Path, Project> saved = new HashMap<>();
+        ProjectRepository repo = new ProjectRepository() {
+            @Override public Project load(Path p) { return saved.get(p); }
+            @Override public void save(Path p, Project proj) { saved.put(p, proj); }
+        };
+
+        Project dos = new CreateProject(repo)
+                .execute(tempDir, "DosDefault", "dos-exe-16", "8086", "borland-tasm", ">=3.2");
+        assertEquals(DebugConfiguration.EMULATOR, dos.debug().backend());
+        assertTrue(dos.debug().usesEmulator());
+
+        // A native program is debugged by GDB, which is chosen by the target rather than by this setting.
+        Project native64 = new CreateProject(repo)
+                .execute(tempDir, "NativeDefault", "win-pe64-console", "x86-64", "nasm", ">=2.14");
+        assertEquals(DebugConfiguration.GDB, native64.debug().backend());
+    }
+
+    @Test
+    void aChosenDebuggerIsSavedWithTheProject() {
+        Map<Path, Project> saved = new HashMap<>();
+        ProjectRepository repo = new ProjectRepository() {
+            @Override public Project load(Path p) { return saved.get(p); }
+            @Override public void save(Path p, Project proj) { saved.put(p, proj); }
+        };
+
+        Project project = new CreateProject(repo).execute(tempDir, "WithTd", "dos-exe-16", "8086",
+                "borland-tasm", ">=3.2", DebugConfiguration.EXTERNAL);
+
+        assertEquals(DebugConfiguration.EXTERNAL, project.debug().backend());
+        assertFalse(project.debug().usesEmulator());
     }
 
     @Test

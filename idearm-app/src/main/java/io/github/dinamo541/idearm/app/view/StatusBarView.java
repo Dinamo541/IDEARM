@@ -31,14 +31,19 @@ public final class StatusBarView extends HBox {
         // Status text on the left
         var statusLabel = new Label();
         statusLabel.textProperty().bind(localization.text(viewModel.statusProperty()));
-        statusLabel.getStyleClass().add(Styles.TEXT_SMALL);
+        statusLabel.getStyleClass().addAll(Styles.TEXT_SMALL, "status-message");
+        statusLabel.setMinWidth(0);
+        statusLabel.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(statusLabel, Priority.ALWAYS);
+        statusLabel.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.ASSEMBLY.create());
 
         var spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        spacer.setMinWidth(12);
 
         // Badges on the right
         var profileBadge = createBadge();
         profileBadge.textProperty().bind(viewModel.targetProfileProperty());
+        profileBadge.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.CHIP.create());
 
         var toolchainBadge = createBadge();
         toolchainBadge.textProperty().bind(viewModel.toolchainProperty());
@@ -65,6 +70,7 @@ public final class StatusBarView extends HBox {
     private static Label createBadge() {
         var label = new Label();
         label.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.TEXT_MUTED);
+        label.setMinWidth(Region.USE_PREF_SIZE);
         return label;
     }
 }

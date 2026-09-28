@@ -1,0 +1,2104 @@
+[
+  {
+    "id": "x86.instr.je",
+    "mnemonic": "JE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JE label",
+      "JZ label"
+    ],
+    "example": "cmp ax, bx\nje iguales",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.je#form.1",
+        "text": "JE label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.je#form.2",
+        "text": "JZ label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jz",
+    "mnemonic": "JZ",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JZ label",
+      "JE label"
+    ],
+    "example": "test al, al\njz es_cero",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JZ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jz#form.1",
+        "text": "JZ label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jz#form.2",
+        "text": "JE label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jne",
+    "mnemonic": "JNE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JNE label",
+      "JNZ label"
+    ],
+    "example": "cmp cx, 0\njne continuar",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JNE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jne#form.1",
+        "text": "JNE label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jne#form.2",
+        "text": "JNZ label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jnz",
+    "mnemonic": "JNZ",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JNZ label",
+      "JNE label"
+    ],
+    "example": "dec cx\njnz bucle",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JNZ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jnz#form.1",
+        "text": "JNZ label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jnz#form.2",
+        "text": "JNE label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.ja",
+    "mnemonic": "JA",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JA label",
+      "JNBE label"
+    ],
+    "example": "cmp ax, bx\nja es_mayor",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "JA",
+        "dialect": "COMMON",
+        "name": "JNBE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:JA",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.ja#form.1",
+        "text": "JA label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.ja#form.2",
+        "text": "JNBE label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jae",
+    "mnemonic": "JAE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JAE label",
+      "JNB label",
+      "JNC label"
+    ],
+    "example": "cmp ax, bx\njae mayor_o_igual",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "JAE",
+        "dialect": "COMMON",
+        "name": "JNB"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:JAE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jae#form.1",
+        "text": "JAE label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jae#form.2",
+        "text": "JNB label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jae#form.3",
+        "text": "JNC label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jb",
+    "mnemonic": "JB",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JB label",
+      "JC label",
+      "JNAE label"
+    ],
+    "example": "cmp ax, bx\njb es_menor",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "JB",
+        "dialect": "COMMON",
+        "name": "JNAE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:JB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jb#form.1",
+        "text": "JB label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jb#form.2",
+        "text": "JC label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jb#form.3",
+        "text": "JNAE label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jbe",
+    "mnemonic": "JBE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JBE label",
+      "JNA label"
+    ],
+    "example": "cmp ax, bx\njbe menor_o_igual",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "JBE",
+        "dialect": "COMMON",
+        "name": "JNA"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:JBE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jbe#form.1",
+        "text": "JBE label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jbe#form.2",
+        "text": "JNA label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jc",
+    "mnemonic": "JC",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JC label",
+      "JB label"
+    ],
+    "example": "shl ax, 1\njc desbordo_acarreo",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jc#form.1",
+        "text": "JC label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jc#form.2",
+        "text": "JB label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jnc",
+    "mnemonic": "JNC",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JNC label",
+      "JAE label",
+      "JNB label"
+    ],
+    "example": "add ax, bx\njnc sin_acarreo",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JNC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jnc#form.1",
+        "text": "JNC label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jnc#form.2",
+        "text": "JAE label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jnc#form.3",
+        "text": "JNB label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jg",
+    "mnemonic": "JG",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JG label",
+      "JNLE label"
+    ],
+    "example": "cmp ax, bx\njg mayor_con_signo",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "JG",
+        "dialect": "COMMON",
+        "name": "JNLE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:JG",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jg#form.1",
+        "text": "JG label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jg#form.2",
+        "text": "JNLE label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jge",
+    "mnemonic": "JGE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JGE label",
+      "JNL label"
+    ],
+    "example": "cmp ax, bx\njge mayor_igual_con_signo",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "JGE",
+        "dialect": "COMMON",
+        "name": "JNL"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:JGE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jge#form.1",
+        "text": "JGE label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jge#form.2",
+        "text": "JNL label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jl",
+    "mnemonic": "JL",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JL label",
+      "JNGE label"
+    ],
+    "example": "cmp ax, bx\njl menor_con_signo",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "JL",
+        "dialect": "COMMON",
+        "name": "JNGE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:JL",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jl#form.1",
+        "text": "JL label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jl#form.2",
+        "text": "JNGE label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jle",
+    "mnemonic": "JLE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JLE label",
+      "JNG label"
+    ],
+    "example": "cmp ax, bx\njle menor_igual_con_signo",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "JLE",
+        "dialect": "COMMON",
+        "name": "JNG"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:JLE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jle#form.1",
+        "text": "JLE label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jle#form.2",
+        "text": "JNG label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.js",
+    "mnemonic": "JS",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JS label"
+    ],
+    "example": "sub ax, bx\njs es_negativo",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.js#form.1",
+        "text": "JS label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jns",
+    "mnemonic": "JNS",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JNS label"
+    ],
+    "example": "sub ax, bx\njns es_positivo",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JNS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jns#form.1",
+        "text": "JNS label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jo",
+    "mnemonic": "JO",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JO label"
+    ],
+    "example": "add ax, bx\njo error_overflow",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JO",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jo#form.1",
+        "text": "JO label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jno",
+    "mnemonic": "JNO",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JNO label"
+    ],
+    "example": "add ax, bx\njno todo_bien",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:JNO",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jno#form.1",
+        "text": "JNO label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jp",
+    "mnemonic": "JP",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JP label",
+      "JPE label"
+    ],
+    "example": "test al, al\njp paridad_par",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "JP",
+        "dialect": "COMMON",
+        "name": "JPE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:JP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jp#form.1",
+        "text": "JP label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jp#form.2",
+        "text": "JPE label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.jnp",
+    "mnemonic": "JNP",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "JNP label",
+      "JPO label"
+    ],
+    "example": "test al, al\njnp paridad_impar",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "JNP",
+        "dialect": "COMMON",
+        "name": "JPO"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:JNP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.jnp#form.1",
+        "text": "JNP label",
+        "minCpu": "8086"
+      },
+      {
+        "id": "x86.instr.jnp#form.2",
+        "text": "JPO label",
+        "minCpu": "8086"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sete",
+    "mnemonic": "SETE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETE reg8",
+      "SETE mem8",
+      "SETZ reg8"
+    ],
+    "example": "cmp ax, bx\nsete al",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sete#form.1",
+        "text": "SETE reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.sete#form.2",
+        "text": "SETE mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.sete#form.3",
+        "text": "SETZ reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setz",
+    "mnemonic": "SETZ",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETZ reg8",
+      "SETZ mem8",
+      "SETE reg8"
+    ],
+    "example": "dec cx\nsetz bl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETZ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setz#form.1",
+        "text": "SETZ reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setz#form.2",
+        "text": "SETZ mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setz#form.3",
+        "text": "SETE reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setne",
+    "mnemonic": "SETNE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETNE reg8",
+      "SETNE mem8",
+      "SETNZ reg8"
+    ],
+    "example": "cmp ax, bx\nsetne al",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETNE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setne#form.1",
+        "text": "SETNE reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setne#form.2",
+        "text": "SETNE mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setne#form.3",
+        "text": "SETNZ reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setnz",
+    "mnemonic": "SETNZ",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETNZ reg8",
+      "SETNZ mem8",
+      "SETNE reg8"
+    ],
+    "example": "dec cx\nsetnz bl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETNZ",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setnz#form.1",
+        "text": "SETNZ reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setnz#form.2",
+        "text": "SETNZ mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setnz#form.3",
+        "text": "SETNE reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.seta",
+    "mnemonic": "SETA",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETA reg8",
+      "SETA mem8",
+      "SETNBE reg8"
+    ],
+    "example": "cmp al, bl\nseta dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SETA",
+        "dialect": "COMMON",
+        "name": "SETNBE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETA",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.seta#form.1",
+        "text": "SETA reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.seta#form.2",
+        "text": "SETA mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.seta#form.3",
+        "text": "SETNBE reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setae",
+    "mnemonic": "SETAE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETAE reg8",
+      "SETAE mem8",
+      "SETNB reg8",
+      "SETNC reg8"
+    ],
+    "example": "cmp al, bl\nsetae dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SETAE",
+        "dialect": "COMMON",
+        "name": "SETNB"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETAE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setae#form.1",
+        "text": "SETAE reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setae#form.2",
+        "text": "SETAE mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setae#form.3",
+        "text": "SETNB reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setae#form.4",
+        "text": "SETNC reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setb",
+    "mnemonic": "SETB",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETB reg8",
+      "SETB mem8",
+      "SETC reg8",
+      "SETNAE reg8"
+    ],
+    "example": "cmp al, bl\nsetb dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SETB",
+        "dialect": "COMMON",
+        "name": "SETNAE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETB",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setb#form.1",
+        "text": "SETB reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setb#form.2",
+        "text": "SETB mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setb#form.3",
+        "text": "SETC reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setb#form.4",
+        "text": "SETNAE reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setbe",
+    "mnemonic": "SETBE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETBE reg8",
+      "SETBE mem8",
+      "SETNA reg8"
+    ],
+    "example": "cmp al, bl\nsetbe dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SETBE",
+        "dialect": "COMMON",
+        "name": "SETNA"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETBE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setbe#form.1",
+        "text": "SETBE reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setbe#form.2",
+        "text": "SETBE mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setbe#form.3",
+        "text": "SETNA reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setc",
+    "mnemonic": "SETC",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETC reg8",
+      "SETC mem8",
+      "SETB reg8"
+    ],
+    "example": "add al, bl\nsetc dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setc#form.1",
+        "text": "SETC reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setc#form.2",
+        "text": "SETC mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setc#form.3",
+        "text": "SETB reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setnc",
+    "mnemonic": "SETNC",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETNC reg8",
+      "SETNC mem8",
+      "SETAE reg8"
+    ],
+    "example": "add al, bl\nsetnc dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETNC",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setnc#form.1",
+        "text": "SETNC reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setnc#form.2",
+        "text": "SETNC mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setnc#form.3",
+        "text": "SETAE reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setg",
+    "mnemonic": "SETG",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETG reg8",
+      "SETG mem8",
+      "SETNLE reg8"
+    ],
+    "example": "cmp al, bl\nsetg dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SETG",
+        "dialect": "COMMON",
+        "name": "SETNLE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETG",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setg#form.1",
+        "text": "SETG reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setg#form.2",
+        "text": "SETG mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setg#form.3",
+        "text": "SETNLE reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setge",
+    "mnemonic": "SETGE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETGE reg8",
+      "SETGE mem8",
+      "SETNL reg8"
+    ],
+    "example": "cmp al, bl\nsetge dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SETGE",
+        "dialect": "COMMON",
+        "name": "SETNL"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETGE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setge#form.1",
+        "text": "SETGE reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setge#form.2",
+        "text": "SETGE mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setge#form.3",
+        "text": "SETNL reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setl",
+    "mnemonic": "SETL",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETL reg8",
+      "SETL mem8",
+      "SETNGE reg8"
+    ],
+    "example": "cmp al, bl\nsetl dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SETL",
+        "dialect": "COMMON",
+        "name": "SETNGE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETL",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setl#form.1",
+        "text": "SETL reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setl#form.2",
+        "text": "SETL mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setl#form.3",
+        "text": "SETNGE reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setle",
+    "mnemonic": "SETLE",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETLE reg8",
+      "SETLE mem8",
+      "SETNG reg8"
+    ],
+    "example": "cmp al, bl\nsetle dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SETLE",
+        "dialect": "COMMON",
+        "name": "SETNG"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETLE",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setle#form.1",
+        "text": "SETLE reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setle#form.2",
+        "text": "SETLE mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setle#form.3",
+        "text": "SETNG reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.sets",
+    "mnemonic": "SETS",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETS reg8",
+      "SETS mem8"
+    ],
+    "example": "sub al, bl\nsets dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.sets#form.1",
+        "text": "SETS reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.sets#form.2",
+        "text": "SETS mem8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setns",
+    "mnemonic": "SETNS",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETNS reg8",
+      "SETNS mem8"
+    ],
+    "example": "sub al, bl\nsetns dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETNS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setns#form.1",
+        "text": "SETNS reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setns#form.2",
+        "text": "SETNS mem8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.seto",
+    "mnemonic": "SETO",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETO reg8",
+      "SETO mem8"
+    ],
+    "example": "add al, bl\nseto dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETO",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.seto#form.1",
+        "text": "SETO reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.seto#form.2",
+        "text": "SETO mem8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setno",
+    "mnemonic": "SETNO",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETNO reg8",
+      "SETNO mem8"
+    ],
+    "example": "add al, bl\nsetno dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETNO",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setno#form.1",
+        "text": "SETNO reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setno#form.2",
+        "text": "SETNO mem8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setp",
+    "mnemonic": "SETP",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETP reg8",
+      "SETP mem8",
+      "SETPE reg8"
+    ],
+    "example": "test al, al\nsetp dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SETP",
+        "dialect": "COMMON",
+        "name": "SETPE"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setp#form.1",
+        "text": "SETP reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setp#form.2",
+        "text": "SETP mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setp#form.3",
+        "text": "SETPE reg8",
+        "minCpu": "80386"
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.setnp",
+    "mnemonic": "SETNP",
+    "kind": "INSTRUCTION",
+    "family": "F-07",
+    "category": "CONTROL_FLOW",
+    "pedagogicalLevel": "INTERMEDIATE",
+    "minCpu": "80386",
+    "syntaxVariants": [
+      "SETNP reg8",
+      "SETNP mem8",
+      "SETPO reg8"
+    ],
+    "example": "test al, al\nsetnp dl",
+    "flags": {
+      "P": "UNAFFECTED",
+      "O": "UNAFFECTED",
+      "I": "UNAFFECTED",
+      "Z": "UNAFFECTED",
+      "C": "UNAFFECTED",
+      "D": "UNAFFECTED",
+      "A": "UNAFFECTED",
+      "T": "UNAFFECTED",
+      "S": "UNAFFECTED"
+    },
+    "aliases": [
+      {
+        "targetMnemonic": "SETNP",
+        "dialect": "COMMON",
+        "name": "SETPO"
+      }
+    ],
+    "sources": [
+      "src.intel-sdm.093#vol2:SETNP",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.setnp#form.1",
+        "text": "SETNP reg8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setnp#form.2",
+        "text": "SETNP mem8",
+        "minCpu": "80386"
+      },
+      {
+        "id": "x86.instr.setnp#form.3",
+        "text": "SETPO reg8",
+        "minCpu": "80386"
+      }
+    ]
+  }
+]

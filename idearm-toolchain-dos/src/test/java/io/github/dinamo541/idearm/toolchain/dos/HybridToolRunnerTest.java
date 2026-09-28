@@ -129,6 +129,62 @@ class HybridToolRunnerTest {
         assertFalse(Files.exists(result.outputDirectory()));
     }
 
+    /**
+     * A file an INCLUDE pulls in must reach the staged drive under its own folder, and the folders the assembler
+     * searches must be rewritten onto that same drive, or ML opens nothing. The project root is spelled "." and
+     * is the drive itself.
+     */
+    @Test
+    void stagesIncludedFilesAndPointsTheHostAssemblerAtTheStagedDrive(@TempDir Path tempDir) throws IOException {
+        Path projectRoot = Files.createDirectory(tempDir.resolve("proj"));
+        Path stagingRoot = Files.createDirectory(tempDir.resolve("staging"));
+        Files.createDirectory(projectRoot.resolve("src"));
+        Files.createDirectory(projectRoot.resolve("SPRITE"));
+        Files.writeString(projectRoot.resolve("src/MAIN.ASM"), "INCLUDE MANZANA.INC");
+        Files.writeString(projectRoot.resolve("SPRITE/MANZANA.INC"), "MANZANA DB 'x'");
+
+        Path mlExe = Files.createFile(tempDir.resolve("ML.EXE"));
+        Path dbxExe = Files.createFile(tempDir.resolve("DOSBOX.EXE"));
+        var hostCommand = new java.util.ArrayList<String>();
+
+        ProcessExecutor processes = (req, cancel) -> {
+            hostCommand.addAll(req.command());
+            try {
+                Files.createDirectories(req.workingDirectory().resolve("OBJ"));
+                Files.writeString(req.workingDirectory().resolve("OBJ/MAIN.OBJ"), "ml_obj");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return new ProcessResult(0, "Assembled on host", false, false);
+        };
+
+        HybridToolRunner runner = new HybridToolRunner(processes, stagingRoot);
+        Project project = sampleProject("microsoft-masm", "src/MAIN.ASM", List.of());
+        ToolInvocation assemble = new ToolInvocation("ml", BuildPhase.ASSEMBLE, HostKind.WIN32_CONSOLE,
+                List.of("/c", "/I.", "/ISPRITE", "/FoOBJ/MAIN.OBJ", "src/MAIN.ASM"), null, null,
+                List.of("OBJ/MAIN.OBJ"));
+        BuildPlan plan = new BuildPlan(project, "release", TargetProfileCatalog.DOS_EXE_16, List.of(assemble),
+                "OBJ/MAIN.OBJ", List.of("OBJ/MAIN.OBJ"), Map.of(), List.of("SPRITE/MANZANA.INC"));
+        ResolvedToolchain tools = new ResolvedToolchain("microsoft-masm", Map.of(
+                "ml", new ToolInstallation("ml", "6.11", mlExe, HostKind.WIN32_CONSOLE, Map.of(), null, "t")
+        ), new ToolInstallation("dosbox", "0.74-3", dbxExe, HostKind.WIN64, Map.of(), null, "t"));
+
+        ToolRunResult result = runner.run(plan, projectRoot, tools, CancellationToken.NONE, Duration.ofSeconds(5));
+
+        assertEquals(BuildStatus.SUCCEEDED, result.status());
+        Path driveS = stagingRoot.resolve(hostCommand.stream().filter(a -> a.startsWith("/I") && a.length() > 2)
+                .findFirst().orElseThrow().substring(2)).normalize();
+        assertTrue(Files.isRegularFile(driveS.resolve("SPRITE/MANZANA.INC")),
+                "the included file must be staged: " + driveS);
+        assertTrue(hostCommand.contains("/I" + driveS), hostCommand + " must search the staged drive root");
+        assertTrue(hostCommand.contains("/I" + driveS.resolve("SPRITE")), hostCommand.toString());
+        // A diagnostic reported inside the staged copy has to name the file the editor can open.
+        assertEquals(projectRoot.resolve("SPRITE/MANZANA.INC").toString(),
+                result.sourcePaths().apply("S:\\SPRITE\\MANZANA.INC"));
+
+        runner.release(result);
+    }
+
     /** A user folder such as "Juan Perez" used to stop the IDE from starting, because the runner threw at creation. */
     @Test
     void anUnmountableStagingRootOnlyFailsTheDosBuild(@TempDir Path tempDir) throws IOException {

@@ -40,7 +40,13 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
+        // The instruction corpus loads while the window is built, not on the JavaFX thread at the first keystroke
+        // or the first opening of the Academic Center (ADR-013).
+        io.github.dinamo541.idearm.language.knowledge.Corpus.warmUp();
         Application.setUserAgentStylesheet(new PrimerDark().getUserAgentStylesheet());
+        io.github.dinamo541.idearm.app.ui.WorkbenchTheme.install();
+        io.github.dinamo541.idearm.app.ui.BrandLogo.install();
+        io.github.dinamo541.idearm.app.ui.BrandLogo.apply(stage);
 
         io.github.dinamo541.idearm.app.viewmodel.WorkbenchServices services;
         try {
@@ -79,17 +85,18 @@ public class App extends Application {
 
         stage.titleProperty().bind(localization.text("app.title", IdearmInfo.NAME, IdearmInfo.version()));
         stage.initStyle(javafx.stage.StageStyle.UNDECORATED);
-        stage.getIcons().addAll(io.github.dinamo541.idearm.app.ui.BrandLogo.image(32),
-                io.github.dinamo541.idearm.app.ui.BrandLogo.image(256));
         stage.setScene(new Scene(workbenchView, 1280, 800));
         workbenchView.installWindowChrome(stage);
-        stage.setMinWidth(800);
-        stage.setMinHeight(500);
+        io.github.dinamo541.idearm.app.ui.WindowSession.install(stage,
+                WorkbenchBootstrap.userDataDirectory().resolve("window.properties"));
         stage.show();
 
         String snapshots = System.getenv(SNAPSHOT_ENV);
         String visualSmoke = System.getenv("IDEARM_VISUAL_SMOKE");
-        if (System.getenv("IDEARM_DRAG_SMOKE") != null) {
+        String designSmoke = System.getenv("IDEARM_DESIGN_SMOKE");
+        if (designSmoke != null && !designSmoke.isBlank()) {
+            SmokeSnapshot.design(stage, workbenchView, Path.of(designSmoke));
+        } else if (System.getenv("IDEARM_DRAG_SMOKE") != null) {
             SmokeSnapshot.dragWindow(stage, workbenchView);
         } else if (visualSmoke != null && !visualSmoke.isBlank()) {
             SmokeSnapshot.visual(stage, workbenchView, Path.of(visualSmoke));

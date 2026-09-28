@@ -83,4 +83,16 @@ class AssemblyLexerTest {
         assertEquals("1010b", numbers.get(3).text());
         assertEquals("77o", numbers.get(4).text());
     }
+
+    @Test
+    void classifiesAsAnInstructionExactlyWhatTheCatalogKnows() {
+        // The lexer, the editor highlighter and the unknown-instruction rule share one list (ADR-011); these words
+        // used to be missing from the lexer's own copy of it and were read as plain identifiers.
+        for (String mnemonic : List.of("BSWAP", "XADD", "MOVZX", "CMOVZ", "PUSHAD", "CPUID", "RDTSC")) {
+            List<Token> tokens = lexer.tokenizeLine("  " + mnemonic + " eax", 1);
+            assertEquals(TokenType.INSTRUCTION, tokens.getFirst().type(), mnemonic + " should be an instruction");
+        }
+
+        assertEquals(TokenType.IDENTIFIER, lexer.tokenizeLine("  MUV ax, 1", 1).getFirst().type());
+    }
 }

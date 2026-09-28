@@ -31,6 +31,220 @@ final class SmokeSnapshot {
     private SmokeSnapshot() {
     }
 
+    /** A reproducible gallery of every major surface; never builds or executes the open project. */
+    static void design(Stage stage, WorkbenchView view, Path folder) {
+        var steps = new java.util.ArrayDeque<Runnable>();
+        var model = view.getViewModel();
+        var text = view.getLocalization();
+        Path file = model.getEditorArea().getActiveDocument().getFilePath();
+        Stage[] dialog = new Stage[1];
+        stage.setWidth(1280);
+        stage.setHeight(800);
+        for (boolean light : new boolean[] {false, true}) {
+            for (var locale : java.util.List.of(io.github.dinamo541.idearm.app.i18n.Localization.ENGLISH,
+                      io.github.dinamo541.idearm.app.i18n.Localization.SPANISH)) {
+                String suffix = (light ? "light-" : "dark-") + locale.getLanguage();
+                steps.add(() -> {
+                    if (view.getStyleClass().contains("light") != light)
+                        ((javafx.scene.control.Button) view.lookup("#theme-action")).fire();
+                    text.localeProperty().set(locale);
+                    model.getBottomPanel().setActiveTab(io.github.dinamo541.idearm.app.viewmodel.BottomPanelViewModel.BottomTab.PROBLEMS);
+                });
+                steps.add(() -> save(stage, folder.resolve("workbench-" + suffix + ".png")));
+                steps.add(() -> saveIconGallery(stage, folder.resolve("png-icons-" + suffix + ".png")));
+                steps.add(() -> {
+                    var editor = model.getEditorArea().getActiveDocument().getEditor();
+                    editor.setBreakpoints(java.util.Set.of(3));
+                    editor.setDisabledBreakpoints(java.util.Set.of(4));
+                    editor.setExecutionLine(5);
+                });
+                steps.add(() -> {
+                    save(stage, folder.resolve("gutter-icons-" + suffix + ".png"));
+                    var editor = model.getEditorArea().getActiveDocument().getEditor();
+                    editor.setBreakpoints(java.util.Set.of());
+                    editor.setDisabledBreakpoints(java.util.Set.of());
+                    editor.setExecutionLine(null);
+                });
+                // Capture each transient popup in its show/layout step, before unrelated desktop focus can dismiss it.
+                steps.add(() -> {
+                    var editor = model.getEditorArea().getActiveDocument().getEditor();
+                    editor.requestFocus();
+                    var completion = new io.github.dinamo541.idearm.app.editor.CompletionPopup();
+                    completion.showCompletions(editor.getNode(), stage.getX() + 380, stage.getY() + 160,
+                            model.getCompletions("mo"), ignored -> {});
+                    require(completion.isShowing(), "Completion popup");
+                    saveImage(completion.getScene().snapshot(null), folder.resolve("completion-" + suffix + ".png"));
+                    completion.hide();
+                });
+                steps.add(() -> {
+                    var hover = new io.github.dinamo541.idearm.app.editor.HoverCardPopup();
+                    hover.showHover(model.getEditorArea().getActiveDocument().getEditor().getNode(),
+                            stage.getX() + 380, stage.getY() + 160,
+                            model.getHover("MOV", text.localeProperty().get().getLanguage()).orElseThrow(), text);
+                    require(hover.isShowing(), "Instruction hover");
+                    saveImage(hover.getScene().snapshot(null), folder.resolve("hover-" + suffix + ".png"));
+                    hover.hide();
+                });
+                steps.add(() -> java.util.List.copyOf(model.getEditorArea().getDocuments()).forEach(model.getEditorArea()::closeDocument));
+                steps.add(() -> save(stage, folder.resolve("welcome-" + suffix + ".png")));
+                steps.add(() -> {
+                    try { model.getEditorArea().openFile(file); }
+                    catch (IOException failure) { throw new IllegalStateException(failure); }
+                });
+                for (var tab : java.util.List.of(
+                        io.github.dinamo541.idearm.app.viewmodel.BottomPanelViewModel.BottomTab.BUILD,
+                        io.github.dinamo541.idearm.app.viewmodel.BottomPanelViewModel.BottomTab.DEBUG,
+                        io.github.dinamo541.idearm.app.viewmodel.BottomPanelViewModel.BottomTab.TERMINAL)) {
+                    steps.add(() -> model.getBottomPanel().setActiveTab(tab));
+                    steps.add(() -> save(stage, folder.resolve(tab.name().toLowerCase(java.util.Locale.ROOT) + "-" + suffix + ".png")));
+                }
+                var windows = new java.util.LinkedHashMap<String, java.util.function.Supplier<Stage>>();
+                windows.put("new-project", () -> new io.github.dinamo541.idearm.app.view.NewProjectDialog(stage, model, text));
+                windows.put("properties", () -> new io.github.dinamo541.idearm.app.view.ProjectPropertiesDialog(stage, model, text));
+                windows.put("doctor", () -> new io.github.dinamo541.idearm.app.view.DoctorDialog(stage, text, model.getToolRegistry()));
+                windows.put("dictionary", () -> {
+                    var dictionary = new io.github.dinamo541.idearm.app.view.MnemonicsDictionaryDialog(stage, text);
+                    dictionary.selectMnemonic("MOV");
+                    return dictionary;
+                });
+                windows.put("recent", () -> new io.github.dinamo541.idearm.app.view.OpenRecentDialog(stage, model, text));
+                windows.forEach((name, factory) -> {
+                    steps.add(() -> { dialog[0] = factory.get(); dialog[0].show(); });
+                    steps.add(() -> {
+                        require(dialog[0].getScene().getRoot().getStyleClass().contains("light") == light, name + " theme");
+                        save(dialog[0], folder.resolve(name + "-" + suffix + ".png"));
+                        dialog[0].close();
+                    });
+                });
+                // Browse each academic layer, including the longest category and the register family at minimum width.
+                steps.add(() -> {
+                    dialog[0] = new io.github.dinamo541.idearm.app.view.AcademicCenterView(stage, text);
+                    dialog[0].show();
+                });
+                steps.add(() -> {
+                    ((io.github.dinamo541.idearm.app.view.AcademicCenterView) dialog[0]).selectInstruction(
+                            io.github.dinamo541.idearm.language.catalog.InstructionCatalog.getByCategory(
+                                    io.github.dinamo541.idearm.language.catalog.InstructionCategory.BIT_MANIPULATION).getFirst());
+                });
+                steps.add(() -> save(dialog[0], folder.resolve("academic-category-" + suffix + ".png")));
+                steps.add(() -> {
+                    var tabs = (javafx.scene.control.TabPane) dialog[0].getScene().lookup("#knowledgeLayers");
+                    tabs.getSelectionModel().select(1);
+                });
+                steps.add(() -> {
+                    @SuppressWarnings("unchecked")
+                    var registers = (javafx.scene.control.ListView<io.github.dinamo541.idearm.language.knowledge.RegisterEntry>)
+                            dialog[0].getScene().lookup("#registersList");
+                    registers.getSelectionModel().select(registers.getItems().stream()
+                            .filter(register -> register.name().equals("AX")).findFirst().orElseThrow());
+                });
+                steps.add(() -> save(dialog[0], folder.resolve("academic-registers-" + suffix + ".png")));
+                steps.add(() -> {
+                    dialog[0].setWidth(840);
+                    dialog[0].setHeight(560);
+                    dialog[0].getScene().getRoot().lookupAll(".register-family-button").stream()
+                            .filter(javafx.scene.control.Button.class::isInstance)
+                            .map(javafx.scene.control.Button.class::cast)
+                            .filter(button -> "RAX".equals(button.getText())).findFirst().orElseThrow().requestFocus();
+                });
+                steps.add(() -> save(dialog[0], folder.resolve("academic-compact-" + suffix + ".png")));
+                steps.add(() -> {
+                    dialog[0].setWidth(1076);
+                    dialog[0].setHeight(759);
+                    ((javafx.scene.control.TabPane) dialog[0].getScene().lookup("#knowledgeLayers"))
+                            .getSelectionModel().select(2);
+                });
+                steps.add(() -> save(dialog[0], folder.resolve("academic-operands-" + suffix + ".png")));
+                steps.add(() -> {
+                    ((javafx.scene.control.TextField) dialog[0].getScene().lookup(".text-field")).setText("mov");
+                });
+                steps.add(() -> {
+                    save(dialog[0], folder.resolve("academic-search-" + suffix + ".png"));
+                    dialog[0].close();
+                });
+                // Exercise the actual About action, including its existing 48 px brand mark.
+                steps.add(() -> Platform.runLater(() -> {
+                    var menus = (javafx.scene.control.MenuBar) view.lookup(".menu-bar");
+                    menus.getMenus().stream().flatMap(menu -> menu.getItems().stream())
+                            .filter(item -> text.get("menu.help.about").equals(item.getText()))
+                            .findFirst().orElseThrow().fire();
+                }));
+                steps.add(() -> {
+                    var about = javafx.stage.Window.getWindows().stream()
+                            .filter(window -> window != stage && window instanceof Stage owned && owned.getOwner() == stage)
+                            .map(Stage.class::cast).findFirst().orElseThrow();
+                    save(about, folder.resolve("about-" + suffix + ".png"));
+                    about.close();
+                });
+                steps.add(view::openCommandPalette);
+                steps.add(() -> {
+                    var palette = javafx.stage.Window.getWindows().stream()
+                            .filter(io.github.dinamo541.idearm.app.view.CommandPaletteDialog.class::isInstance)
+                            .map(Stage.class::cast).findFirst().orElseThrow();
+                    save(palette, folder.resolve("commands-" + suffix + ".png"));
+                    palette.close();
+                });
+            }
+        }
+        // A modeless reference window must follow theme changes while it remains open.
+        steps.add(() -> {
+            dialog[0] = new io.github.dinamo541.idearm.app.view.MnemonicsDictionaryDialog(stage, text);
+            dialog[0].show();
+            ((javafx.scene.control.Button) view.lookup("#theme-action")).fire();
+            require(!dialog[0].getScene().getRoot().getStyleClass().contains("light"), "Live reference theme");
+            dialog[0].close();
+            stage.setWidth(800); stage.setHeight(600);
+            model.getBottomPanel().setActiveTab(io.github.dinamo541.idearm.app.viewmodel.BottomPanelViewModel.BottomTab.DEBUG);
+        });
+        steps.add(() -> save(stage, folder.resolve("compact-dark-es.png")));
+        steps.add(() -> java.util.List.copyOf(model.getEditorArea().getDocuments()).forEach(model.getEditorArea()::closeDocument));
+        steps.add(() -> save(stage, folder.resolve("compact-welcome-dark-es.png")));
+        designStep(steps);
+    }
+
+    /** Diagnostic contact sheet: exercise every packaged bitmap at the sizes used by controls and headings. */
+    private static void saveIconGallery(Stage owner, Path file) {
+        var grid = new javafx.scene.layout.GridPane();
+        grid.setPadding(new javafx.geometry.Insets(20));
+        grid.setHgap(24);
+        grid.setVgap(8);
+        io.github.dinamo541.idearm.app.ui.WorkbenchTheme.apply(grid, owner);
+        int index = 0;
+        for (var icon : io.github.dinamo541.idearm.app.ui.WorkbenchIcons.values()) {
+            var label = new javafx.scene.control.Label(icon.name());
+            label.setStyle("-fx-font-size: 11px;");
+            var row = new javafx.scene.layout.HBox(10, icon.create(), icon.create(28), label);
+            row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            grid.add(row, index % 4, index / 4);
+            index++;
+        }
+        var scene = new javafx.scene.Scene(grid);
+        grid.applyCss();
+        grid.resize(grid.prefWidth(-1), grid.prefHeight(-1));
+        grid.layout();
+        saveImage(scene.snapshot(null), file);
+    }
+
+    private static void designStep(java.util.Deque<Runnable> steps) {
+        var pause = new PauseTransition(Duration.millis(250));
+        pause.setOnFinished(event -> Platform.runLater(() -> {
+            try {
+                if (steps.isEmpty()) {
+                    System.out.println("DESIGN SMOKE: four theme/language combinations, academic layers, dialogs and compact layout PASS");
+                    Platform.exit();
+                } else {
+                    steps.removeFirst().run();
+                    designStep(steps);
+                }
+            } catch (RuntimeException | AssertionError failure) {
+                failure.printStackTrace();
+                System.out.println("DESIGN SMOKE FAILED: " + failure);
+                Platform.exit();
+            }
+        }));
+        pause.play();
+    }
+
     /** Native pointer regression: the empty toolbar area must drag despite its control skin. */
     static void dragWindow(Stage stage, WorkbenchView view) {
         var robot = new javafx.scene.robot.Robot();
@@ -157,7 +371,9 @@ final class SmokeSnapshot {
             model.openProject(currentProject);
             model.getRecentItems().remember(io.github.dinamo541.idearm.domain.model.RecentItem.Kind.FILE, file);
             saveImage(io.github.dinamo541.idearm.app.ui.BrandLogo.image(512), folder.resolve("idearm-logo.png"));
-            saveImage(io.github.dinamo541.idearm.app.ui.BrandLogo.image(256), folder.resolve("idearm-icon-256.png"));
+            for (int size : new int[] {16, 24, 32, 48, 64, 128, 256}) {
+                saveImage(io.github.dinamo541.idearm.app.ui.BrandLogo.image(size), folder.resolve("idearm-icon-" + size + ".png"));
+            }
             var dialog = new io.github.dinamo541.idearm.app.view.OpenRecentDialog(stage, model, view.getLocalization());
             dialog.show();
             step(350, () -> {
@@ -194,7 +410,7 @@ final class SmokeSnapshot {
             require(!stage.isMaximized() && Math.abs(stage.getWidth() - width) < 5, "Restore previous window size");
             ((javafx.scene.control.Button) view.lookup("#window-minimize")).fire();
         }, () -> step(350, () -> {
-            require(stage.isIconified(), "Minimize control"); stage.setIconified(false); stage.toFront();
+            require(stage.isIconified(), "Minimize control"); stage.setIconified(false); stage.toFront(); stage.requestFocus();
         }, () -> step(350, () -> {
             var button = (javafx.scene.control.Button) view.lookup("#recent-action");
             require(button.getTooltip().getShowDelay().toMillis() == 450, "Delayed hover help");

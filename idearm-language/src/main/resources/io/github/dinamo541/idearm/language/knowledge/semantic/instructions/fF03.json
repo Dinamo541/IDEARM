@@ -1,0 +1,300 @@
+[
+  {
+    "id": "x86.instr.aaa",
+    "mnemonic": "AAA",
+    "kind": "INSTRUCTION",
+    "family": "F-03",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "AAA"
+    ],
+    "example": "add al, bl\naaa",
+    "flags": {
+      "P": "UNDEFINED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "UNDEFINED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "UNDEFINED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:AAA",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.aaa#form.1",
+        "text": "AAA",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        },
+        "sources": ["src.intel-sdm.093#vol2:AAA"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.aas",
+    "mnemonic": "AAS",
+    "kind": "INSTRUCTION",
+    "family": "F-03",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "AAS"
+    ],
+    "example": "sub al, bl\naas",
+    "flags": {
+      "P": "UNDEFINED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "UNDEFINED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "UNDEFINED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:AAS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.aas#form.1",
+        "text": "AAS",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        },
+        "sources": ["src.intel-sdm.093#vol2:AAS"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.aam",
+    "mnemonic": "AAM",
+    "kind": "INSTRUCTION",
+    "family": "F-03",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "AAM",
+      "AAM imm8"
+    ],
+    "example": "mul bl\naam",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "UNDEFINED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:AAM",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.aam#form.1",
+        "text": "AAM",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        },
+        "sources": ["src.intel-sdm.093#vol2:AAM"]
+      },
+      {
+        "id": "x86.instr.aam#form.2",
+        "text": "AAM imm8",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        },
+        "sources": ["src.intel-sdm.093#vol2:AAM"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.aad",
+    "mnemonic": "AAD",
+    "kind": "INSTRUCTION",
+    "family": "F-03",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "AAD",
+      "AAD imm8"
+    ],
+    "example": "aad\ndiv bl",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "UNDEFINED",
+      "D": "UNAFFECTED",
+      "A": "UNDEFINED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:AAD",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.aad#form.1",
+        "text": "AAD",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        },
+        "sources": ["src.intel-sdm.093#vol2:AAD"]
+      },
+      {
+        "id": "x86.instr.aad#form.2",
+        "text": "AAD imm8",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        },
+        "sources": ["src.intel-sdm.093#vol2:AAD"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.daa",
+    "mnemonic": "DAA",
+    "kind": "INSTRUCTION",
+    "family": "F-03",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "DAA"
+    ],
+    "example": "add al, bl\ndaa",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:DAA",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.daa#form.1",
+        "text": "DAA",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        },
+        "sources": ["src.intel-sdm.093#vol2:DAA"]
+      }
+    ]
+  },
+  {
+    "id": "x86.instr.das",
+    "mnemonic": "DAS",
+    "kind": "INSTRUCTION",
+    "family": "F-03",
+    "category": "ARITHMETIC",
+    "pedagogicalLevel": "BASIC",
+    "minCpu": "8086",
+    "syntaxVariants": [
+      "DAS"
+    ],
+    "example": "sub al, bl\ndas",
+    "flags": {
+      "P": "MODIFIED",
+      "O": "UNDEFINED",
+      "I": "UNAFFECTED",
+      "Z": "MODIFIED",
+      "C": "MODIFIED",
+      "D": "UNAFFECTED",
+      "A": "MODIFIED",
+      "T": "UNAFFECTED",
+      "S": "MODIFIED"
+    },
+    "aliases": [],
+    "sources": [
+      "src.intel-sdm.093#vol2:DAS",
+      "src.irvine.5e-es"
+    ],
+    "recognizedBy": [
+      "MASM",
+      "TASM",
+      "NASM"
+    ],
+    "forms": [
+      {
+        "id": "x86.instr.das#form.1",
+        "text": "DAS",
+        "minCpu": "8086",
+        "requirement": {
+          "minGeneration": "I8086",
+          "invalidModes": ["LONG"]
+        },
+        "sources": ["src.intel-sdm.093#vol2:DAS"]
+      }
+    ]
+  }
+]

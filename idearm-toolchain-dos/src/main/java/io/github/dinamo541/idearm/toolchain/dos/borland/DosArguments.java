@@ -7,4 +7,8 @@ final class DosArguments {
     static String path(char drive, String logical) {
         return io.github.dinamo541.idearm.toolchain.dos.DosArguments.path(drive, logical);
     }
+
+    static String directory(char drive, String logical) {
+        return io.github.dinamo541.idearm.toolchain.dos.DosArguments.directory(drive, logical);
+    }
 }

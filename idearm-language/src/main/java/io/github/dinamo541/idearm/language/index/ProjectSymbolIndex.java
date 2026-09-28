@@ -113,6 +113,21 @@ public final class ProjectSymbolIndex {
             ));
         }
 
+        // 5b. Macros
+        for (AstNode stmt : ast.statements()) {
+            if (stmt instanceof MacroNode macro) {
+                defs.add(new SymbolDefinition(
+                        macro.name(),
+                        SymbolKind.MACRO,
+                        normalizedPath,
+                        macro.line(),
+                        macro.column(),
+                        macro.name() + " MACRO",
+                        null
+                ));
+            }
+        }
+
         // 6. Extract identifier references from tokens
         for (Token tok : tokens) {
             if (tok.is(TokenType.IDENTIFIER)) {
@@ -148,6 +163,10 @@ public final class ProjectSymbolIndex {
             }
         }
         return Optional.empty();
+    }
+
+    public Optional<SymbolDefinition> find(String symbolName) {
+        return findDefinition(symbolName);
     }
 
     /**

@@ -90,6 +90,9 @@ if (-not $SkipBuild) {
 
 $work = Join-Path $root 'target' 'release'
 if (Test-Path -LiteralPath $work) {
+    if ([IO.Path]::GetFullPath($work) -ne [IO.Path]::GetFullPath((Join-Path $root 'target/release'))) {
+        throw 'Refusing to remove a release directory outside this workspace.'
+    }
     Remove-Item -LiteralPath $work -Recurse -Force
 }
 $mods = New-Item -ItemType Directory -Force (Join-Path $work 'mods')
@@ -115,9 +118,14 @@ Invoke-Checked (Get-JdkTool 'jlink') @('--add-modules', $jdkModules, '--include-
     '--no-header-files', '--no-man-pages', '--output', $runtime)
 
 # The command-line launcher: a console program on Windows, and no menu entry or shortcut of its own.
+$branding = Join-Path $root 'idearm-app' 'src' 'main' 'resources' 'io' 'github' 'dinamo541' 'idearm' 'app' 'branding'
+$launcherIcon = Join-Path $branding ($IsWindows ? 'idearm.ico' : 'idearm.png')
+# Java .properties treats backslashes as escapes, even in Windows paths.
+$launcherIconProperty = $launcherIcon.Replace('\', '/').Replace(':', '\:')
 $cliLauncher = Join-Path $work 'idearm-cli.properties'
 Set-Content -LiteralPath $cliLauncher -Encoding ascii -Value @(
     "module=$cliModule"
+    "icon=$launcherIconProperty"
     'java-options=--enable-native-access=io.github.dinamo541.idearm.infrastructure'
     'win-console=true'
     'win-shortcut=false'
@@ -125,7 +133,6 @@ Set-Content -LiteralPath $cliLauncher -Encoding ascii -Value @(
     'linux-shortcut=false'
 )
 
-$branding = Join-Path $root 'idearm-app' 'src' 'main' 'resources' 'io' 'github' 'dinamo541' 'idearm' 'app' 'branding'
 $common = @(
     '--name', 'IDEARM',
     '--app-version', $appVersion,

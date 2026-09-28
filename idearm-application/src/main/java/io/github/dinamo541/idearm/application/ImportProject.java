@@ -114,7 +114,7 @@ public final class ImportProject {
                 new Resources(List.of()),
                 Map.of("debug", BuildConfiguration.debug(), "release", BuildConfiguration.release()),
                 RunConfiguration.defaults(),
-                new DebugConfiguration("external"),
+                new DebugConfiguration(DebugConfiguration.EMULATOR),
                 new DistConfiguration(true, false)
         );
 

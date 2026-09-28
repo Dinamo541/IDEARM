@@ -18,6 +18,7 @@ public record Project(int schema, ProjectInfo info, TargetSelection target, Tool
                 new Sources("src/main.asm", java.util.List.of(), java.util.List.of(), java.util.List.of()),
                 new Resources(java.util.List.of()),
                 Map.of("debug", BuildConfiguration.debug(), "release", BuildConfiguration.release()),
-                RunConfiguration.defaults(), new DebugConfiguration("external"), new DistConfiguration(true, false));
+                RunConfiguration.defaults(), new DebugConfiguration(DebugConfiguration.EMULATOR),
+                new DistConfiguration(true, false));
     }
 }

@@ -86,7 +86,7 @@ public final class WorkbenchBootstrap {
         }
     }
 
-    static Path userDataDirectory() {
+    public static Path userDataDirectory() {
         String custom = System.getenv("IDEARM_USER_DATA_DIR");
         if (custom != null && !custom.isBlank()) return Path.of(custom);
         String appData = System.getenv("APPDATA");
