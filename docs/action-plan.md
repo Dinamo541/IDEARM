@@ -39,7 +39,7 @@
 
 | ID | Question | Recommendation | Blocks |
 |---|---|---|---|
-| D1 | Default debugger for new DOS projects: built-in emulator (`emu8086`) or Turbo Debugger/CodeView in DOSBox (`external`, today's default, needs TD.EXE/CV.EXE)? | `emu8086`: it needs no proprietary tool and every IDE panel works with it. | P2-02 |
+| D1 | Default debugger for new DOS projects: built-in emulator (`emu8086`) or Turbo Debugger/CodeView in DOSBox (`external`, today's default, needs TD.EXE/CV.EXE)? | **Decided 2026-09-23: `emu8086`** — it needs no proprietary tool and every IDE panel works with it ([ADR-010](adr/ADR-010-debugger-capabilities-and-default-backend.md)). | P2-02 |
 | D2 | May the user build while a program or debug session is still open (for example DOSBox waiting for a key)? | Yes for Build/Clean from the IDE after P3-04; keep one Run/Debug session at a time. | P3-04 |
 | D3 | Charset used for a source that is not valid UTF-8. | **Decided 2026-09-21: Windows-1252** (what Notepad/Notepad++ "ANSI" write on Spanish Windows); switchable per file later (P2-04). | P1-02 |
 | D4 | Charset of *new* files in DOS projects. | Keep UTF-8, and warn when a DOS string literal contains non-ASCII characters (P2-04). | P2-04 |
@@ -313,6 +313,21 @@ the old program. `ImportProject` adds `.asm` files that other files INCLUDE as s
 **Done when.** A project whose `main.asm` includes `macros.inc` builds with TASM and MASM (tagged tests); editing
 `macros.inc` triggers a rebuild; a missing include is reported at its line.
 
+**Done 2026-09-24 (items 1-4).** `IncludeResolver` (application) walks the INCLUDE graph of the planned sources
+against one flat search path -- the folder of every source, then the declared include folders, first match wins --
+and returns the files it reaches plus `build.include.missing` / `build.include.elsewhere` at the INCLUDE line,
+before any tool runs. `BuildPlan.dependencies` carries those files; `DosBoxToolRunner` and `HybridToolRunner` stage
+them at their project path on drive S and map them back for diagnostics, so an error inside an `.inc` opens the
+real file. The same search path reaches `/i`, `/I` and `-I`, with the project root spelled `"."`
+(`DosArguments.directory`). `FreshBuild` counts the included files as build inputs. `AssemblyParser` had to be
+fixed first: it kept only the first token of an INCLUDE, so every `manzana.inc` arrived as `manzana`. Project
+Properties gained an **Include Folders** editor writing `[sources] include`. Verified on Windows with TASM 3.2,
+MASM 6.11 and DOSBox 0.74-3: the file beside the source, a declared sibling folder, sources at the project root,
+and a diagnostic raised inside an included file.
+
+**Still open (item 5).** `ImportProject` keeps adding included `.asm` files to `modules` and does not prefer the
+label named by `END <label>` as the entry.
+
 ### P2-02 · Choose the debugger in the UI — S (after D1)
 
 **Problem.** The built-in emulator is reachable only by editing `[debug] backend = "emu8086"` by hand; the default
@@ -324,6 +339,11 @@ follow D1. When `external` is chosen and TD/CV is missing, the diagnostic sugges
 offers to switch. Update the examples and user guide §6.1.
 
 **Done when.** A view model test covers saving the choice; `DebugProjectTest` covers the suggestion; visual smoke.
+
+**Done 2026-09-23.** `emu8086` is the default in `Project`, `CreateProject`, `ImportProject` and the
+`idearm.toml` reader; a Debugger dropdown in New Project and Project Properties writes `[debug] backend`;
+`debug.tool.missing` now names the emulator as the way out. `CreateProjectTest` covers both defaults and an
+explicit choice. See [ADR-010](adr/ADR-010-debugger-capabilities-and-default-backend.md).
 
 ### P2-03 · Debugger capabilities and Pause — M
 
@@ -342,6 +362,14 @@ stopped, not inspected.
 
 **Done when.** An emulator test pauses an infinite loop within 100 ms with registers reported; a tagged GDB test
 pauses; visual smoke with each backend.
+
+**Done 2026-09-23.** `DebugCapability` and `DebugSession.capabilities()`/`pause()`/`setBreakpoints()` exist; the
+emulator and GDB declare what they do and `DosBoxDebugSession` declares nothing; every control in the panel, the
+menus, the toolbar and the palette is bound to a capability, and a launch-only session replaces the panels with
+an explanation. Pause is `F6`. **Spike S9** settled the GDB question: `-exec-interrupt` gets no reply at all
+until `mi-async` is on, and the stop then lands on an injected thread in `ntdll`, so the program's own thread is
+selected before reporting. `Emu8086DebugSessionTest` pauses an endless loop in under 100 ms with its line and
+registers. `EnvCapability` was left alone: it still describes run environments (P3-07).
 
 ### P2-04 · Encoding choices and DOS accents — M (after P1-02, D3, D4)
 
@@ -369,8 +397,21 @@ are reported by P1-04. Update the user guide.
 document 400 ms after typing stops, on a background thread, for DOS targets. Publish results as a separate "live"
 group in Problems, replaced on every run; build diagnostics stay separate.
 
-**Done when.** A debounce test with `FakeEditorComponent`; with `loadmap.asm` (104 KB) lint takes under 100 ms off
-the UI thread and typing latency stays within ADR-005 (p95 11 ms).
+**Done.** `EditorComponent.setDiagnostics(...)` and `setOnTextChanged(...)`; `LiveLintCoordinator` validates 400 ms
+after typing stops on a daemon thread, reading the text on the JavaFX thread once per pause rather than once per
+key; `BottomPanelViewModel` keeps build and live problems in separate lists; the mark is a wavy underline drawn by
+RichTextFX itself (`-rtfx-underline-wave-radius`, no custom node) and hovering it shows the message with the
+closest real mnemonic. Beyond the original item: a new `UnknownInstructionRule` reports a mistyped mnemonic on
+every target, the parser records what it used to drop (`UnknownStatementNode`, `MacroNode`), `Location` gained a
+`length`, and the lexer and the highlighter now key on `InstructionCatalog.knownMnemonics()` so a mnemonic cannot
+be coloured one way and judged another. No gutter marker: the underline and the hover were what the user asked
+for. Evidence: ADR-011. Measured on a generated 104 KB / 7 600-line program: one lint pass 25 ms best / 37 ms
+average off the UI thread, one paragraph of highlighting 0.014 ms. Tests: `UnknownInstructionRuleTest`,
+`LiveLintCoordinatorTest`, `LintSourceTest`, `LocationTest`, plus additions to `AssemblyLexerTest`,
+`AssemblyParserTest`, `InstructionCatalogTest`, `AssemblySyntaxHighlighterTest`, `BottomPanelViewModelTest`.
+
+**Known limitation.** The catalog describes neither the x87 FPU nor the SETcc/CMOVcc conditionals, so those words
+are never reported (they cannot be told apart from a typo). Describing those families in the catalog lifts it.
 
 ### P2-07 · Tool detection off the UI thread — S **(reproduced)**
 
@@ -398,6 +439,34 @@ Jackson (escapes tabs and other control characters). Decide whether `build` defa
 **Do.** Build, Run or Debug requested while a task runs shows `status.task.busy` instead of silently doing nothing.
 
 **Done when.** A view model test.
+
+**Done 2026-09-23** as part of P2-03: `WorkbenchViewModel.startTask` publishes `status.task.busy` when the
+single-task guard rejects the request, instead of returning a completed-null future in silence.
+
+### P2-10 · Dialogs sized by their content — S **(reported in use)**
+
+**Problem.** New Project wrote its window height into the source (`540 x 320`) and was not resizable, but six rows
+of form plus the button bar need 354, so the **Create** button was pushed out of the window with no way to drag it
+back. Project Properties had the same shape (`560 x 440` for what needs 474). Neither inherited `workbench.css`,
+so their rows were also taller than the same rows inside the IDE, and desktop text scaling widened the gap.
+
+**Done 2026-09-24.** `app.ui.DialogWindow` gives both dialogs the workbench style sheet and a scene measured from
+its content, with `setMinWidth`/`setMinHeight` recorded on first show so dragging cannot reproduce the bug.
+`NewProjectDialogTest` and `ProjectPropertiesDialogTest` show the real window and assert the button sits inside it.
+
+### P2-11 · Choosing the main file in the UI — M **(reported in use)**
+
+**Problem.** `[sources] entry` decides which program Run starts and what the executable is called, and it could
+only be changed by editing `idearm.toml` by hand. A folder of one-file exercises could not be switched between at
+all: `modules = ["src/*.asm"]` links them into one program, which carries every exercise in every executable and
+fails outright once two of them export the same name (TLINK 3.01: *MAIN defined in module EJERCIC2.ASM is
+duplicated in module EJERCIC1.ASM*).
+
+**Done 2026-09-24.** A **Main file** row in Project Properties lists every `.asm` in the project, with a
+**Build only this file** switch beside it. `EntrySelection` (application) works out what the choice leaves
+`modules` as: a pattern is left alone, a literal list swaps the old main in for the new one so no file silently
+stops being built, and the switch empties the list or brings the folder pattern back. Checking it asks first when
+it would drop modules. Verified with TASM 3.2 and DOSBox 0.74-3 in all three shapes.
 
 ---
 
