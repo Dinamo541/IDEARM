@@ -63,4 +63,22 @@ class PresentationArchitectureTest {
                 .because("View models publish message keys so both languages stay switchable at runtime (ADR-006)")
                 .check(classes);
     }
+
+    @Test
+    void viewsDoNotRunUseCases() {
+        var useCaseCall = new com.tngtech.archunit.base.DescribedPredicate<com.tngtech.archunit.core.domain.JavaMethodCall>(
+                "a use case of the application layer") {
+            @Override
+            public boolean test(com.tngtech.archunit.core.domain.JavaMethodCall call) {
+                return call.getTarget().getName().equals("execute")
+                        && call.getTargetOwner().getPackageName().startsWith("io.github.dinamo541.idearm.application");
+            }
+        };
+        noClasses()
+                .that().resideInAPackage("..app.view..")
+                .should().callMethodWhere(useCaseCall)
+                .because("A view shows its view model's state; running a use case, often on every repaint, belongs "
+                        + "in the view model (MVVM)")
+                .check(classes);
+    }
 }

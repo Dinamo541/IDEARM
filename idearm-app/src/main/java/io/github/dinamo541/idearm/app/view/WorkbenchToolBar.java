@@ -37,6 +37,16 @@ public final class WorkbenchToolBar extends ToolBar {
         });
         debug.disableProperty().bind(model.currentProjectProperty().isNull().or(model.busyProperty()
                 .and(model.getBottomPanel().getDebugViewModel().pausedProperty().not())));
+        // The stepping controls appear only while a session that can step is running, so the toolbar stays compact
+        // for everything else. A launch-only debugger never shows them.
+        var debugModel = model.getBottomPanel().getDebugViewModel();
+        var steppable = debugModel.pausedProperty().and(debugModel.canStepProperty());
+        var pause = stepAction(WorkbenchIcons.PAUSE, "tooltip.pause", text, model::pauseDebug,
+                debugModel.activeProperty().and(debugModel.pausedProperty().not())
+                        .and(debugModel.canPauseProperty()));
+        var stepOver = stepAction(WorkbenchIcons.STEP_OVER, "tooltip.stepOver", text, model::stepOver, steppable);
+        var stepInto = stepAction(WorkbenchIcons.STEP_INTO, "tooltip.stepInto", text, model::stepInto, steppable);
+        var stepOut = stepAction(WorkbenchIcons.STEP_OUT, "tooltip.stepOut", text, model::stepOut, steppable);
         var stop = action(WorkbenchIcons.STOP, "tooltip.stop", text, model::stop);
         stop.getStyleClass().add("stop-action");
         stop.disableProperty().bind(model.busyProperty().not());
@@ -49,13 +59,22 @@ public final class WorkbenchToolBar extends ToolBar {
         language.setOnAction(e -> text.localeProperty().set(text.localeProperty().get().equals(Localization.ENGLISH)
                 ? Localization.SPANISH : Localization.ENGLISH));
         HoverHelp.install(language, text, "action.switchLanguage", "");
-        getItems().addAll(command, spacer, recent, new Separator(), run, debug, build, stop, new Separator(), theme, language);
+        getItems().addAll(command, spacer, recent, new Separator(), run, debug, pause, stepOver, stepInto, stepOut,
+                build, stop, new Separator(), theme, language);
     }
     private Button action(WorkbenchIcons icon, String key, Localization text, Runnable action) {
         var button = new Button(null, icon.create());
         button.getStyleClass().add("icon-button");
         HoverHelp.install(button, text, key, "");
         button.setOnAction(e -> action.run());
+        return button;
+    }
+    /** A debug control that takes no room while the session cannot use it. */
+    private Button stepAction(WorkbenchIcons icon, String key, Localization text, Runnable action,
+                              javafx.beans.binding.BooleanExpression enabled) {
+        var button = action(icon, key, text, action);
+        button.visibleProperty().bind(enabled);
+        button.managedProperty().bind(button.visibleProperty());
         return button;
     }
     public void setOnCommandPaletteRequested(Runnable action) { onCommandPaletteRequested = action; }

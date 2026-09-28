@@ -33,6 +33,8 @@ public final class DocumentOutlineView extends BorderPane {
         var header = new Label();
         header.textProperty().bind(localization.text("outline.title"));
         header.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_SMALL);
+        header.getStyleClass().add("sidebar-heading");
+        header.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.OUTLINE.create());
         header.setPadding(new Insets(6, 12, 6, 12));
         getStyleClass().add("document-outline");
         setTop(header);
@@ -99,13 +101,7 @@ public final class DocumentOutlineView extends BorderPane {
 
         OutlineTreeCell() {
             this.badge = new Label();
-            this.badge.setStyle(
-                    "-fx-font-family: 'JetBrains Mono', monospace; " +
-                    "-fx-font-size: 9px; " +
-                    "-fx-font-weight: bold; " +
-                    "-fx-padding: 1 4; " +
-                    "-fx-background-radius: 3px;"
-            );
+            this.badge.getStyleClass().add("outline-badge");
 
             this.nameLabel = new Label();
             this.nameLabel.setStyle("-fx-font-family: 'JetBrains Mono', 'Consolas', monospace; -fx-font-size: 11px;");
@@ -130,18 +126,19 @@ public final class DocumentOutlineView extends BorderPane {
                 nameLabel.setText(item.name());
                 lineLabel.setText("Ln " + item.line());
 
+                badge.getStyleClass().removeAll("outline-procedure", "outline-segment", "outline-label");
                 switch (item.kind()) {
                     case "procedure" -> {
                         badge.setText("PROC");
-                        badge.setStyle(badge.getStyle() + "-fx-background-color: -color-warning-subtle; -fx-text-fill: -color-warning-fg;");
+                        badge.getStyleClass().add("outline-procedure");
                     }
                     case "segment" -> {
                         badge.setText("SEG");
-                        badge.setStyle(badge.getStyle() + "-fx-background-color: rgba(180, 100, 255, 0.2); -fx-text-fill: #a855f7;");
+                        badge.getStyleClass().add("outline-segment");
                     }
                     default -> {
                         badge.setText("LBL");
-                        badge.setStyle(badge.getStyle() + "-fx-background-color: -color-accent-subtle; -fx-text-fill: -color-accent-fg;");
+                        badge.getStyleClass().add("outline-label");
                     }
                 }
 

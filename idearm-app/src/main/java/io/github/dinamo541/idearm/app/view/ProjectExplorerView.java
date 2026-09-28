@@ -200,6 +200,7 @@ public final class ProjectExplorerView extends BorderPane {
         var title = new Label();
         title.textProperty().bind(localization.text("explorer.title"));
         title.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.TEXT_MUTED);
+        title.getStyleClass().add("sidebar-heading");
 
         var folderName = new Label();
         folderName.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_SMALL);
@@ -224,6 +225,7 @@ public final class ProjectExplorerView extends BorderPane {
         folderRow.setAlignment(Pos.CENTER_LEFT);
 
         var header = new VBox(4, title, folderRow);
+        header.getStyleClass().add("explorer-header");
         header.setPadding(new Insets(8, 4, 4, 10));
         return header;
     }

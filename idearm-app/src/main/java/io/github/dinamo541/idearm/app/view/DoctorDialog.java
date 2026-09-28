@@ -55,6 +55,7 @@ public final class DoctorDialog extends Stage {
         this.toolRegistry = toolRegistry;
 
         initOwner(owner);
+        io.github.dinamo541.idearm.app.ui.BrandLogo.apply(this);
         initModality(Modality.APPLICATION_MODAL);
         titleProperty().bind(localization.text("dialog.doctor.title"));
 
@@ -64,7 +65,7 @@ public final class DoctorDialog extends Stage {
     private void buildUi() {
         var header = new Label();
         header.textProperty().bind(localization.text("dialog.doctor.detected"));
-        header.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        header.getStyleClass().add("debug-heading");
 
         var table = new TableView<ToolRow>();
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -82,12 +83,19 @@ public final class DoctorDialog extends Stage {
         var kindCol = new TableColumn<ToolRow, String>();
         kindCol.textProperty().bind(localization.text("dialog.doctor.hostKind"));
         kindCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().hostKind()));
-        kindCol.setMinWidth(110);
-        kindCol.setMaxWidth(130);
+        kindCol.setMinWidth(145);
+        kindCol.setMaxWidth(150);
 
         var pathCol = new TableColumn<ToolRow, String>();
         pathCol.textProperty().bind(localization.text("dialog.doctor.path"));
         pathCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().path()));
+        pathCol.setCellFactory(column -> new TableCell<>() {
+            @Override protected void updateItem(String path, boolean empty) {
+                super.updateItem(path, empty);
+                setText(empty ? null : path);
+                setTooltip(empty || path == null ? null : new javafx.scene.control.Tooltip(path));
+            }
+        });
 
         var statusCol = new TableColumn<ToolRow, Boolean>();
         statusCol.textProperty().bind(localization.text("dialog.doctor.status"));
@@ -123,6 +131,7 @@ public final class DoctorDialog extends Stage {
         var hint = new Label();
         hint.textProperty().bind(localization.text("dialog.doctor.hint"));
         hint.setWrapText(true);
+        hint.getStyleClass().add("dialog-description");
 
         var feedback = new Label();
         feedback.setWrapText(true);
@@ -131,22 +140,28 @@ public final class DoctorDialog extends Stage {
 
         var addButton = new Button();
         addButton.textProperty().bind(localization.text("dialog.doctor.addFolder"));
+        addButton.getStyleClass().add("accent");
+        addButton.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.PLUS.create());
         addButton.setOnAction(e -> addFolder(table, addButton, feedback));
 
         var closeButton = new Button();
         closeButton.textProperty().bind(localization.text("dialog.doctor.close"));
-        closeButton.setDefaultButton(true);
+        closeButton.setCancelButton(true);
         closeButton.setOnAction(e -> close());
 
         var buttonBar = new HBox(10, addButton, feedback, closeButton);
         buttonBar.setAlignment(Pos.CENTER_LEFT);
-        buttonBar.setPadding(new Insets(10, 0, 0, 0));
-
-        var root = new VBox(12, header, hint, table, buttonBar);
+        buttonBar.getStyleClass().add("dialog-footer");
+        var body = new VBox(12, header, hint, table);
+        body.getStyleClass().add("dialog-body");
         VBox.setVgrow(table, Priority.ALWAYS);
-        root.setPadding(new Insets(16));
-
-        setScene(new Scene(root, 980, 460));
+        var root = new VBox(io.github.dinamo541.idearm.app.ui.DialogWindow.heading(localization,
+                "dialog.doctor.title", "dialog.doctor.description", io.github.dinamo541.idearm.app.ui.WorkbenchIcons.BUILD), body, buttonBar);
+        VBox.setVgrow(body, Priority.ALWAYS);
+        io.github.dinamo541.idearm.app.ui.DialogWindow.theme(root, getOwner());
+        setScene(new Scene(root, 1020, 520));
+        setMinWidth(780);
+        setMinHeight(420);
     }
 
     /** The same registry the build uses: detecting again here could report tools the build never picks. */

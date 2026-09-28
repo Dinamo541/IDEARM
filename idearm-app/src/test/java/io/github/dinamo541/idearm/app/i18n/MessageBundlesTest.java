@@ -36,6 +36,37 @@ class MessageBundlesTest {
     }
 
     @Test
+    void noDuplicateKeysInAnyBundle() throws IOException {
+        for (String bundleFile : List.of("messages_en.properties", "messages_es.properties")) {
+            var seen = new java.util.HashSet<String>();
+            var duplicates = new java.util.ArrayList<String>();
+            try (var in = MessageBundlesTest.class.getResourceAsStream(bundleFile);
+                 var reader = new java.io.BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+                assertNotNull(in, "Missing bundle " + bundleFile);
+                String line;
+                int lineNum = 0;
+                while ((line = reader.readLine()) != null) {
+                    lineNum++;
+                    String trimmed = line.trim();
+                    if (trimmed.isEmpty() || trimmed.startsWith("#") || trimmed.startsWith("!")) {
+                        continue;
+                    }
+                    int eq = trimmed.indexOf('=');
+                    int colon = trimmed.indexOf(':');
+                    int sep = eq != -1 && colon != -1 ? Math.min(eq, colon) : Math.max(eq, colon);
+                    if (sep != -1) {
+                        String key = trimmed.substring(0, sep).trim();
+                        if (!seen.add(key)) {
+                            duplicates.add(key + " (line " + lineNum + " in " + bundleFile + ")");
+                        }
+                    }
+                }
+            }
+            assertTrue(duplicates.isEmpty(), "Duplicate keys found in " + bundleFile + ": " + duplicates);
+        }
+    }
+
+    @Test
     void everyKeyTheCodeAsksForExists() throws IOException {
         Set<String> defined = keys("messages_en.properties");
         var missing = new TreeSet<String>();

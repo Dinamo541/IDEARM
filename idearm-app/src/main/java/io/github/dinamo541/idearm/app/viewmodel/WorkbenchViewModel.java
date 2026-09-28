@@ -1,5 +1,6 @@
 package io.github.dinamo541.idearm.app.viewmodel;
 
+import io.github.dinamo541.idearm.app.editor.EditorComponent;
 import io.github.dinamo541.idearm.app.i18n.Message;
 import io.github.dinamo541.idearm.app.i18n.Problem;
 import io.github.dinamo541.idearm.application.BuildEvent;
@@ -10,6 +11,7 @@ import io.github.dinamo541.idearm.application.CreateProject;
 import io.github.dinamo541.idearm.application.DebugProject;
 import io.github.dinamo541.idearm.application.DebugResult;
 import io.github.dinamo541.idearm.application.ImportProject;
+import io.github.dinamo541.idearm.application.knowledge.InstantiateExampleProject;
 import io.github.dinamo541.idearm.application.LintProject;
 import io.github.dinamo541.idearm.application.ManageBreakpoints;
 import io.github.dinamo541.idearm.application.ManageProjectFiles;
@@ -19,12 +21,15 @@ import io.github.dinamo541.idearm.application.RunProject;
 import io.github.dinamo541.idearm.application.RunResult;
 import io.github.dinamo541.idearm.application.editor.CompletionItem;
 import io.github.dinamo541.idearm.application.editor.HoverInfo;
+import io.github.dinamo541.idearm.application.editor.LintSource;
 import io.github.dinamo541.idearm.application.editor.OutlineItem;
 import io.github.dinamo541.idearm.application.editor.QueryCompletion;
 import io.github.dinamo541.idearm.application.editor.QueryDefinition;
+import io.github.dinamo541.idearm.application.editor.QueryExplain;
 import io.github.dinamo541.idearm.application.editor.QueryHover;
 import io.github.dinamo541.idearm.application.editor.QueryOutline;
 import io.github.dinamo541.idearm.application.editor.QueryReferences;
+import io.github.dinamo541.idearm.language.knowledge.CompatibilityContext;
 import io.github.dinamo541.idearm.domain.build.BuildStatus;
 import io.github.dinamo541.idearm.domain.build.CancellationToken;
 import io.github.dinamo541.idearm.domain.debug.Breakpoint;
@@ -34,10 +39,14 @@ import io.github.dinamo541.idearm.domain.diagnostic.Location;
 import io.github.dinamo541.idearm.domain.diagnostic.Severity;
 import io.github.dinamo541.idearm.domain.dist.DistResult;
 import io.github.dinamo541.idearm.domain.execution.SessionState;
+import io.github.dinamo541.idearm.application.EntrySelection;
+import io.github.dinamo541.idearm.domain.model.DebugConfiguration;
 import io.github.dinamo541.idearm.domain.model.Project;
 import io.github.dinamo541.idearm.domain.model.RunConfiguration;
 import io.github.dinamo541.idearm.domain.model.Sources;
+import io.github.dinamo541.idearm.domain.model.TargetProfile;
 import io.github.dinamo541.idearm.domain.model.TargetProfileCatalog;
+import io.github.dinamo541.idearm.domain.model.ToolchainSelection;
 import io.github.dinamo541.idearm.domain.port.ProjectRepository;
 import io.github.dinamo541.idearm.domain.port.ToolRegistry;
 import io.github.dinamo541.idearm.language.index.ProjectSymbolIndex;
@@ -54,6 +63,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -74,6 +84,9 @@ import javafx.collections.ListChangeListener;
  * also retranslates what is already on screen.
  */
 public final class WorkbenchViewModel {
+
+    /** How long typing must pause before the document is validated: long enough not to lint half-typed words. */
+    private static final long LIVE_LINT_DELAY_MILLIS = 400;
 
     private static final String DEFAULT_CONFIGURATION = "debug";
 
@@ -100,8 +113,11 @@ public final class WorkbenchViewModel {
     private final QueryReferences queryReferences = new QueryReferences();
     private final QueryCompletion queryCompletion = new QueryCompletion();
     private final QueryHover queryHover = new QueryHover();
+    private final QueryExplain queryExplain = new QueryExplain();
     private final QueryOutline queryOutline = new QueryOutline();
     private final LintProject lintProject = new LintProject();
+    private final LintSource lintSource = new LintSource();
+    private final LiveLintCoordinator liveLint;
 
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     /** Guards the single-task rule: the busy property alone is set on the JavaFX thread and can lag behind. */
@@ -141,6 +157,9 @@ public final class WorkbenchViewModel {
                 services.debugProviders(), services.toolchainProviders(), services.workspace(),
                 buildProject, services.breakpointStore(), services.stagingRoot());
 
+        this.liveLint = new LiveLintCoordinator(lintSource, liveLintExecutor(), LIVE_LINT_DELAY_MILLIS,
+                diagnostics -> bottomPanel.setLiveDiagnostics(diagnostics, currentProjectPath.get()));
+
         this.editorArea.getDocuments().addListener((ListChangeListener<EditorDocumentViewModel>) change -> {
             while (change.next()) {
                 if (change.wasAdded()) {
@@ -148,7 +167,11 @@ public final class WorkbenchViewModel {
                         initDocumentBreakpoints(doc);
                         followCaret(doc);
                         followFormat(doc);
+                        validateWhileTyping(doc);
                     }
+                }
+                for (EditorDocumentViewModel doc : change.getRemoved()) {
+                    liveLint.clear(doc.getEditor());
                 }
             }
         });
@@ -168,6 +191,8 @@ public final class WorkbenchViewModel {
 
         this.explorer.connect(new ManageProjectFiles(services.projectFiles()), this::isDosTarget);
         this.explorer.addListener(new ExplorerChanges());
+
+        bottomPanel.getDebugViewModel().setOnBreakpointEnabledChanged(this::setBreakpointEnabled);
     }
 
     public void openTerminal() {
@@ -255,6 +280,104 @@ public final class WorkbenchViewModel {
             services.projectRepository().save(root, updated);
             currentProject.set(updated);
             statusBar.setStatus(Message.of("status.project.runEnvironmentUpdated", environment));
+        } catch (RuntimeException failure) {
+            statusBar.setStatus(Message.of("status.task.failed", Problem.of(failure)));
+        }
+    }
+
+    /**
+     * Every assembly source of the open project, as project-relative paths, for the main-file chooser.
+     * Generated folders are left out, the same ones project indexing skips.
+     */
+    public List<String> listAssemblySources() {
+        Path root = currentProjectPath.get();
+        if (root == null || !Files.isDirectory(root)) {
+            return List.of();
+        }
+        try (var tree = Files.walk(root)) {
+            return tree.filter(Files::isRegularFile)
+                    .filter(file -> !isGenerated(root, file))
+                    .filter(file -> file.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".asm"))
+                    .map(file -> root.relativize(file).toString().replace('\\', '/'))
+                    .sorted()
+                    .toList();
+        } catch (IOException | RuntimeException unreadable) {
+            return List.of();
+        }
+    }
+
+    /**
+     * Saves which source is the program's main file, to {@code [sources] entry}, together with whether it is the
+     * whole program or one module among several. {@link EntrySelection} works out what that leaves {@code modules}
+     * as, because a main file that is also listed there would be assembled twice.
+     *
+     * <p>The executable is named after this file, and saving {@code idearm.toml} is what makes the next Run
+     * rebuild, so nothing else has to be invalidated by hand.
+     */
+    public void updateEntry(String entry, boolean onlyThisFile) {
+        Project project = currentProject.get();
+        Path root = currentProjectPath.get();
+        if (project == null || root == null || entry == null || entry.isBlank()) {
+            return;
+        }
+        Sources sources = EntrySelection.choose(project.sources(), entry, onlyThisFile);
+        if (sources.equals(project.sources())) {
+            return;
+        }
+        Project updated = new Project(project.schema(), project.info(), project.target(), project.toolchain(),
+                sources, project.resources(), project.build(), project.run(), project.debug(), project.dist());
+        try {
+            services.projectRepository().save(root, updated);
+            currentProject.set(updated);
+            statusBar.setStatus(Message.of("status.project.entryUpdated", sources.entry()));
+        } catch (RuntimeException failure) {
+            statusBar.setStatus(Message.of("status.task.failed", Problem.of(failure)));
+        }
+    }
+
+    /**
+     * Saves the folders an INCLUDE may name, to {@code [sources] include}. A file next to the source that includes
+     * it is always found, so this is only needed when the included file lives in another folder of the project.
+     *
+     * <p>Saving {@code idearm.toml} is what makes the next Run rebuild: the file is one of the build inputs.
+     */
+    public void updateIncludeDirs(List<String> folders) {
+        Project project = currentProject.get();
+        Path root = currentProjectPath.get();
+        if (project == null || root == null || folders == null || folders.equals(project.sources().include())) {
+            return;
+        }
+        Sources sources = project.sources();
+        Project updated = new Project(project.schema(), project.info(), project.target(), project.toolchain(),
+                new Sources(sources.entry(), sources.modules(), List.copyOf(folders), sources.exclude()),
+                project.resources(), project.build(), project.run(), project.debug(), project.dist());
+        try {
+            services.projectRepository().save(root, updated);
+            currentProject.set(updated);
+            statusBar.setStatus(Message.of("status.project.includeDirsUpdated",
+                    folders.isEmpty() ? "-" : String.join(", ", folders)));
+        } catch (RuntimeException failure) {
+            statusBar.setStatus(Message.of("status.task.failed", Problem.of(failure)));
+        }
+    }
+
+    /**
+     * Saves which debugger this project uses to {@code [debug] backend}. The choice decides whether the workbench
+     * can step and show registers at all, so it belongs in the project file rather than in a session setting.
+     */
+    public void updateDebugBackend(String backend) {
+        Project project = currentProject.get();
+        Path root = currentProjectPath.get();
+        if (project == null || root == null || backend == null || backend.equals(project.debug().backend())) {
+            return;
+        }
+        Project updated = new Project(project.schema(), project.info(), project.target(), project.toolchain(),
+                project.sources(), project.resources(), project.build(), project.run(),
+                new DebugConfiguration(backend), project.dist());
+        try {
+            services.projectRepository().save(root, updated);
+            currentProject.set(updated);
+            statusBar.setStatus(Message.of("status.project.debuggerUpdated", backend));
         } catch (RuntimeException failure) {
             statusBar.setStatus(Message.of("status.task.failed", Problem.of(failure)));
         }
@@ -376,8 +499,14 @@ public final class WorkbenchViewModel {
     /** Creates a new project using the CreateProject use case and opens it. */
     public Project createProject(Path parentDirectory, String name, String targetProfile, String cpu,
                                  String toolchainId, String toolchainVersion) {
+        return createProject(parentDirectory, name, targetProfile, cpu, toolchainId, toolchainVersion, null);
+    }
+
+    /** With a debugger chosen in the wizard; a blank one leaves the default for the target. */
+    public Project createProject(Path parentDirectory, String name, String targetProfile, String cpu,
+                                 String toolchainId, String toolchainVersion, String debugBackend) {
         Project project = new CreateProject(services.projectRepository())
-                .execute(parentDirectory, name, targetProfile, cpu, toolchainId, toolchainVersion);
+                .execute(parentDirectory, name, targetProfile, cpu, toolchainId, toolchainVersion, debugBackend);
         openProject(parentDirectory.resolve(name));
         return project;
     }
@@ -387,6 +516,43 @@ public final class WorkbenchViewModel {
         Project project = new ImportProject(services.projectRepository()).execute(directory);
         openProject(directory);
         return project;
+    }
+
+    /** Instantiates an academic example into a new non-destructive project and opens it. */
+    public Project instantiateExampleProject(String exampleName, String snippet) {
+        Path parentDirectory = currentProjectPath.get() != null
+                ? currentProjectPath.get().getParent()
+                : Path.of(System.getProperty("user.home"), "IDEARM_Projects");
+        if (parentDirectory == null) {
+            parentDirectory = Path.of(System.getProperty("user.home"), "IDEARM_Projects");
+        }
+        try {
+            if (!java.nio.file.Files.exists(parentDirectory)) {
+                java.nio.file.Files.createDirectories(parentDirectory);
+            }
+        } catch (java.io.IOException e) {
+            parentDirectory = Path.of(System.getProperty("java.io.tmpdir"), "idearm-examples");
+            try {
+                java.nio.file.Files.createDirectories(parentDirectory);
+            } catch (java.io.IOException ignored) {}
+        }
+        InstantiateExampleProject.Request req = new InstantiateExampleProject.Request(
+                parentDirectory,
+                exampleName != null && !exampleName.isBlank() ? exampleName : "academic_example",
+                snippet != null ? snippet : "",
+                "dos-com-16",
+                "8086",
+                "internal-emu"
+        );
+        try {
+            InstantiateExampleProject.Result result = new InstantiateExampleProject(services.projectRepository()).execute(req);
+            openProject(result.projectDirectory());
+            return result.project();
+        } catch (RuntimeException failure) {
+            // Shown like any other failed task, instead of the example silently not opening.
+            reportFailure(failure);
+            return null;
+        }
     }
 
     /** Stops the running task. */
@@ -486,7 +652,8 @@ public final class WorkbenchViewModel {
         return result;
     }
 
-    private void reportDebugEvent(DebugEvent event) {
+    /** Package-private so the debug event pipeline can be driven directly in tests. */
+    void reportDebugEvent(DebugEvent event) {
         switch (event) {
             case DebugEvent.Started started -> {
                 bottomPanel.appendOutputLine("[DEBUG] " + started.debugger());
@@ -499,7 +666,9 @@ public final class WorkbenchViewModel {
                 bottomPanel.appendOutputLine("[DEBUG] Paused at " + paused.file() + ":" + paused.line());
                 bottomPanel.getDebugViewModel().setPaused(true);
                 bottomPanel.getDebugViewModel().updateRegisters(paused.registers());
-                bottomPanel.getDebugViewModel().refreshMemoryDump();
+                // Asked for on a background thread: reading memory, the call stack and each watch from GDB waits
+                // for its answer, and stepping must not feel slow while that happens.
+                bottomPanel.getDebugViewModel().requestMemoryRefresh();
                 bottomPanel.getDebugViewModel().refreshInstructionsExecuted();
                 highlightExecutionLine(paused.file(), paused.line());
             }
@@ -572,6 +741,14 @@ public final class WorkbenchViewModel {
 
     public void resumeDebug() {
         bottomPanel.getDebugViewModel().resume();
+    }
+
+    /**
+     * Interrupts the running program. A program stuck in an endless loop — a classic student bug — can then be
+     * read where it is, instead of only being killed.
+     */
+    public void pauseDebug() {
+        bottomPanel.getDebugViewModel().pause();
     }
 
     /**
@@ -664,7 +841,13 @@ public final class WorkbenchViewModel {
     private <T> CompletableFuture<T> startTask(Message status, boolean cancellable,
                                                Function<CancellableToken, T> work) {
         Path projectPath = currentProjectPath.get();
-        if (projectPath == null || currentProject.get() == null || !taskRunning.compareAndSet(false, true)) {
+        if (projectPath == null || currentProject.get() == null) {
+            return CompletableFuture.completedFuture(null);
+        }
+        if (!taskRunning.compareAndSet(false, true)) {
+            // Pressing Debug or Build again while one is running used to do nothing at all, which reads as a broken
+            // key rather than as a busy workbench.
+            statusBar.setStatus(Message.of("status.task.busy"));
             return CompletableFuture.completedFuture(null);
         }
         saveAllQuietly();
@@ -814,11 +997,53 @@ public final class WorkbenchViewModel {
     }
 
     public Optional<HoverInfo> getHover(String word, String locale) {
-        return queryHover.execute(word, locale, symbolIndex, (filePath, line, size) -> {
+        var hover = queryHover.execute(word, locale, symbolIndex, (filePath, line, size) -> {
             if (bottomPanel.getDebugViewModel().isPaused()) {
                 return bottomPanel.getDebugViewModel().evaluateVariable(filePath, line, size);
             }
             return Optional.empty();
+        });
+        if (hover.isPresent()) {
+            return hover;
+        }
+        if (word != null && !word.isBlank()) {
+            Project proj = currentProject.get();
+            TargetProfile profile = (proj != null && proj.target() != null)
+                    ? TargetProfileCatalog.require(proj.target().profile())
+                    : TargetProfileCatalog.DOS_EXE_16;
+            String cpu = (proj != null && proj.target() != null) ? proj.target().cpu() : "8086";
+            ToolchainSelection toolchain = proj != null ? proj.toolchain() : null;
+            DebugConfiguration debug = proj != null ? proj.debug() : null;
+            CompatibilityContext ctx = CompatibilityContext.from(profile, cpu, toolchain, debug, Set.of());
+            var explanation = queryExplain.execute(new QueryExplain.Request(word, 1, 1, locale, ctx, symbolIndex));
+            if (explanation.isPresent()) {
+                return Optional.of(explanation.get().toHoverInfo());
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Validates this document whenever typing in it pauses, so an educational warning no longer waits for a build.
+     * The file and the target are read when the pass runs, because either may have changed since the last keystroke.
+     */
+    private void validateWhileTyping(EditorDocumentViewModel doc) {
+        EditorComponent editor = doc.getEditor();
+        editor.setOnTextChanged(() -> liveLint.requestLint(editor, () -> {
+            Path file = doc.getFilePath();
+            if (file == null) {
+                return null;
+            }
+            String cpu = currentProject.get() != null ? currentProject.get().target().cpu() : "8086";
+            return new LiveLintCoordinator.LintContext(file.toString(), cpu, isDosTarget(), symbolIndex);
+        }));
+    }
+
+    private static ScheduledExecutorService liveLintExecutor() {
+        return Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "idearm-live-lint");
+            thread.setDaemon(true);
+            return thread;
         });
     }
 
@@ -871,8 +1096,27 @@ public final class WorkbenchViewModel {
         Path normFile = file.toAbsolutePath().normalize();
         String rel = projectRoot.relativize(normFile).toString().replace('\\', '/');
         manageBreakpoints.toggleBreakpoint(projectRoot, rel, line);
-        bottomPanel.getDebugViewModel().setBreakpoints(manageBreakpoints.getBreakpoints(projectRoot));
+        publishBreakpoints(projectRoot);
         syncEditorBreakpoints(normFile);
+    }
+
+    /**
+     * Shows the project's breakpoints in the panel and hands them to a running session, so one set or cleared
+     * during a pause takes effect on the next resume instead of only on the next launch.
+     */
+    private void publishBreakpoints(Path projectRoot) {
+        var current = manageBreakpoints.getBreakpoints(projectRoot);
+        bottomPanel.getDebugViewModel().setBreakpoints(current);
+        bottomPanel.getDebugViewModel().pushBreakpoints(current);
+    }
+
+    /** The breakpoint list's checkbox: stored, shown in the editor margin, and told to a running session. */
+    private void setBreakpointEnabled(Breakpoint breakpoint, boolean enabled) {
+        Path projectRoot = currentProjectPath.get();
+        if (projectRoot == null || breakpoint == null) return;
+        manageBreakpoints.setBreakpointEnabled(projectRoot, breakpoint.path(), breakpoint.line(), enabled);
+        bottomPanel.getDebugViewModel().pushBreakpoints(manageBreakpoints.getBreakpoints(projectRoot));
+        syncEditorBreakpoints(projectRoot.resolve(breakpoint.path()).normalize());
     }
 
     public void toggleBreakpointAtCaret() {
@@ -888,8 +1132,10 @@ public final class WorkbenchViewModel {
         if (projectRoot != null) {
             manageBreakpoints.clearBreakpoints(projectRoot);
             bottomPanel.getDebugViewModel().setBreakpoints(List.of());
+            bottomPanel.getDebugViewModel().pushBreakpoints(List.of());
             for (var doc : editorArea.getDocuments()) {
                 doc.getEditor().setBreakpoints(Set.of());
+                doc.getEditor().setDisabledBreakpoints(Set.of());
             }
         }
     }
@@ -898,9 +1144,7 @@ public final class WorkbenchViewModel {
         Path projectRoot = currentProjectPath.get();
         if (projectRoot != null && doc.getFilePath().startsWith(projectRoot)) {
             String rel = projectRoot.relativize(doc.getFilePath()).toString().replace('\\', '/');
-            var bps = manageBreakpoints.getBreakpointsForFile(projectRoot, rel);
-            Set<Integer> lines = bps.stream().map(Breakpoint::line).collect(Collectors.toSet());
-            doc.getEditor().setBreakpoints(lines);
+            showBreakpointsIn(doc, manageBreakpoints.getBreakpointsForFile(projectRoot, rel));
         }
         doc.getEditor().setOnBreakpointToggled(line -> {
             toggleBreakpointFromEditor(doc.getFilePath(), line);
@@ -913,7 +1157,7 @@ public final class WorkbenchViewModel {
         Path normFile = file.toAbsolutePath().normalize();
         String rel = projectRoot.relativize(normFile).toString().replace('\\', '/');
         manageBreakpoints.toggleBreakpoint(projectRoot, rel, line);
-        bottomPanel.getDebugViewModel().setBreakpoints(manageBreakpoints.getBreakpoints(projectRoot));
+        publishBreakpoints(projectRoot);
     }
 
     private void syncEditorBreakpoints(Path file) {
@@ -921,12 +1165,21 @@ public final class WorkbenchViewModel {
         if (projectRoot == null || file == null) return;
         String rel = projectRoot.relativize(file).toString().replace('\\', '/');
         var bps = manageBreakpoints.getBreakpointsForFile(projectRoot, rel);
-        Set<Integer> lines = bps.stream().map(Breakpoint::line).collect(Collectors.toSet());
         for (var doc : editorArea.getDocuments()) {
             if (doc.getFilePath().equals(file)) {
-                doc.getEditor().setBreakpoints(lines);
+                showBreakpointsIn(doc, bps);
             }
         }
+    }
+
+    /** A switched-off breakpoint stays visible in the margin, drawn hollow, so the line is not lost. */
+    private void showBreakpointsIn(EditorDocumentViewModel doc, List<Breakpoint> breakpoints) {
+        Set<Integer> enabled = breakpoints.stream().filter(Breakpoint::enabled)
+                .map(Breakpoint::line).collect(Collectors.toSet());
+        Set<Integer> disabled = breakpoints.stream().filter(bp -> !bp.enabled())
+                .map(Breakpoint::line).collect(Collectors.toSet());
+        doc.getEditor().setBreakpoints(enabled);
+        doc.getEditor().setDisabledBreakpoints(disabled);
     }
 
     public ManageBreakpoints getManageBreakpoints() {
@@ -943,6 +1196,7 @@ public final class WorkbenchViewModel {
         stop();
         explorer.dispose();
         executor.shutdownNow();
+        liveLint.close();
     }
 
     /** Whether the open project builds for DOS, whose tools only see 8.3 names. */

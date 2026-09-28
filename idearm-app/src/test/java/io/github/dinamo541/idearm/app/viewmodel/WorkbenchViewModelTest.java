@@ -13,6 +13,8 @@ import io.github.dinamo541.idearm.domain.build.BuildStatus;
 import io.github.dinamo541.idearm.domain.build.CancellationToken;
 import io.github.dinamo541.idearm.domain.build.ToolRunResult;
 import io.github.dinamo541.idearm.domain.debug.Breakpoint;
+import io.github.dinamo541.idearm.domain.debug.DebugEvent;
+import io.github.dinamo541.idearm.domain.debug.RegisterState;
 import io.github.dinamo541.idearm.domain.model.Project;
 import io.github.dinamo541.idearm.domain.model.ResolvedToolchain;
 import io.github.dinamo541.idearm.domain.port.BreakpointStore;
@@ -204,6 +206,12 @@ class WorkbenchViewModelTest {
         assertEquals(io.github.dinamo541.idearm.application.editor.HoverKind.NUMBER_CONVERSION, numHover.get().kind());
         assertTrue(numHover.get().syntax().contains("0x20"));
 
+        // 2b. QueryExplain colon notation fallback hover (AA-P4-02, Acceptance Case 2)
+        var colonHover = viewModel.getHover("DS:DX", "es");
+        assertTrue(colonHover.isPresent());
+        assertTrue(colonHover.get().description().toLowerCase().contains("no representan concatenación")
+                || colonHover.get().description().toLowerCase().contains("no concatenación"));
+
         // 3. Autocompletion
         var completions = viewModel.getCompletions("PU");
         assertFalse(completions.isEmpty());
@@ -297,6 +305,90 @@ class WorkbenchViewModelTest {
         }
     };
 
+    /**
+     * Stepping is only useful if the line the program is about to run is visible. Nothing covered the debug event
+     * pipeline before, so a Paused event marking no line would have gone unnoticed.
+     */
+    @Test
+    void aPausedProgramMarksItsLineAndClearsItAgain() throws Exception {
+        var editorArea = new EditorAreaViewModel(FakeEditorComponent::new);
+        var vm = workbench(editorArea, new StatusBarViewModel(), repositoryReturning(Project.hello("Paused")));
+        try {
+            Path source = tempDir.resolve("src").resolve("main.asm");
+            Files.createDirectories(source.getParent());
+            Files.writeString(source, "mov ax, 1\nmov bx, 2\nint 21h\n");
+            vm.openProject(tempDir);
+
+            vm.reportDebugEvent(new DebugEvent.Paused(source.toString(), 2, RegisterState.initialDosState()));
+
+            var doc = editorArea.getDocuments().stream()
+                    .filter(open -> open.getFilePath().equals(source))
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("The paused file was not opened"));
+            var editor = (FakeEditorComponent) doc.getEditor();
+            assertEquals(2, editor.getExecutionLine());
+            assertTrue(vm.getBottomPanel().getDebugViewModel().isPaused());
+
+            // Continuing takes the mark away: the program is no longer standing on that line.
+            vm.reportDebugEvent(new DebugEvent.Resumed());
+            assertNull(editor.getExecutionLine());
+            assertFalse(vm.getBottomPanel().getDebugViewModel().isPaused());
+
+            vm.reportDebugEvent(new DebugEvent.Paused(source.toString(), 3, RegisterState.initialDosState()));
+            assertEquals(3, editor.getExecutionLine());
+
+            vm.reportDebugEvent(new DebugEvent.Stopped());
+            assertNull(editor.getExecutionLine());
+        } finally {
+            vm.dispose();
+        }
+    }
+
+    /** Pressing Debug again while one runs used to do nothing at all, which reads as a broken key (P2-09). */
+    @Test
+    void asecondTaskWhileOneRunsSaysTheWorkbenchIsBusy() throws Exception {
+        var mayEnd = new java.util.concurrent.CountDownLatch(1);
+        var started = new java.util.concurrent.CountDownLatch(1);
+        ProjectRepository slowRepository = new ProjectRepository() {
+            @Override public boolean exists(Path projectRoot) { return true; }
+
+            @Override
+            public Project load(Path projectRoot) {
+                if (started.getCount() > 0) {
+                    started.countDown();
+                } else {
+                    try {
+                        mayEnd.await();
+                    } catch (InterruptedException interrupted) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                return Project.hello("Busy");
+            }
+
+            @Override public void save(Path projectRoot, Project project) { }
+        };
+        var statusBar = new StatusBarViewModel();
+        var vm = workbench(new EditorAreaViewModel(FakeEditorComponent::new), statusBar, slowRepository);
+        try {
+            vm.openProject(tempDir);
+            var first = vm.build();
+            // Wait until the first task really holds the slot.
+            while (!vm.isBusy()) {
+                Thread.sleep(5);
+            }
+
+            assertNull(vm.debug().join(), "The second request is refused");
+            assertEquals("status.task.busy", statusBar.getStatus().key());
+
+            mayEnd.countDown();
+            first.get(5, java.util.concurrent.TimeUnit.SECONDS);
+        } finally {
+            mayEnd.countDown();
+            vm.dispose();
+        }
+    }
+
     /** Restart used to call debug() while the stopped session still held the task slot, so nothing restarted. */
     @Test
     void restartWaitsForTheStoppedSessionThenDebugsAgain() throws Exception {
@@ -345,6 +437,119 @@ class WorkbenchViewModelTest {
         } finally {
             vm.dispose();
         }
+    }
+
+    /**
+     * The Include Folders editor in Project Properties writes {@code [sources] include}; saving idearm.toml is
+     * also what makes the next Run rebuild, because the project file is a build input.
+     */
+    @Test
+    void savingIncludeFoldersKeepsTheRestOfTheSourcesUntouched() throws IOException {
+        Files.writeString(tempDir.resolve("idearm.toml"), "schema = 1");
+        var saved = new java.util.ArrayList<Project>();
+        Project opened = Project.hello("MANZANA");
+        ProjectRepository repository = new ProjectRepository() {
+            @Override public Project load(Path projectRoot) { return opened; }
+            @Override public void save(Path projectRoot, Project project) { saved.add(project); }
+        };
+        var statusBar = new StatusBarViewModel();
+        var vm = workbench(new EditorAreaViewModel(FakeEditorComponent::new), statusBar, repository);
+        try {
+            vm.openProject(tempDir);
+
+            vm.updateIncludeDirs(List.of("sprite"));
+
+            assertEquals(1, saved.size());
+            assertEquals(List.of("sprite"), saved.getFirst().sources().include());
+            assertEquals(opened.sources().entry(), saved.getFirst().sources().entry());
+            assertEquals(opened.sources().modules(), saved.getFirst().sources().modules());
+            assertEquals(List.of("sprite"), vm.getCurrentProject().sources().include());
+            assertEquals("status.project.includeDirsUpdated", statusBar.getStatus().key());
+
+            // Picking the same folders again is not a change, so idearm.toml is left alone.
+            vm.updateIncludeDirs(List.of("sprite"));
+            assertEquals(1, saved.size());
+        } finally { vm.dispose(); }
+    }
+
+    /**
+     * The main-file chooser in Project Properties writes {@code [sources] entry}. It is what decides which
+     * program Run starts and what the executable is called, so it must reach idearm.toml, and the module list
+     * must stay consistent with it.
+     */
+    @Test
+    void savingTheMainFileKeepsThePatternThatAlreadyCoversIt() throws IOException {
+        Files.writeString(tempDir.resolve("idearm.toml"), "schema = 1");
+        var saved = new java.util.ArrayList<Project>();
+        Project opened = withModules(Project.hello("MANZANA"), List.of("src/*.asm"));
+        var statusBar = new StatusBarViewModel();
+        var vm = workbench(new EditorAreaViewModel(FakeEditorComponent::new), statusBar, recording(opened, saved));
+        try {
+            vm.openProject(tempDir);
+
+            vm.updateEntry("src/ejercicio2.asm", false);
+
+            assertEquals(1, saved.size());
+            assertEquals("src/ejercicio2.asm", saved.getFirst().sources().entry());
+            assertEquals(List.of("src/*.asm"), saved.getFirst().sources().modules());
+            assertEquals("status.project.entryUpdated", statusBar.getStatus().key());
+
+            // Choosing the same file again changes nothing, so idearm.toml is left alone.
+            vm.updateEntry("src/ejercicio2.asm", false);
+            assertEquals(1, saved.size());
+        } finally { vm.dispose(); }
+    }
+
+    @Test
+    void buildingOnlyTheMainFileEmptiesTheModuleList() throws IOException {
+        Files.writeString(tempDir.resolve("idearm.toml"), "schema = 1");
+        var saved = new java.util.ArrayList<Project>();
+        Project opened = withModules(Project.hello("MANZANA"), List.of("src/*.asm"));
+        var vm = workbench(new EditorAreaViewModel(FakeEditorComponent::new), new StatusBarViewModel(),
+                recording(opened, saved));
+        try {
+            vm.openProject(tempDir);
+
+            vm.updateEntry("src/ejercicio2.asm", true);
+            assertEquals(List.of(), saved.getFirst().sources().modules());
+
+            vm.updateEntry("src/ejercicio2.asm", false);
+            assertEquals(List.of("src/*.asm"), saved.get(1).sources().modules());
+        } finally { vm.dispose(); }
+    }
+
+    /** The chooser must offer the project's own sources, not what a previous build left behind. */
+    @Test
+    void listingAssemblySourcesSkipsGeneratedFolders() throws IOException {
+        Files.writeString(tempDir.resolve("idearm.toml"), "schema = 1");
+        for (String relative : List.of("src/main.asm", "src/video.asm", "src/macros.inc",
+                "build/debug/obj/main.asm", "dist/main.asm")) {
+            Path file = tempDir.resolve(relative);
+            Files.createDirectories(file.getParent());
+            Files.writeString(file, "; test");
+        }
+        var vm = workbench(new EditorAreaViewModel(FakeEditorComponent::new), new StatusBarViewModel(),
+                repositoryReturning(Project.hello("MANZANA")));
+        try {
+            vm.openProject(tempDir);
+
+            assertEquals(List.of("src/main.asm", "src/video.asm"), vm.listAssemblySources());
+        } finally { vm.dispose(); }
+    }
+
+    private static Project withModules(Project project, List<String> modules) {
+        var sources = project.sources();
+        return new Project(project.schema(), project.info(), project.target(), project.toolchain(),
+                new io.github.dinamo541.idearm.domain.model.Sources(sources.entry(), modules, sources.include(),
+                        sources.exclude()),
+                project.resources(), project.build(), project.run(), project.debug(), project.dist());
+    }
+
+    private static ProjectRepository recording(Project opened, List<Project> saved) {
+        return new ProjectRepository() {
+            @Override public Project load(Path projectRoot) { return opened; }
+            @Override public void save(Path projectRoot, Project project) { saved.add(project); }
+        };
     }
 
     private WorkbenchViewModel workbench(EditorAreaViewModel editorArea, StatusBarViewModel statusBar,

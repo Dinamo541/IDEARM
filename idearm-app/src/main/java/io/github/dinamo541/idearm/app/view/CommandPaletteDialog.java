@@ -47,6 +47,7 @@ public final class CommandPaletteDialog extends Stage {
 
     public CommandPaletteDialog(Window owner, Localization localization, List<CommandEntry> commands) {
         initOwner(owner);
+        io.github.dinamo541.idearm.app.ui.BrandLogo.apply(this);
         initModality(Modality.APPLICATION_MODAL);
         initStyle(StageStyle.UNDECORATED);
         titleProperty().bind(localization.text("dialog.palette.title"));
@@ -58,7 +59,8 @@ public final class CommandPaletteDialog extends Stage {
 
     private void buildUi(Localization localization) {
         searchField.promptTextProperty().bind(localization.text("dialog.palette.placeholder"));
-        searchField.setStyle("-fx-font-size: 14px; -fx-padding: 8px;");
+        searchField.setId("command-search");
+        searchField.accessibleTextProperty().bind(localization.text("dialog.palette.placeholder"));
 
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             filteredCommands.setPredicate(entry -> {
@@ -83,6 +85,12 @@ public final class CommandPaletteDialog extends Stage {
             }
         });
 
+        commandList.setId("command-list");
+        commandList.setFixedCellSize(32);
+        var empty = new Label();
+        empty.textProperty().bind(localization.text("dialog.palette.empty"));
+        empty.getStyleClass().add("empty-description");
+        commandList.setPlaceholder(empty);
         commandList.setItems(filteredCommands);
         commandList.setCellFactory(lv -> new ListCell<>() {
             @Override
@@ -98,18 +106,20 @@ public final class CommandPaletteDialog extends Stage {
                     if (item.category() != null && !item.category().isBlank()) {
                         var catBadge = new Label(item.category());
                         catBadge.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.ROUNDED);
-                        catBadge.setStyle("-fx-background-color: -color-bg-subtle; -fx-text-fill: -color-fg-muted; -fx-padding: 1px 6px;");
+                        catBadge.getStyleClass().add("command-category");
                         box.getChildren().add(catBadge);
                     }
 
                     var titleLbl = new Label(item.title());
-                    titleLbl.setStyle("-fx-font-weight: bold;");
+                    titleLbl.setMinWidth(0);
+                    titleLbl.setMaxWidth(Double.MAX_VALUE);
                     HBox.setHgrow(titleLbl, Priority.ALWAYS);
                     box.getChildren().add(titleLbl);
 
                     if (item.shortcut() != null && !item.shortcut().isBlank()) {
                         var shortcutLbl = new Label(item.shortcut());
-                        shortcutLbl.setStyle("-fx-text-fill: -color-fg-muted; -fx-font-size: 11px;");
+                        shortcutLbl.getStyleClass().add("keycap");
+                        shortcutLbl.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
                         box.getChildren().add(shortcutLbl);
                     }
 
@@ -153,16 +163,22 @@ public final class CommandPaletteDialog extends Stage {
             }
         });
 
-        var root = new VBox(8, searchField, commandList);
+        var hint = new Label();
+        hint.textProperty().bind(localization.text("dialog.palette.hint"));
+        hint.getStyleClass().add("picker-hint");
+        var root = new VBox(8, searchField, commandList, hint);
         VBox.setVgrow(commandList, Priority.ALWAYS);
         root.setPadding(new Insets(12));
 
         root.getStyleClass().add("command-palette");
-        if (getOwner() instanceof Stage parent) {
-            root.getStyleClass().addAll(parent.getScene().getRoot().getStyleClass());
-        }
-        setScene(new Scene(root, 640, 380));
-        if (getOwner() instanceof Stage parent) getScene().getStylesheets().addAll(parent.getScene().getRoot().getStylesheets());
+        io.github.dinamo541.idearm.app.ui.WorkbenchTheme.apply(root, getOwner());
+        setScene(new Scene(root, 640, 400));
+        getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.ESCAPE) { close(); event.consume(); }
+            else if (event.getCode() == KeyCode.ENTER && commandList.isFocused()) {
+                executeSelected(); event.consume();
+            }
+        });
         setOnShowing(e -> { if (getOwner() != null) {
             setX(getOwner().getX() + (getOwner().getWidth() - 640) / 2);
             setY(getOwner().getY() + 64);
