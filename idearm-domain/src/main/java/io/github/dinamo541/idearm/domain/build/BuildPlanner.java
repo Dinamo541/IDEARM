@@ -13,6 +13,19 @@ public final class BuildPlanner {
     private final CompatibilityResolver compatibility = new CompatibilityResolver();
 
     public BuildPlan plan(Project project, String configuration, ToolchainProvider provider) {
+        return plan(project, configuration, provider, List.of(), List.of());
+    }
+
+    /**
+     * Plans a build whose INCLUDE graph has already been resolved against the file system.
+     *
+     * @param dependencies project-relative files the sources INCLUDE; they are staged but never assembled
+     * @param searchPath   project-relative folders the assembler must search, most specific first, with the
+     *                     project root spelled {@code "."}. An empty list keeps the declared include folders,
+     *                     which is what callers that do not resolve includes still expect.
+     */
+    public BuildPlan plan(Project project, String configuration, ToolchainProvider provider,
+                          List<String> dependencies, List<String> searchPath) {
         if (project.schema() != 1) fail("project.schema.unsupported", "Unsupported project schema: " + project.schema(), project.schema());
         if (project.info().name().isBlank() || project.info().version().isBlank()) {
             fail("project.info.invalid", "Project name and version must not be blank.");
@@ -35,7 +48,10 @@ public final class BuildPlanner {
         List<String> allSources = new ArrayList<>();
         allSources.add(sources.entry());
         allSources.addAll(sources.modules());
-        FileNameRules.validateDistinctPaths(allSources, dosNames);
+        // Included files share the staged tree with the sources, so they must not collide with one another either.
+        var stagedInputs = new ArrayList<>(allSources);
+        stagedInputs.addAll(dependencies);
+        FileNameRules.validateDistinctPaths(stagedInputs, dosNames);
 
         for (String src : allSources) {
             if (!FileNames.extension(FileNames.lastSegment(src)).equals("asm")) {
@@ -46,6 +62,14 @@ public final class BuildPlanner {
         if (!sources.include().isEmpty()) {
             FileNameRules.validateDistinctPaths(sources.include(), dosNames);
         }
+        // Search folders nest by design (src and src/mac are both legitimate), so each one is checked on its own
+        // rather than as a set of distinct paths.
+        for (String folder : searchPath) {
+            if (!folder.equals(".")) {
+                FileNameRules.validateRelativePath(folder, dosNames);
+            }
+        }
+        List<String> includeDirs = searchPath.isEmpty() ? sources.include() : List.copyOf(searchPath);
 
         // Generated names keep the source's spelling, with lower-case folders and extensions (FileNames).
         // DOS upper-cases them inside the emulator; runners publish them exactly as spelled here.
@@ -63,7 +87,7 @@ public final class BuildPlanner {
             String listing = flags.listing() ? "lst/" + stem + ".lst" : null;
 
             steps.add(provider.assembler().assemble(
-                    new AssembleRequest(src, object, listing, flags.debugInfo(), target.cpuBaseline(), sources.include(),
+                    new AssembleRequest(src, object, listing, flags.debugInfo(), target.cpuBaseline(), includeDirs,
                             target)));
             objectFiles.add(object);
             outputs.add(object);
@@ -87,7 +111,7 @@ public final class BuildPlanner {
 
         FileNameRules.validateDistinctPaths(outputs, dosNames);
         return new BuildPlan(project, configuration, target, List.copyOf(steps), executable, List.copyOf(outputs),
-                listings);
+                listings, List.copyOf(dependencies));
     }
 
     private static void fail(String code, String message, Object... arguments) {

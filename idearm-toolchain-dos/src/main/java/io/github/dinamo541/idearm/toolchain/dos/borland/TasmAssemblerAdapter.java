@@ -20,7 +20,7 @@ public final class TasmAssemblerAdapter implements AssemblerAdapter {
         }
         // TASM searches include directories given as /i<path>; staged sources and includes share drive S.
         for (String include : request.includeDirs()) {
-            switches.append(" /i").append(DosArguments.path('S', include));
+            switches.append(" /i").append(DosArguments.directory('S', include));
         }
         String files = DosArguments.path('S', request.source()) + "," + DosArguments.path('C', request.objectFile());
         if (request.listingFile() != null) {

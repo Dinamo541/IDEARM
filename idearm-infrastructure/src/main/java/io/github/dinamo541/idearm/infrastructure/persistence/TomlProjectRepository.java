@@ -72,7 +72,7 @@ public final class TomlProjectRepository implements ProjectRepository {
                     new Resources(array(resources, "files")), configurations,
                     new RunConfiguration(string(run, "environment", "dosbox"), string(run, "isolation", "required"),
                             bool(run, "keep-open", true), string(run, "cycles", "auto"), integer(run, "memsize", 16), array(run, "args")),
-                    new DebugConfiguration(string(debug, "backend", "external")),
+                    new DebugConfiguration(string(debug, "backend", DebugConfiguration.EMULATOR)),
                     new DistConfiguration(bool(dist, "launcher", true), bool(dist, "zip", false)));
         } catch (DomainException failure) { throw failure; }
         catch (IOException | IllegalArgumentException failure) { throw new DomainException("project.toml.invalid", "Cannot read project " + file + ": " + failure.getMessage(), failure, failure.getMessage(), file); }

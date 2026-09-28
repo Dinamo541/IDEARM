@@ -52,7 +52,20 @@ public final class BuildProject {
                         "Expected one provider for toolchain: " + project.toolchain().id(), project.toolchain().id());
             }
             var provider = matching.getFirst();
-            BuildPlan plan = new BuildPlanner().plan(project, configuration, provider);
+            // Planning is pure, so a first pass only answers which target this is; resolving INCLUDE needs that
+            // answer to know whether DOS name rules apply before it can judge a name.
+            var planner = new BuildPlanner();
+            var includes = IncludeResolver.resolve(project,
+                    root, planner.plan(project, configuration, provider).target().isDos());
+            diagnostics.addAll(includes.problems());
+            if (includes.hasErrors()) {
+                // Stopping here is what makes an unresolved include readable: the tools would report it as a fatal
+                // error against a staged drive path, at the line of the INCLUDE but in a file the editor cannot open.
+                return finish(new BuildResult(BuildStatus.FAILED, configuration, diagnostics, List.of(), output),
+                        events);
+            }
+            BuildPlan plan = planner.plan(project, configuration, provider, includes.dependencies(),
+                    includes.searchPath());
             workspace.invalidate(root, configuration);
             workspace.validateSources(root, project);
             var resolved = provider.resolve(project, tools);
@@ -101,6 +114,11 @@ public final class BuildProject {
             result = new BuildResult(ex.code().equals("task.cancelled") ? BuildStatus.CANCELLED : BuildStatus.FAILED,
                     configuration, diagnostics, List.of(), output);
         }
+        return finish(result, events);
+    }
+
+    /** Every exit from a build publishes its diagnostics and announces that it ended, in that order. */
+    private static BuildResult finish(BuildResult result, Consumer<BuildEvent> events) {
         events.accept(new BuildEvent.DiagnosticsPublished(result.diagnostics()));
         events.accept(new BuildEvent.Finished(result));
         return result;

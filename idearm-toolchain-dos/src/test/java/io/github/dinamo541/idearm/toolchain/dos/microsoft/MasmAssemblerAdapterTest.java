@@ -49,6 +49,30 @@ class MasmAssemblerAdapterTest {
     }
 
     @Test
+    void searchesEveryIncludeFolderNatively() {
+        AssembleRequest req = new AssembleRequest("src/MAIN.ASM", "OBJ/MAIN.OBJ", null, false, "8086",
+                List.of("src", ".", "inc/mac"));
+        List<String> args = adapter.assemble(req).arguments();
+
+        // Folders are spelled like the object and the source are, so the hybrid runner rewrites them the same way.
+        assertTrue(args.contains("/Isrc"));
+        assertTrue(args.contains("/I."));
+        assertTrue(args.contains("/Iinc\\mac"));
+    }
+
+    @Test
+    void searchesEveryIncludeFolderOnTheStagedDriveInsideDosBox() {
+        var insideDos = new MasmAssemblerAdapter(true);
+        AssembleRequest req = new AssembleRequest("src/MAIN.ASM", "OBJ/MAIN.OBJ", null, false, "8086",
+                List.of("src", "."));
+        List<String> args = insideDos.assemble(req).arguments();
+
+        assertTrue(args.contains("/IS:\\SRC"));
+        assertTrue(args.contains("/IS:\\"));
+        assertTrue(args.contains("S:\\SRC\\MAIN.ASM"));
+    }
+
+    @Test
     void providesMasmDiagnosticParser() {
         assertNotNull(adapter.diagnostics());
         assertInstanceOf(MasmDiagnosticParser.class, adapter.diagnostics());

@@ -60,9 +60,15 @@ final class FreshBuild {
      */
     static Outcome ensure(Path root, Project project, String configuration, List<ToolchainProvider> toolchains,
                           BuildProject builder, CancellationToken cancellation, Consumer<BuildEvent> events) {
-        BuildPlan plan = new BuildPlanner().plan(project, configuration, toolchain(project, toolchains));
+        var planner = new BuildPlanner();
+        ToolchainProvider provider = toolchain(project, toolchains);
+        var includes = IncludeResolver.resolve(project, root,
+                planner.plan(project, configuration, provider).target().isDos());
+        BuildPlan plan = planner.plan(project, configuration, provider, includes.dependencies(),
+                includes.searchPath());
         Path buildDirectory = root.resolve("build").resolve(configuration);
-        if (!upToDate(root, project, plan, buildDirectory)) {
+        // An include that cannot be found is not a reason to reuse the old program: the build reports it properly.
+        if (includes.hasErrors() || !upToDate(root, project, plan, buildDirectory)) {
             BuildResult result = builder.execute(root, configuration, cancellation, events);
             if (result.status() != BuildStatus.SUCCEEDED) {
                 return new Outcome(plan, buildDirectory, null, result);
@@ -89,7 +95,7 @@ final class FreshBuild {
             if (oldestOutput == null) {
                 return false;
             }
-            for (Path input : inputs(root, project)) {
+            for (Path input : inputs(root, project, plan)) {
                 // Equal times rebuild too: a save in the same clock tick as the build must not be missed.
                 if (Files.getLastModifiedTime(input, LinkOption.NOFOLLOW_LINKS).compareTo(oldestOutput) >= 0) {
                     return false;
@@ -101,12 +107,16 @@ final class FreshBuild {
         }
     }
 
-    private static List<Path> inputs(Path root, Project project) throws IOException {
+    private static List<Path> inputs(Path root, Project project, BuildPlan plan) throws IOException {
         var inputs = new ArrayList<Path>();
         inputs.add(root.resolve("idearm.toml"));
         inputs.add(root.resolve(project.sources().entry()));
         for (String module : project.sources().modules()) {
             inputs.add(root.resolve(module));
+        }
+        // Editing an included file changes the program just as much as editing the source that includes it.
+        for (String dependency : plan.dependencies()) {
+            inputs.add(root.resolve(dependency));
         }
         for (String include : project.sources().include()) {
             Path folder = root.resolve(include);

@@ -59,10 +59,11 @@ public final class HybridToolRunner implements ToolRunner {
         }
 
         Path root = projectRoot.toAbsolutePath().normalize();
-        List<String> sources = DosStaging.sources(plan);
+        // Included files are staged and mapped like sources, so a diagnostic inside one opens the real file.
+        List<String> staged = DosStaging.stagedFiles(plan);
         if (cancellation.cancelled()) {
             return new ToolRunResult(BuildStatus.CANCELLED, List.of(), null, "Build cancelled.",
-                    new PathMapper(root, sources));
+                    new PathMapper(root, staged));
         }
 
         Path session = null;
@@ -70,8 +71,8 @@ public final class HybridToolRunner implements ToolRunner {
             session = DosStaging.createSession(stagingRoot, "H", root);
             Path driveC = session.resolve("C");
             Path driveS = session.resolve("S");
-            var sourcePaths = new PathMapper(root, sources, driveS);
-            DosStaging.copySources(root, driveS, sources);
+            var sourcePaths = new PathMapper(root, staged, driveS);
+            DosStaging.copySources(root, driveS, staged);
             DosStaging.copyIncludes(root, driveS, plan.project().sources().include());
             DosStaging.prepareOutputs(plan, driveC);
 
@@ -203,7 +204,10 @@ public final class HybridToolRunner implements ToolRunner {
             return argument.substring(0, 3) + resolve(driveC, argument.substring(3));
         }
         if (argument.startsWith("/I")) {
-            return "/I" + resolve(driveS, argument.substring(2));
+            String folder = argument.substring(2);
+            // The project root is spelled "." on the search path and is the staged drive itself, which
+            // safeOutput has no 8.3 name for.
+            return "/I" + (folder.equals(".") ? driveS.toString() : resolve(driveS, folder));
         }
         if (argument.toUpperCase(Locale.ROOT).endsWith(".ASM")) {
             return resolve(driveS, argument).toString();

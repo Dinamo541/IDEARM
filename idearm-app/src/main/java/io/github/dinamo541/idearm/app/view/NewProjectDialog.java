@@ -1,13 +1,14 @@
 package io.github.dinamo541.idearm.app.view;
 
 import io.github.dinamo541.idearm.app.i18n.Localization;
+import io.github.dinamo541.idearm.app.ui.DialogWindow;
 import io.github.dinamo541.idearm.app.viewmodel.WorkbenchViewModel;
+import io.github.dinamo541.idearm.domain.model.DebugConfiguration;
 import io.github.dinamo541.idearm.domain.model.Project;
 import java.io.File;
 import java.nio.file.Path;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -36,12 +37,14 @@ public final class NewProjectDialog extends Stage {
     private final ComboBox<String> profileBox = new ComboBox<>();
     private final ComboBox<String> cpuBox = new ComboBox<>();
     private final ComboBox<String> toolchainBox = new ComboBox<>();
+    private final ComboBox<String> debuggerBox = new ComboBox<>();
 
     public NewProjectDialog(Window owner, WorkbenchViewModel viewModel, Localization localization) {
         this.viewModel = viewModel;
         this.localization = localization;
 
         initOwner(owner);
+        io.github.dinamo541.idearm.app.ui.BrandLogo.apply(this);
         initModality(Modality.APPLICATION_MODAL);
         titleProperty().bind(localization.text("dialog.newProject.title"));
 
@@ -68,11 +71,31 @@ public final class NewProjectDialog extends Stage {
                 toolchainBox.getItems().setAll("borland-tasm", "microsoft-masm");
                 toolchainBox.setValue("borland-tasm");
                 cpuBox.setValue("8086");
+                // The built-in emulator first: it needs no proprietary debugger and drives every IDE panel.
+                debuggerBox.getItems().setAll(DebugConfiguration.EMULATOR, DebugConfiguration.EXTERNAL);
+                debuggerBox.setValue(DebugConfiguration.EMULATOR);
+                debuggerBox.setDisable(false);
             } else {
                 toolchainBox.getItems().setAll("nasm");
                 toolchainBox.setValue("nasm");
                 cpuBox.setValue("win-pe32-console".equals(newVal) ? "80386" : "x86-64");
+                // A native program is debugged by GDB; there is nothing to choose.
+                debuggerBox.getItems().setAll(DebugConfiguration.GDB);
+                debuggerBox.setValue(DebugConfiguration.GDB);
+                debuggerBox.setDisable(true);
             }
+        });
+        debuggerBox.setConverter(new javafx.util.StringConverter<>() {
+            @Override public String toString(String id) {
+                if (id == null) return "";
+                return switch (id) {
+                    case DebugConfiguration.EMULATOR -> localization.get("dialog.properties.debugger.emulator");
+                    case DebugConfiguration.EXTERNAL -> localization.get("dialog.properties.debugger.external");
+                    case DebugConfiguration.GDB -> localization.get("dialog.properties.debugger.gdb");
+                    default -> id;
+                };
+            }
+            @Override public String fromString(String label) { return label; }
         });
         profileBox.setValue("dos-exe-16");
 
@@ -81,14 +104,21 @@ public final class NewProjectDialog extends Stage {
 
     private void buildUi() {
         var grid = new GridPane();
+        grid.getStyleClass().add("form-grid");
+        var labelColumn = new javafx.scene.layout.ColumnConstraints();
+        labelColumn.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
+        var valueColumn = new javafx.scene.layout.ColumnConstraints();
+        valueColumn.setHgrow(javafx.scene.layout.Priority.ALWAYS);
+        grid.getColumnConstraints().addAll(labelColumn, valueColumn);
         grid.setHgap(12);
         grid.setVgap(14);
-        grid.setPadding(new Insets(20));
+
 
         // Row 0: Name
         var nameLabel = new Label();
         nameLabel.textProperty().bind(localization.text("dialog.newProject.name"));
-        nameLabel.setStyle("-fx-font-weight: bold;");
+        nameLabel.getStyleClass().add("form-label");
+        nameLabel.setLabelFor(nameField);
         GridPane.setHgrow(nameField, Priority.ALWAYS);
         grid.add(nameLabel, 0, 0);
         grid.add(nameField, 1, 0);
@@ -96,7 +126,8 @@ public final class NewProjectDialog extends Stage {
         // Row 1: Location + Browse
         var locationLabel = new Label();
         locationLabel.textProperty().bind(localization.text("dialog.newProject.location"));
-        locationLabel.setStyle("-fx-font-weight: bold;");
+        locationLabel.getStyleClass().add("form-label");
+        locationLabel.setLabelFor(locationField);
 
         var browseButton = new Button();
         browseButton.textProperty().bind(localization.text("dialog.newProject.browse"));
@@ -121,7 +152,8 @@ public final class NewProjectDialog extends Stage {
         // Row 2: Target Profile
         var profileLabel = new Label();
         profileLabel.textProperty().bind(localization.text("dialog.newProject.profile"));
-        profileLabel.setStyle("-fx-font-weight: bold;");
+        profileLabel.getStyleClass().add("form-label");
+        profileLabel.setLabelFor(profileBox);
         profileBox.setMaxWidth(Double.MAX_VALUE);
         grid.add(profileLabel, 0, 2);
         grid.add(profileBox, 1, 2);
@@ -129,7 +161,8 @@ public final class NewProjectDialog extends Stage {
         // Row 3: CPU
         var cpuLabel = new Label();
         cpuLabel.textProperty().bind(localization.text("dialog.newProject.cpu"));
-        cpuLabel.setStyle("-fx-font-weight: bold;");
+        cpuLabel.getStyleClass().add("form-label");
+        cpuLabel.setLabelFor(cpuBox);
         cpuBox.setMaxWidth(Double.MAX_VALUE);
         grid.add(cpuLabel, 0, 3);
         grid.add(cpuBox, 1, 3);
@@ -137,15 +170,29 @@ public final class NewProjectDialog extends Stage {
         // Row 4: Toolchain
         var toolchainLabel = new Label();
         toolchainLabel.textProperty().bind(localization.text("dialog.newProject.toolchain"));
-        toolchainLabel.setStyle("-fx-font-weight: bold;");
+        toolchainLabel.getStyleClass().add("form-label");
+        toolchainLabel.setLabelFor(toolchainBox);
         toolchainBox.setMaxWidth(Double.MAX_VALUE);
         grid.add(toolchainLabel, 0, 4);
         grid.add(toolchainBox, 1, 4);
 
+        // Row 5: Debugger
+        var debuggerLabel = new Label();
+        debuggerLabel.textProperty().bind(localization.text("dialog.newProject.debugger"));
+        debuggerLabel.getStyleClass().add("form-label");
+        debuggerLabel.setLabelFor(debuggerBox);
+        debuggerBox.setMaxWidth(Double.MAX_VALUE);
+        grid.add(debuggerLabel, 0, 5);
+        grid.add(debuggerBox, 1, 5);
+
         // Buttons
         var createButton = new Button();
+        createButton.setId("createProject");
         createButton.textProperty().bind(localization.text("dialog.newProject.create"));
         createButton.setDefaultButton(true);
+        createButton.disableProperty().bind(javafx.beans.binding.Bindings.createBooleanBinding(
+                () -> nameField.getText().isBlank() || locationField.getText().isBlank(),
+                nameField.textProperty(), locationField.textProperty()));
         createButton.getStyleClass().addAll("accent");
         createButton.setOnAction(e -> handleCreate());
 
@@ -156,11 +203,12 @@ public final class NewProjectDialog extends Stage {
 
         var buttonBar = new HBox(10, cancelButton, createButton);
         buttonBar.setAlignment(Pos.CENTER_RIGHT);
-        buttonBar.setPadding(new Insets(10, 20, 20, 20));
+        buttonBar.getStyleClass().add("dialog-footer");
 
-        var root = new VBox(grid, buttonBar);
-        setScene(new Scene(root, 540, 320));
-        setResizable(false);
+        var root = new VBox(DialogWindow.heading(localization, "dialog.newProject.title",
+                "dialog.newProject.description", io.github.dinamo541.idearm.app.ui.WorkbenchIcons.PLUS), grid, buttonBar);
+        DialogWindow.theme(root, getOwner());
+        DialogWindow.fitToContent(this, root, 600);
     }
 
     private void handleCreate() {
@@ -192,7 +240,8 @@ public final class NewProjectDialog extends Stage {
                     profileBox.getValue(),
                     cpuBox.getValue(),
                     selectedTc,
-                    versionConstraint
+                    versionConstraint,
+                    debuggerBox.getValue()
             );
 
             if (project != null) {

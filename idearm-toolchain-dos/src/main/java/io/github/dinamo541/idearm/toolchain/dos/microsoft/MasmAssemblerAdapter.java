@@ -41,7 +41,7 @@ public final class MasmAssemblerAdapter implements AssemblerAdapter {
             args.add("/Zi");
         }
         for (String include : request.includeDirs()) {
-            args.add("/I" + (insideDos ? DosArguments.path('S', include) : include));
+            args.add("/I" + (insideDos ? DosArguments.directory('S', include) : include.replace('/', '\\')));
         }
         args.add("/Fo" + (insideDos ? DosArguments.path('C', request.objectFile()) : request.objectFile().replace('/', '\\')));
         if (request.listingFile() != null) {

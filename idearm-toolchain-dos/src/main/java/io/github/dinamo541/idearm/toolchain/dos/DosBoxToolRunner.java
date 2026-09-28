@@ -46,8 +46,9 @@ public final class DosBoxToolRunner implements ToolRunner {
                              CancellationToken cancellation, Duration timeout) {
         DosStaging.requireMountable(stagingRoot);
         Path root = projectRoot.toAbsolutePath().normalize();
-        List<String> sources = DosStaging.sources(plan);
-        var sourcePaths = new PathMapper(root, sources);
+        // Included files are staged and mapped like sources, so a diagnostic inside one opens the real file.
+        List<String> staged = DosStaging.stagedFiles(plan);
+        var sourcePaths = new PathMapper(root, staged);
         if (cancellation.cancelled()) {
             return new ToolRunResult(BuildStatus.CANCELLED, List.of(), null, "Build cancelled.", sourcePaths);
         }
@@ -56,7 +57,7 @@ public final class DosBoxToolRunner implements ToolRunner {
             session = DosStaging.createSession(stagingRoot, "S", root);
             Path driveC = session.resolve("C");
             Path driveS = session.resolve("S");
-            DosStaging.copySources(root, driveS, sources);
+            DosStaging.copySources(root, driveS, staged);
             DosStaging.copyIncludes(root, driveS, plan.project().sources().include());
             DosStaging.prepareOutputs(plan, driveC);
 

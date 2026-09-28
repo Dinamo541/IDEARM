@@ -20,12 +20,16 @@ class BuildPlannerTest {
 
     private final BuildPlanner planner = new BuildPlanner();
 
+    /** What each assemble step was told to search, in plan order. */
+    private final List<List<String>> searched = new java.util.ArrayList<>();
+
     private final ToolchainProvider borlandProvider = new ToolchainProvider() {
         @Override public String id() { return "borland-tasm"; }
         @Override public Set<TargetSupport> supports() { return Set.of(new TargetSupport(16, "OMF", "MZ", "DOS")); }
         @Override public AssemblerAdapter assembler() {
             return new AssemblerAdapter() {
                 @Override public ToolInvocation assemble(AssembleRequest r) {
+                    searched.add(r.includeDirs());
                     return new ToolInvocation("tasm", BuildPhase.ASSEMBLE, HostKind.DOS_REAL, List.of(r.source()), null, null, List.of(r.objectFile()));
                 }
                 @Override public io.github.dinamo541.idearm.domain.port.DiagnosticParser diagnostics() { return null; }
@@ -203,5 +207,49 @@ class BuildPlannerTest {
                 new DistConfiguration(true, false)
         );
         assertThrows(DomainException.class, () -> planner.plan(p, "release", borlandProvider));
+    }
+
+    @Test
+    void theResolvedSearchPathReachesEveryAssembleStep() {
+        Project project = sampleProject();
+        BuildPlan plan = planner.plan(project, "release", borlandProvider,
+                List.of("src/manzana.inc"), List.of("src", "sprite"));
+
+        assertEquals(List.of(List.of("src", "sprite")), searched);
+        assertEquals(List.of("src/manzana.inc"), plan.dependencies());
+    }
+
+    @Test
+    void theDeclaredIncludeFoldersStillApplyWhenNothingWasResolved() {
+        Project project = sampleProject();
+        Project withInclude = new Project(project.schema(), project.info(), project.target(), project.toolchain(),
+                new Sources("src/main.asm", List.of(), List.of("inc"), List.of()), project.resources(),
+                project.build(), project.run(), project.debug(), project.dist());
+
+        BuildPlan plan = planner.plan(withInclude, "release", borlandProvider);
+
+        assertEquals(List.of(List.of("inc")), searched);
+        assertEquals(List.of(), plan.dependencies());
+    }
+
+    /** src and src/mac are both legitimate search folders, so nesting must not read as a path collision. */
+    @Test
+    void nestedSearchFoldersAreAccepted() {
+        assertDoesNotThrow(() -> planner.plan(sampleProject(), "release", borlandProvider,
+                List.of(), List.of("src", "src/mac", ".")));
+    }
+
+    @Test
+    void rejectsASearchFolderDosToolsCannotName() {
+        var failure = assertThrows(DomainException.class, () -> planner.plan(sampleProject(), "release",
+                borlandProvider, List.of(), List.of("sprites-grandes")));
+        assertEquals("path.dos.invalid", failure.code());
+    }
+
+    @Test
+    void rejectsAnIncludedFileThatOnlyDiffersFromASourceInCase() {
+        var failure = assertThrows(DomainException.class, () -> planner.plan(sampleProject(), "release",
+                borlandProvider, List.of("SRC/MAIN.ASM"), List.of("src")));
+        assertEquals("path.collision", failure.code());
     }
 }

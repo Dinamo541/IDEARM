@@ -44,11 +44,18 @@ public final class CreateProject {
             String targetProfile,
             String cpu,
             String toolchainId,
-            String toolchainVersion
+            String toolchainVersion,
+            /** The debugger to store in {@code [debug] backend}; blank leaves the default for the target. */
+            String debugBackend
     ) {
         public Request {
             Objects.requireNonNull(parentDirectory, "parentDirectory cannot be null");
             Objects.requireNonNull(projectName, "projectName cannot be null");
+        }
+
+        public Request(Path parentDirectory, String projectName, String targetProfile, String cpu,
+                       String toolchainId, String toolchainVersion) {
+            this(parentDirectory, projectName, targetProfile, cpu, toolchainId, toolchainVersion, null);
         }
     }
 
@@ -60,7 +67,8 @@ public final class CreateProject {
                 request.targetProfile(),
                 request.cpu(),
                 request.toolchainId(),
-                request.toolchainVersion()
+                request.toolchainVersion(),
+                request.debugBackend()
         );
     }
 
@@ -71,6 +79,17 @@ public final class CreateProject {
             String cpu,
             String toolchainId,
             String toolchainVersion) {
+        return execute(parentDirectory, projectName, targetProfile, cpu, toolchainId, toolchainVersion, null);
+    }
+
+    public Project execute(
+            Path parentDirectory,
+            String projectName,
+            String targetProfile,
+            String cpu,
+            String toolchainId,
+            String toolchainVersion,
+            String debugBackend) {
 
         Objects.requireNonNull(parentDirectory, "parentDirectory cannot be null");
         Objects.requireNonNull(projectName, "projectName cannot be null");
@@ -95,6 +114,9 @@ public final class CreateProject {
         String version = (toolchainVersion == null || toolchainVersion.isBlank())
                 ? defaultVersion(toolchain) : toolchainVersion.trim();
         TargetProfile target = TargetProfileCatalog.require(profile);
+        String debugger = (debugBackend == null || debugBackend.isBlank())
+                ? (target.isDos() ? DebugConfiguration.EMULATOR : DebugConfiguration.GDB)
+                : debugBackend.trim();
 
         try {
             Path srcDir = projectRoot.resolve("src");
@@ -136,10 +158,12 @@ public final class CreateProject {
                 new Sources("src/main.asm", List.of("src/*.asm"), List.of(), List.of()),
                 new Resources(List.of()),
                 Map.of("debug", BuildConfiguration.debug(), "release", BuildConfiguration.release()),
-                // A DOS program runs in DOSBox and debugs in TD/CodeView; a native one runs on the host under GDB.
+                // A DOS program runs in DOSBox; a native one runs on the host.
                 target.isDos() ? RunConfiguration.defaults()
                         : new RunConfiguration("host", "native", true, "auto", 16, List.of()),
-                new DebugConfiguration(target.isDos() ? "external" : "gdb"),
+                // DOS programs debug in the built-in emulator, which needs no proprietary debugger and drives
+                // every panel of the IDE; a native one is debugged by GDB.
+                new DebugConfiguration(debugger),
                 new DistConfiguration(true, false)
         );
 
