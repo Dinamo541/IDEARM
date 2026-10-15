@@ -137,6 +137,8 @@ class QueryEditorUseCasesTest {
                 .orElseThrow();
 
         assertEquals(2, mainProc.children().size());
+        assertEquals(2, mainProc.line());
+        assertEquals(7, mainProc.endLine(), "a procedure covers the lines up to its ENDP");
         assertEquals("step1", mainProc.children().get(0).name());
         assertEquals("step2", mainProc.children().get(1).name());
     }

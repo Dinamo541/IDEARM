@@ -34,23 +34,33 @@ a JavaFX window icon cannot replace the icon embedded in that separate executabl
 
 ## Workbench palette and typography
 
-The workbench colours grow out of the mark (ADR-012, "Hexcore" addendum). Dark surfaces are tinted towards the
-navy field instead of neutral grey; the light theme uses the same hues on cool white. All values are tokens in
-`idearm-app/src/main/resources/io/github/dinamo541/idearm/app/view/workbench.css`.
+The workbench colours follow Visual Studio Code's current default themes, **Dark 2026** and **Light 2026**
+(`extensions/theme-defaults/themes/2026-dark.json` and `2026-light.json` in microsoft/vscode), with VS Code's deep
+blacks in the dark theme. The brand keeps its own colours in the logo and in the welcome title's gradient. All
+values are tokens in `idearm-app/src/main/resources/io/github/dinamo541/idearm/app/view/workbench.css`.
 
-| Token | Dark | Light | Role |
+| Token | Dark | Light | VS Code colour |
 |---|---|---|---|
-| `-wb-rail` | `#0C1018` | `#EDF0F5` | Title bar, activity bar, status bar |
-| `-wb-sidebar` | `#10151F` | `#F5F7FA` | Explorer, outline, panel headers |
-| `-wb-editor` | `#141A25` | `#FFFFFF` | Editor canvas and panels |
-| `-wb-raised` | `#1A2130` | `#FFFFFF` | Cards, menus, popups |
-| `-color-accent-emphasis` | `#3976F6` | `#2F6FED` | Primary buttons, focus, active markers (brand blue) |
-| `-color-accent-fg` | `#6CB6FF` | `#1D5FD6` | Accent text and icons |
-| `-wb-brand-gradient` | `#52D6EF` → `#3976F6` | same | Welcome title and dictionary mnemonic |
-| `-wb-token-register` | `#79E6CF` | `#0B7F72` | Registers (the mint monogram) |
+| `-wb-editor` | `#121314` | `#FFFFFF` | `editor.background` — the deepest surface |
+| `-wb-rail`, `-wb-sidebar` | `#191A1B` | `#FAFAFD` | `titleBar`, `activityBar`, `sideBar`, `panel`, `statusBar` |
+| `-wb-raised` | `#202122` | `#FAFAFD` | `editorWidget`, `menu`, `quickInput` |
+| `-color-border-default` | `#2A2B2C` | `#E4E5E6` | `widget.border`, `tab.border` |
+| `-color-accent-emphasis` | `#3994BC` | `#0069CC` | `focusBorder`, `tab.activeBorderTop` (black in Light 2026) |
+| `-wb-button` | `#297AA0` | `#0069CC` | `button.background`, `quickInputList.focusBackground` |
+| `-wb-current-line` | `#1D1E20` | `#F6F6F8` | `editor.lineHighlightBackground`, slightly deeper |
+| `-wb-editor-selection` | `#276782DD` | `#0069CC40` | `editor.selectionBackground` |
 
-Syntax colours keep one hue per token family: instructions blue, registers mint, directives violet, numbers
-peach, strings green, labels amber and comments slate italic.
+Syntax colours take the 2026 themes' hues and map them onto Assembly:
+
+| Assembly token | Dark | Light | Theme role |
+|---|---|---|---|
+| Instruction | `#FF7B72` | `#CF222E` | keyword |
+| Register | `#79C0FF` | `#0550AE` | constant, `variable.language` |
+| Directive | `#FFA657` | `#953800` | `entity.name` |
+| Label, procedure | `#D2A8FF` | `#8250DF` | `entity.name.function` |
+| Number | `#B5CEA8` | `#098658` | `constant.numeric` (inherited from Dark+ / Light+) |
+| String | `#A5D6FF` | `#0A3069` | string |
+| Comment | `#8B949E` | `#6E7781` | comment |
 
 The interface is set in **Inter** and code in **JetBrains Mono**. Both are bundled under the SIL Open Font
 License 1.1 in `idearm-app/src/main/resources/io/github/dinamo541/idearm/app/fonts/`, with their license files,
@@ -61,13 +71,14 @@ files are the 4.1.1 `inter-ui` web faces unpacked to TrueType; JetBrains Mono 2.
 
 ## README screenshots
 
-`docs/images/workbench-dark.png`, `docs/images/workbench-light-es.png` and `docs/images/welcome-dark.png` are
-unedited copies of the real captures from the 2026-10-15 design smoke run (`IDEARM_DESIGN_SMOKE`). They show the
-repository's `hello` example in English and Spanish, and the welcome screen. The README reuses the original SVG
-logo directly from the app's branding folder.
+`docs/images/workbench-dark.png`, `docs/images/editing-dark.png`, `docs/images/workbench-light-es.png` and
+`docs/images/welcome-dark.png` are unedited copies of the real captures from the 2026-10-15 design smoke run
+(`IDEARM_DESIGN_SMOKE`). They show the repository's `hello` example in English and Spanish, the editing view with
+an unsaved change, find, a breakpoint, the paused line and two diagnostics, and the welcome screen. The README
+reuses the original SVG logo directly from the app's branding folder.
 
 When refreshing these screenshots, run the design smoke described in ADR-012 against a copy of `examples/hello`
-in a folder named `hello`, inspect the images, and copy only the workbench and welcome captures into
+in a folder named `hello`, inspect the images, and copy only the workbench, editing and welcome captures into
 `docs/images/`. Keep recent-history captures and local machine paths out of the public README images.
 
 ## Workbench icons

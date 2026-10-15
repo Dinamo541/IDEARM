@@ -116,3 +116,42 @@ Verification: the app module's tests pass under Xvfb (203 tests, 15 skipped), in
 the new palette values. The design smoke passes with 90 captures; the four theme/language combinations,
 welcome, debugger, consoles, dialogs, palette, hover and completion popups, Academic Center and the 800 × 600
 compact layout were inspected in both themes.
+
+## Addendum: VS Code 2026 palette and the editing view — 2026-10-15
+
+The user then asked for the editing view to look impressive yet minimal and comfortable, keeping its indicators,
+in Visual Studio Code's current palette with deep blacks. This supersedes the "Hexcore" palette above; the
+bundled typefaces, shapes and focus behaviour remain.
+
+- **Palette.** The tokens now follow VS Code's default themes, Dark 2026 and Light 2026 (microsoft/vscode,
+  `extensions/theme-defaults/themes/2026-dark.json` and `2026-light.json`). The editor is the deepest surface
+  (`#121314`) inside a `#191A1B` frame with `#2A2B2C` hairlines; floating widgets use `#202122`; the accent is
+  `#3994BC` with `#297AA0` buttons. Selections in lists, the activity bar and the panel tabs are neutral, as in
+  VS Code. Syntax colours take the 2026 hues: instructions coral, registers blue, directives orange, labels and
+  procedures lavender, numbers the inherited Dark+ green, strings light blue, comments grey. `docs/branding.md`
+  lists them for both themes.
+- **Tabs.** A flat strip with hairline separators. The active file opens into the canvas under a 2 px accent line
+  (black in the light theme, as in Light 2026). The close button shows on the active tab and under the pointer;
+  a dot replaces it while the file has unsaved changes, so the title no longer carries " *". The tooltip names
+  the full path and, when modified, says "Unsaved changes" (`editor.tab.unsaved`).
+- **Breadcrumbs.** `EditorBreadcrumbs` shows folder › file (with its icon) › segment › procedure. The symbols
+  follow the caret and refresh 450 ms after typing stops; clicking one moves the caret to its declaration.
+  `OutlineItem` gained `endLine` (ENDP for a procedure, ENDS for a full segment; a simplified segment runs until
+  the next one), filled in by `QueryOutline`.
+- **Find.** The find/replace widget floats over the top-right corner of the code, hanging from the tab strip as
+  in VS Code, instead of pushing every line down.
+- **Code canvas.** The line highlight sits behind the code only; the caret's line number brightens while the
+  others stay quiet. The selection is VS Code's teal, the caret 2 px, and the squiggles use VS Code's error and
+  warning colours. The glyph margin draws vector markers: a red dot for a breakpoint, a grey dot while it is
+  switched off, a yellow arrow on the paused line (with the dot inside when it stopped on a breakpoint), and a
+  faint dot where a click would add one. The paused line keeps a translucent tint and a 2 px stripe. These two
+  markers replace the PNG ring and play icons in the gutter; the rest of the workbench keeps its Lucide assets.
+- **Fixed on the way.** Line numbers had always been painted as bright as the code: the plain-text rule matched
+  the "text" node a Label draws its digits with. Code rules now name RichTextFX's `.paragraph-text` parent. The
+  explorer tree had taken the editor's background through rule order; it is back on the sidebar colour.
+
+Verification: the application and app modules' tests pass (182 and 206, 15 skipped), including
+`EditorBreadcrumbsTest` for the symbol path and an `endLine` assertion in `QueryEditorUseCasesTest`. The design
+smoke now also saves `editing-<theme>-<language>.png`: a second tab, an unsaved edit, a warning and an error, the
+find widget, a breakpoint and the paused line, with the caret inside the procedure. It passes with 94 captures,
+inspected in both themes and languages and at 800 × 600.

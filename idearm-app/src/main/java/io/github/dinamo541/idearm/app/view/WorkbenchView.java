@@ -66,6 +66,7 @@ public final class WorkbenchView extends BorderPane {
         this.explorerView = new ProjectExplorerView(viewModel.getExplorer(), localization);
         this.outlineView = new DocumentOutlineView(localization);
         this.editorAreaView = new EditorAreaView(viewModel.getEditorArea(), localization);
+        editorAreaView.setOutlineProvider(viewModel::getOutline);
         this.bottomPanelView = new BottomPanelView(viewModel.getBottomPanel(), localization);
         viewModel.setProblemFormatter(localization::describe);
         this.statusBarView = new StatusBarView(viewModel.getStatusBar(), localization);

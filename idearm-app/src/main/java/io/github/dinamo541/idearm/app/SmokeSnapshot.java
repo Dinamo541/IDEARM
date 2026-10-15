@@ -79,6 +79,51 @@ final class SmokeSnapshot {
                         rfx.getCodeArea().deselect();
                     }
                 });
+                // The editing view while writing: an unsaved edit, a warning and an error, the find widget, a
+                // breakpoint and the paused line, with the caret inside the procedure.
+                steps.add(() -> {
+                    // A second, inactive tab shows the strip's separators and the quieter inactive label.
+                    try {
+                        model.getEditorArea().openFile(file.getParent().getParent().resolve("idearm.toml"));
+                        model.getEditorArea().openFile(file);
+                    } catch (IOException failure) { throw new IllegalStateException(failure); }
+                    var editor = model.getEditorArea().getActiveDocument().getEditor();
+                    if (editor instanceof io.github.dinamo541.idearm.app.editor.RichTextFxEditorComponent rfx) {
+                        var area = rfx.getCodeArea();
+                        area.insertText(area.getLength(), "\n");
+                        editor.setBreakpoints(java.util.Set.of(13));
+                        editor.setExecutionLine(14);
+                        String code = "design-smoke", path = file.toString();
+                        editor.setDiagnostics(java.util.List.of(
+                                new io.github.dinamo541.idearm.domain.diagnostic.Diagnostic(
+                                        io.github.dinamo541.idearm.domain.diagnostic.Severity.WARNING, code, code,
+                                        new io.github.dinamo541.idearm.domain.diagnostic.Location(path, 12, 13, 2), code, ""),
+                                new io.github.dinamo541.idearm.domain.diagnostic.Diagnostic(
+                                        io.github.dinamo541.idearm.domain.diagnostic.Severity.ERROR, code, code,
+                                        new io.github.dinamo541.idearm.domain.diagnostic.Location(path, 16, 13, 5), code, "")));
+                        area.moveTo(10, 8);
+                        rfx.execute(io.github.dinamo541.idearm.app.editor.EditorCommand.FIND);
+                        ((TextField) rfx.getNode().lookup("#editor-find")).setText("ax");
+                    }
+                });
+                steps.add(() -> {
+                    save(stage, folder.resolve("editing-" + suffix + ".png"));
+                    var editor = model.getEditorArea().getActiveDocument().getEditor();
+                    if (editor instanceof io.github.dinamo541.idearm.app.editor.RichTextFxEditorComponent rfx) {
+                        var query = rfx.getNode().lookup("#editor-find");
+                        query.fireEvent(new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.ESCAPE, false, false, false, false));
+                        var area = rfx.getCodeArea();
+                        area.deleteText(area.getLength() - 1, area.getLength());
+                        editor.modifiedProperty().set(false);
+                        editor.setDiagnostics(java.util.List.of());
+                        editor.setBreakpoints(java.util.Set.of());
+                        editor.setExecutionLine(null);
+                        area.moveTo(0, 0);
+                    }
+                    java.util.List.copyOf(model.getEditorArea().getDocuments()).stream()
+                            .filter(doc -> doc.getFilePath().getFileName().toString().equals("idearm.toml"))
+                            .forEach(model.getEditorArea()::closeDocument);
+                });
                 // Capture each transient popup in its show/layout step, before unrelated desktop focus can dismiss it.
                 steps.add(() -> {
                     var editor = model.getEditorArea().getActiveDocument().getEditor();

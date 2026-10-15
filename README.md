@@ -149,6 +149,10 @@ example uses the Windows API and is intended for Windows.
 
 <p align="center"><em>The IDEARM workbench in English, with the dark theme and the hello project open.</em></p>
 
+![Editing in IDEARM: a modified tab, breadcrumbs down to the procedure, the floating find widget, a breakpoint, the paused line and two diagnostics](docs/images/editing-dark.png)
+
+<p align="center"><em>While editing: unsaved changes, breadcrumbs that follow the caret, find, a breakpoint and the paused line.</em></p>
+
 <details>
 <summary><strong>See the light theme and Spanish interface</strong></summary>
 

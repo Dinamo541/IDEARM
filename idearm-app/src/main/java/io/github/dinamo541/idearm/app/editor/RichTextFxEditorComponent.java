@@ -94,6 +94,9 @@ public final class RichTextFxEditorComponent implements EditorComponent {
     private Function<String, Optional<HoverInfo>> hoverProvider;
     private Function<String, List<CompletionItem>> completionProvider;
 
+    /** Width of the breakpoint column left of the line numbers. */
+    private static final double GLYPH_MARGIN = 22;
+
     private final Set<Integer> breakpoints = new ConcurrentSkipListSet<>();
     /** Breakpoints the user switched off: shown hollow, because the line still matters to them. */
     private final Set<Integer> disabledBreakpoints = new ConcurrentSkipListSet<>();
@@ -110,13 +113,20 @@ public final class RichTextFxEditorComponent implements EditorComponent {
 
         this.scrollPane = new VirtualizedScrollPane<>(codeArea);
         this.actions = new EditorActions(codeArea, () -> this.localization);
-        this.editorRoot = new javafx.scene.layout.BorderPane(scrollPane);
+        // The find widget floats over the top-right corner of the code, as in VS Code, instead of pushing every
+        // line down while it is open.
+        var search = actions.searchBar();
+        search.setMaxSize(javafx.scene.layout.Region.USE_PREF_SIZE, javafx.scene.layout.Region.USE_PREF_SIZE);
+        search.setPrefWidth(440);
+        var surface = new StackPane(scrollPane, search);
+        StackPane.setAlignment(search, Pos.TOP_RIGHT);
+        StackPane.setMargin(search, new javafx.geometry.Insets(0, 18, 0, 0));
+        this.editorRoot = new javafx.scene.layout.BorderPane(surface);
         this.editorRoot.getStyleClass().add("editor-root");
         this.minimap = new CodeMinimap(codeArea);
         this.minimap.setLocalization(localization);
         this.minimap.managedProperty().bind(minimap.visibleProperty());
         this.editorRoot.setRight(minimap);
-        this.editorRoot.setTop(actions.searchBar());
         this.editorRoot.getStylesheets().add(
                 Objects.requireNonNull(getClass().getResource("editor.css"), "editor.css not found").toExternalForm()
         );
@@ -693,37 +703,43 @@ public final class RichTextFxEditorComponent implements EditorComponent {
             Node lineNode = lineNumbers.apply(paragraphIndex);
 
             StackPane bpGutter = new StackPane();
-            bpGutter.setPrefWidth(18);
-            bpGutter.setMinWidth(18);
-            bpGutter.setMaxWidth(18);
+            bpGutter.setPrefWidth(GLYPH_MARGIN);
+            bpGutter.setMinWidth(GLYPH_MARGIN);
+            bpGutter.setMaxWidth(GLYPH_MARGIN);
             bpGutter.getStyleClass().add("idearm-gutter-breakpoint");
-
-            Label marker = new Label();
-            marker.setAlignment(Pos.CENTER);
 
             boolean isBp = breakpoints.contains(line);
             boolean isDisabledBp = disabledBreakpoints.contains(line);
             boolean isExec = executionLine != null && executionLine == line;
 
+            // VS Code's glyph margin: a solid red dot for a breakpoint, a grey one while it is switched off, a
+            // yellow arrow on the line about to run (with the dot inside when it stopped on a breakpoint), and a
+            // faint dot under the pointer where a click would add one.
+            Node marker;
             if (isExec) {
-                marker.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.RUN.create(12));
-                marker.getStyleClass().add("idearm-execution-arrow");
-                marker.setVisible(true);
-            } else if (isDisabledBp) {
-                // A hollow ring: the breakpoint is remembered but will not stop the program.
-                marker.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.BREAKPOINT_DISABLED.create(14));
-                marker.getStyleClass().add("idearm-breakpoint-disabled");
-                marker.setVisible(true);
-            } else if (isBp) {
-                marker.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.BREAKPOINT.create(14));
-                marker.getStyleClass().add("idearm-breakpoint-active");
-                marker.setVisible(true);
+                var arrow = new javafx.scene.shape.SVGPath();
+                arrow.setContent("M1 1.5 Q1 0 2.5 0 H7.6 Q8.4 0 8.9 0.6 L12.6 5.2 Q13.2 6 12.6 6.8 L8.9 11.4"
+                        + " Q8.4 12 7.6 12 H2.5 Q1 12 1 10.5 Z");
+                arrow.getStyleClass().add("idearm-stack-frame");
+                var group = new StackPane(arrow);
+                if (isBp || isDisabledBp) {
+                    var dot = new javafx.scene.shape.Circle(2.6);
+                    dot.getStyleClass().add(isBp ? "idearm-breakpoint-dot" : "idearm-breakpoint-dot-disabled");
+                    StackPane.setMargin(dot, new javafx.geometry.Insets(0, 4, 0, 0));
+                    group.getChildren().add(dot);
+                }
+                group.getStyleClass().add("idearm-execution-arrow");
+                marker = group;
             } else {
-                marker.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.BREAKPOINT.create(14));
-                marker.getStyleClass().add("idearm-breakpoint-ghost");
-                marker.setVisible(false);
+                var dot = new javafx.scene.shape.Circle(4.6);
+                dot.getStyleClass().add(isDisabledBp ? "idearm-breakpoint-dot-disabled" : "idearm-breakpoint-dot");
+                var holder = new StackPane(dot);
+                holder.getStyleClass().add(isDisabledBp ? "idearm-breakpoint-disabled"
+                        : isBp ? "idearm-breakpoint-active" : "idearm-breakpoint-ghost");
+                holder.setVisible(isBp || isDisabledBp);
+                marker = holder;
             }
-
+            marker.setMouseTransparent(true);
             bpGutter.getChildren().add(marker);
 
             bpGutter.setOnMouseEntered(e -> {

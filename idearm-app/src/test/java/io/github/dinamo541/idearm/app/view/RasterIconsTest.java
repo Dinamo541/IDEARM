@@ -48,10 +48,10 @@ class RasterIconsTest {
             new Scene(root);
             root.applyCss();
             var image = (ImageView) canvas.getChildren().getFirst();
-            assertColor("#4fd69c", ink(image.getImage()));
+            assertColor("#73c991", ink(image.getImage()));
             root.getStyleClass().add("light");
             root.applyCss();
-            assertColor("#17803d", ink(image.getImage()));
+            assertColor("#116329", ink(image.getImage()));
             button.getStyleClass().add("accent");
             root.applyCss();
             assertColor("#ffffff", ink(image.getImage()));
@@ -60,7 +60,7 @@ class RasterIconsTest {
             button.getStyleClass().add("activity-button");
             button.pseudoClassStateChanged(PseudoClass.getPseudoClass("selected"), true);
             root.applyCss();
-            assertColor("#1d5fd6", ink(image.getImage()));
+            assertColor("#202020", ink(image.getImage()));
             return null;
         });
     }

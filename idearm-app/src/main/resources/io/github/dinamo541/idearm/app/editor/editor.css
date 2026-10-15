@@ -1,18 +1,19 @@
 /*
- * IDEARM Assembly editor.
+ * IDEARM Assembly editor — the code canvas.
  *
- * Colours come from the workbench tokens (workbench.css), inherited from the .workbench root, so the editor follows
- * the light and the dark theme without its own palette. An earlier "*" block here pinned dark values on every node
- * inside the editor and painted identifiers light grey on the light theme's white canvas.
+ * Colours are workbench tokens (workbench.css), inherited from the .workbench root, so the editor follows the light
+ * and the dark theme. They come from VS Code's "Dark 2026" and "Light 2026": a #121314 canvas with no gutter
+ * border, quiet line numbers that light up on the caret's line, a line highlight that stays behind the code, the
+ * teal selection, and the debugger's red dots and yellow arrow in the glyph margin.
  *
  * Code is set in the bundled JetBrains Mono (WorkbenchFonts): Consolas and Cascadia Code do not exist on Linux, and
  * the proportional fallback misaligned every column of Assembly.
  */
 
 /* Minimap: the same token hues as the code, drawn at a glance-size. */
-.code-minimap { -fx-background-color: -color-bg-subtle; -fx-border-color: transparent transparent transparent -color-border-muted; -fx-border-width: 0 0 0 1; -fx-cursor: hand; }
+.code-minimap { -fx-background-color: -color-bg-default; -fx-cursor: hand; }
 .code-minimap:focused { -fx-border-color: -color-accent-emphasis; -fx-border-width: 1; }
-.minimap-viewport { -fx-background-color: -color-accent-fg; -fx-opacity: 0.10; -fx-border-color: -color-accent-fg; -fx-border-width: 1; -fx-background-radius: 3; -fx-border-radius: 3; }
+.minimap-viewport { -fx-background-color: -color-accent-fg; -fx-opacity: 0.10; -fx-background-radius: 2; }
 .code-minimap:hover .minimap-viewport, .code-minimap:focused .minimap-viewport { -fx-opacity: 0.22; }
 .code-minimap .minimap-plain { -fx-fill: -color-fg-muted; }
 .code-minimap .minimap-instruction, .code-minimap .minimap-number, .code-minimap .minimap-caret { -fx-fill: -color-accent-fg; }
@@ -22,15 +23,33 @@
 .code-minimap .minimap-comment { -fx-fill: -color-fg-muted; }
 .code-minimap .minimap-label, .code-minimap .minimap-warning, .code-minimap .minimap-execution { -fx-fill: -color-warning-fg; }
 
-/* Keep workbench overrides in this sheet: JavaFX gives a nearer parent stylesheet precedence. */
-.workbench .idearm-code-area .instruction, .workbench .code-minimap .minimap-instruction { -fx-fill: -wb-token-keyword; -fx-font-weight: normal; }
-.workbench .idearm-code-area .register, .workbench .code-minimap .minimap-register { -fx-fill: -wb-token-register; }
-.workbench .idearm-code-area .directive, .workbench .code-minimap .minimap-directive { -fx-fill: -wb-token-directive; -fx-font-weight: normal; }
-.workbench .idearm-code-area .number, .workbench .code-minimap .minimap-number { -fx-fill: -wb-token-number; }
-.workbench .idearm-code-area .string, .workbench .code-minimap .minimap-string { -fx-fill: -wb-token-string; }
-.workbench .idearm-code-area .comment, .workbench .code-minimap .minimap-comment { -fx-fill: -wb-token-comment; }
-.workbench .idearm-code-area .comment { -fx-font-style: italic; }
-.workbench .idearm-code-area .label, .workbench .code-minimap .minimap-label { -fx-fill: -wb-token-label; }
+/*
+ * Keep workbench overrides in this sheet: JavaFX gives a nearer parent stylesheet precedence.
+ * Code text is RichTextFX's TextExt inside .paragraph-text. The selectors name that parent because a line-number
+ * Label draws its digits with a node of class "text" too, and a bare ".text" rule painted every number as bright as
+ * the code. Plain text comes first: the token rules have the same specificity and must win over it.
+ */
+.workbench .idearm-code-area .paragraph-text > .text { -fx-fill: -wb-editor-fg; }
+.workbench .idearm-code-area .paragraph-text > .instruction { -fx-fill: -wb-token-keyword; -fx-font-weight: normal; }
+.workbench .idearm-code-area .paragraph-text > .register { -fx-fill: -wb-token-register; }
+.workbench .idearm-code-area .paragraph-text > .directive { -fx-fill: -wb-token-directive; -fx-font-weight: normal; }
+.workbench .idearm-code-area .paragraph-text > .number { -fx-fill: -wb-token-number; }
+.workbench .idearm-code-area .paragraph-text > .string { -fx-fill: -wb-token-string; }
+.workbench .idearm-code-area .paragraph-text > .comment { -fx-fill: -wb-token-comment; -fx-font-style: normal; }
+.workbench .idearm-code-area .paragraph-text > .label { -fx-fill: -wb-token-label; }
+.workbench .code-minimap .minimap-instruction { -fx-fill: -wb-token-keyword; }
+.workbench .code-minimap .minimap-register { -fx-fill: -wb-token-register; }
+.workbench .code-minimap .minimap-directive { -fx-fill: -wb-token-directive; }
+.workbench .code-minimap .minimap-number { -fx-fill: -wb-token-number; }
+.workbench .code-minimap .minimap-string { -fx-fill: -wb-token-string; }
+.workbench .code-minimap .minimap-comment { -fx-fill: -wb-token-comment; }
+.workbench .code-minimap .minimap-label { -fx-fill: -wb-token-label; }
+.workbench .code-minimap .minimap-plain { -fx-fill: -wb-editor-fg; }
+.workbench .code-minimap .minimap-caret { -fx-fill: -wb-cursor; }
+.workbench .code-minimap .minimap-error { -fx-fill: -wb-squiggle-error; }
+.workbench .code-minimap .minimap-warning { -fx-fill: -wb-squiggle-warning; }
+.workbench .code-minimap .minimap-breakpoint { -fx-fill: -wb-breakpoint; }
+.workbench .code-minimap .minimap-execution { -fx-fill: -wb-stack-frame; }
 
 .idearm-code-area {
     -fx-font-family: "JetBrains Mono";
@@ -40,122 +59,120 @@
 
 /* Line Number Gutter */
 .idearm-code-area .lineno {
-    -fx-background-color: -color-bg-subtle;
-    -fx-text-fill: -color-fg-muted;
+    -fx-background-color: -color-bg-default;
+    -fx-text-fill: -color-fg-subtle;
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
-    -fx-padding: 0 12 0 6;
+    -fx-padding: 0 20 0 2;
     -fx-alignment: center-right;
     -fx-border-color: transparent;
     -fx-border-width: 0;
 }
 
 /* Plain text. RichTextFX paints text black unless told otherwise, which vanishes on the dark theme. */
-.idearm-code-area .text {
+.idearm-code-area .paragraph-text > .text {
     -fx-fill: -color-fg-default;
 }
 
 /* Token Syntax Highlighting outside the workbench (bare AtlantaFX tokens). Inside it the -wb-token rules above win. */
-.idearm-code-area .instruction { -fx-fill: -color-accent-fg; }
-.idearm-code-area .register { -fx-fill: -color-chart-6; }
-.idearm-code-area .directive { -fx-fill: -color-danger-fg; }
-.idearm-code-area .label { -fx-fill: -color-warning-fg; }
-.idearm-code-area .number { -fx-fill: -color-accent-fg; }
-.idearm-code-area .string { -fx-fill: -color-success-fg; }
-.idearm-code-area .comment { -fx-fill: -color-fg-muted; -fx-font-style: italic; }
+.idearm-code-area .paragraph-text > .instruction { -fx-fill: -color-accent-fg; }
+.idearm-code-area .paragraph-text > .register { -fx-fill: -color-chart-6; }
+.idearm-code-area .paragraph-text > .directive { -fx-fill: -color-danger-fg; }
+.idearm-code-area .paragraph-text > .label { -fx-fill: -color-warning-fg; }
+.idearm-code-area .paragraph-text > .number { -fx-fill: -color-accent-fg; }
+.idearm-code-area .paragraph-text > .string { -fx-fill: -color-success-fg; }
+.idearm-code-area .paragraph-text > .comment { -fx-fill: -color-fg-muted; }
 
-/* Diagnostic underlines. RichTextFX draws the wave itself through -rtfx-underline-wave-radius, so the familiar
-   squiggle needs no custom node; theme colours keep it readable on the light and the dark theme alike. */
+/* Diagnostic underlines: VS Code's squiggles. RichTextFX draws the wave itself through -rtfx-underline-wave-radius. */
 .idearm-code-area .idearm-diagnostic-error {
-    -rtfx-underline-color: -color-danger-fg;
+    -rtfx-underline-color: -color-danger-emphasis;
     -rtfx-underline-width: 1.2;
-    -rtfx-underline-offset: 1;
-    -rtfx-underline-wave-radius: 2;
+    -rtfx-underline-offset: 1.5;
+    -rtfx-underline-wave-radius: 1.8;
     -rtfx-underline-cap: round;
 }
 
 .idearm-code-area .idearm-diagnostic-warning {
-    -rtfx-underline-color: -color-warning-fg;
+    -rtfx-underline-color: -color-warning-emphasis;
     -rtfx-underline-width: 1.2;
-    -rtfx-underline-offset: 1;
-    -rtfx-underline-wave-radius: 2;
+    -rtfx-underline-offset: 1.5;
+    -rtfx-underline-wave-radius: 1.8;
     -rtfx-underline-cap: round;
 }
+.workbench .idearm-code-area .idearm-diagnostic-error { -rtfx-underline-color: -wb-squiggle-error; }
+.workbench .idearm-code-area .idearm-diagnostic-warning { -rtfx-underline-color: -wb-squiggle-warning; }
 
-/* Breakpoint Gutter Column */
+/* Glyph margin: the breakpoint column left of the line numbers. */
 .idearm-compound-gutter {
-    -fx-background-color: -color-bg-subtle;
+    -fx-background-color: -color-bg-default;
     -fx-border-color: transparent;
     -fx-border-width: 0;
 }
-
 .idearm-gutter-breakpoint {
     -fx-alignment: center;
     -fx-cursor: hand;
 }
-
-/* Theme tokens, not fixed colours: the gutter has to stay readable in the light and the dark theme alike. */
-.idearm-breakpoint-active { -fx-text-fill: -color-danger-emphasis; -fx-font-size: 13px; -fx-font-weight: bold; }
-.idearm-breakpoint-disabled { -fx-text-fill: -color-danger-fg; -fx-opacity: 0.7; -fx-font-size: 13px; }
-.idearm-breakpoint-ghost { -fx-text-fill: -color-danger-fg; -fx-opacity: 0.4; -fx-font-size: 13px; }
-.idearm-execution-arrow { -fx-text-fill: -color-warning-emphasis; -fx-font-size: 13px; -fx-font-weight: bold; }
+.idearm-breakpoint-dot { -fx-fill: -color-danger-emphasis; }
+.idearm-breakpoint-dot-disabled { -fx-fill: -color-fg-muted; }
+.idearm-breakpoint-ghost { -fx-opacity: 0.38; }
+.idearm-stack-frame { -fx-fill: -color-warning-emphasis; }
+.workbench .idearm-breakpoint-dot { -fx-fill: -wb-breakpoint; }
+.workbench .idearm-breakpoint-dot-disabled { -fx-fill: -wb-breakpoint-disabled; }
+.workbench .idearm-stack-frame { -fx-fill: -wb-stack-frame; }
+.workbench .idearm-execution-arrow .idearm-breakpoint-dot { -fx-fill: -wb-breakpoint; }
 
 /*
  * The row of the instruction about to run. While stepping, this is what the eye follows; the arrow in the margin
- * alone is too small to find on a full screen of code.
+ * alone is too small to find on a full screen of code. A thin bar on the left edge marks it even under the caret.
  */
-.idearm-execution-line {
+.idearm-code-area .paragraph-text.idearm-execution-line {
     -fx-background-color: -color-warning-emphasis, -color-warning-subtle;
-    -fx-background-insets: 0, 0 0 0 3;
+    -fx-background-insets: 0, 0 0 0 2;
+}
+.workbench .idearm-code-area .paragraph-text.idearm-execution-line,
+.workbench .idearm-code-area .paragraph-box:has-caret .paragraph-text.idearm-execution-line {
+    /* The stripe, then the canvas over the rest of the row, then the translucent tint on top of it. */
+    -fx-background-color: -wb-stack-frame, -wb-editor, -wb-stack-frame-line;
+    -fx-background-insets: 0, 0 0 0 2, 0 0 0 2;
 }
 
 /* Workbench geometry belongs here because this sheet is nearest to the RichTextFX control. */
 .workbench .idearm-code-area {
     -fx-background-color: -wb-editor;
-    -fx-padding: 8 0 16 0;
+    -fx-padding: 6 0 18 0;
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 13.5px;
 }
-.workbench .idearm-code-area .paragraph-box { -fx-padding: 1.5 0; }
-.workbench .idearm-code-area .paragraph-box:has-caret { -fx-background-color: -wb-current-line; }
+.workbench .idearm-code-area .paragraph-box { -fx-padding: 1.5 0; -fx-background-color: transparent; }
+/* VS Code's line highlight sits behind the code only; the gutter just brightens the caret's line number. */
+.workbench .idearm-code-area .paragraph-box:has-caret .paragraph-text { -fx-background-color: -wb-current-line; }
 .workbench .idearm-code-area .lineno, .workbench .idearm-compound-gutter {
     -fx-background-color: -wb-editor;
     -fx-border-width: 0;
-    -fx-text-fill: -color-fg-subtle;
+    -fx-text-fill: -wb-line-number;
     -fx-font-style: normal;
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
 }
-.workbench .idearm-code-area .paragraph-box:has-caret .lineno {
-    -fx-text-fill: -color-accent-fg;
-    -fx-font-weight: bold;
-}
-.workbench .idearm-code-area .caret { -fx-stroke: -color-accent-fg; -fx-stroke-width: 2; }
-.workbench.light .idearm-code-area .caret { -fx-stroke: -color-accent-emphasis; }
+.workbench .idearm-code-area .paragraph-box:has-caret .lineno { -fx-text-fill: -wb-line-number-active; }
+.workbench .idearm-code-area .caret { -fx-stroke: -wb-cursor; -fx-stroke-width: 2; }
 .workbench .idearm-code-area .selection {
-    -fx-fill: -wb-selection;
-    -fx-stroke: -wb-selection;
-    -fx-stroke-width: 3.5;
+    -fx-fill: -wb-editor-selection;
+    -fx-stroke: -wb-editor-selection;
+    -fx-stroke-width: 3;
     -fx-stroke-line-join: round;
     -fx-stroke-line-cap: round;
     -fx-stroke-type: centered;
 }
-.workbench .code-minimap { -fx-background-color: -wb-editor; -fx-border-color: transparent transparent transparent -color-border-muted; -fx-border-width: 0 0 0 1; }
-.workbench .minimap-viewport {
-    -fx-background-color: rgba(108, 182, 255, 0.10);
-    -fx-border-color: rgba(108, 182, 255, 0.28);
-    -fx-border-width: 1;
-    -fx-background-radius: 3;
-    -fx-border-radius: 3;
-    -fx-opacity: 1;
-}
-.workbench.light .minimap-viewport {
-    -fx-background-color: rgba(47, 111, 237, 0.08);
-    -fx-border-color: rgba(47, 111, 237, 0.25);
-}
+.workbench .idearm-code-area:focused .selection { -fx-fill: -wb-editor-selection; }
 
-/* The editor gutter uses the same PNG assets and token-driven tint as workbench controls. */
-.idearm-breakpoint-active .workbench-icon { -wb-icon-color: -color-danger-emphasis; }
-.idearm-breakpoint-disabled .workbench-icon { -wb-icon-color: -color-danger-fg; }
-.idearm-breakpoint-ghost .workbench-icon { -wb-icon-color: -color-danger-fg; }
-.idearm-execution-arrow .workbench-icon { -wb-icon-color: -color-warning-fg; }
+/* Minimap: no frame, characters at a glance, and a slider that shows itself under the pointer. */
+.workbench .code-minimap { -fx-background-color: -wb-editor; -fx-border-color: transparent; -fx-border-width: 0; }
+.workbench .code-minimap:focused { -fx-border-color: -wb-focus; -fx-border-width: 1; }
+.workbench .minimap-viewport {
+    -fx-background-color: -wb-hover;
+    -fx-border-width: 0;
+    -fx-background-radius: 0;
+    -fx-opacity: 0.55;
+}
+.workbench .code-minimap:hover .minimap-viewport, .workbench .code-minimap:focused .minimap-viewport { -fx-opacity: 1; }

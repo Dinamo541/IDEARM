@@ -1,13 +1,15 @@
 /*
- * IDEARM workbench — "Hexcore" visual system (ADR-012).
+ * IDEARM workbench visual system (ADR-012).
  *
- * The palette grows out of the brand mark: a cyan-to-blue frame (#52D6EF → #3976F6), a mint monogram (#79EFD2)
- * and a deep navy field (#101B2D). Dark surfaces are tinted towards that navy instead of neutral grey, and the light
- * theme uses the same hues on cool white. Inter sets the interface and JetBrains Mono sets code; both are bundled
- * (WorkbenchFonts). JavaFX picks only regular or bold inside a family, so medium and semibold text names the
- * "Inter Medium" and "Inter SemiBold" families with a normal weight.
+ * Colours follow Visual Studio Code's current default themes, "Dark 2026" and "Light 2026"
+ * (microsoft/vscode, extensions/theme-defaults/themes/2026-dark.json and 2026-light.json). The dark theme keeps
+ * VS Code's deep blacks: the editor is the deepest surface (#121314) inside a #191A1B frame, with #2A2B2C hairlines
+ * and #202122 floating widgets. Syntax colours come from the same themes, mapped onto Assembly tokens.
+ * Inter sets the interface and JetBrains Mono sets code; both are bundled (WorkbenchFonts). JavaFX picks only
+ * regular or bold inside a family, so medium and semibold text names the "Inter Medium" and "Inter SemiBold"
+ * families with a normal weight.
  *
- * Layering, from back to front: rail (title and activity bars) → sidebar → editor → raised (cards, popups).
+ * Layering, from back to front: editor (deepest) → rail and sidebar (frame) → raised (cards, menus, popups).
  * Keyboard focus draws a ring through :focus-visible, so a mouse click never leaves a stray outline behind.
  */
 
@@ -16,157 +18,195 @@
     -fx-font-family: "Inter";
     -fx-font-size: 13px;
 
-    /* Brand */
+    /* Brand: the logo keeps its own colours; the welcome title uses its gradient. */
     -wb-brand-cyan: #52d6ef;
     -wb-brand-blue: #3976f6;
     -wb-brand-mint: #79efd2;
     -wb-brand-gradient: linear-gradient(to right, #52d6ef 0%, #3976f6 100%);
 
-    /* Surfaces */
-    -wb-rail: #0c1018;
-    -wb-sidebar: #10151f;
-    -wb-editor: #141a25;
-    -wb-raised: #1a2130;
-    -wb-input: #182030;
-    -wb-hover: #1f2838;
-    -wb-pressed: #273246;
-    -wb-selection: #1c3a66;
-    -wb-selection-muted: #1a2a44;
-    -wb-current-line: #182030;
-    -wb-strong: #f4f7fc;
-    -wb-border-strong: #364158;
-    -wb-shadow: rgba(0, 0, 0, 0.55);
+    /* Surfaces (VS Code Dark 2026) */
+    -wb-rail: #191a1b;
+    -wb-sidebar: #191a1b;
+    -wb-editor: #121314;
+    -wb-raised: #202122;
+    -wb-input: #191a1b;
+    -wb-hover: rgba(255, 255, 255, 0.075);
+    -wb-pressed: rgba(255, 255, 255, 0.12);
+    -wb-selection: rgba(255, 255, 255, 0.13);
+    -wb-selection-muted: #2c2d2e;
+    -wb-current-line: #1d1e20;
+    -wb-strong: #ededed;
+    -wb-border-strong: #333536;
+    -wb-shadow: rgba(0, 0, 0, 0.62);
+    -wb-button: #297aa0;
+    -wb-button-hover: #2b7da3;
+    -wb-focus: #3994bc;
+
+    /* Editor canvas */
+    -wb-editor-fg: #bbbebf;
+    -wb-editor-selection: rgba(39, 103, 130, 0.87);
+    -wb-editor-selection-inactive: rgba(39, 103, 130, 0.38);
+    -wb-line-number: #5f6366;
+    -wb-line-number-active: #bbbebf;
+    -wb-cursor: #bbbebf;
+    -wb-tab-active-border: #3994bc;
+    -wb-squiggle-error: #f14c4c;
+    -wb-squiggle-warning: #cca700;
+    -wb-breakpoint: #e51400;
+    -wb-breakpoint-disabled: #848484;
+    -wb-stack-frame: #ffcc00;
+    -wb-stack-frame-line: rgba(255, 204, 0, 0.13);
+    -wb-find-match: rgba(39, 103, 130, 0.56);
 
     /* Status bar */
-    -wb-status: #0c1018;
-    -wb-status-fg: #8d99ae;
-    -wb-status-debug: #c8641e;
+    -wb-status: #191a1b;
+    -wb-status-fg: #8c8c8c;
+    -wb-status-debug: #3994bc;
     -wb-status-debug-fg: #ffffff;
 
-    /* Syntax: one hue per token family, tuned for the navy canvas. */
-    -wb-token-keyword: #6cb6ff;
-    -wb-token-register: #79e6cf;
-    -wb-token-directive: #c79bf2;
-    -wb-token-number: #f5a97f;
-    -wb-token-string: #a6da95;
-    -wb-token-comment: #66748c;
-    -wb-token-label: #ffd479;
-    -wb-icon-folder: #e3b660;
-    -wb-icon-folder-open: #f0c674;
-    -wb-icon-assembly: #52c6ff;
+    /* Syntax: the Dark 2026 hues mapped onto Assembly (keyword, constant, entity, function, string, comment). */
+    -wb-token-keyword: #ff7b72;
+    -wb-token-register: #79c0ff;
+    -wb-token-directive: #ffa657;
+    -wb-token-number: #b5cea8;
+    -wb-token-string: #a5d6ff;
+    -wb-token-comment: #8b949e;
+    -wb-token-label: #d2a8ff;
+    -wb-icon-folder: #c5a364;
+    -wb-icon-folder-open: #d6b778;
+    -wb-icon-assembly: #519aba;
 
     /* AtlantaFX semantic tokens, shared by every control the theme draws. */
-    -color-bg-default: #141a25;
-    -color-bg-subtle: #10151f;
-    -color-bg-inset: #0c1018;
-    -color-bg-overlay: #1a2130;
-    -color-fg-default: #d5ddea;
-    -color-fg-muted: #8d99ae;
-    -color-fg-subtle: #5d6a80;
+    -color-bg-default: #121314;
+    -color-bg-subtle: #191a1b;
+    -color-bg-inset: #0e0f10;
+    -color-bg-overlay: #202122;
+    -color-fg-default: #bfbfbf;
+    -color-fg-muted: #8c8c8c;
+    -color-fg-subtle: #6b6e71;
     -color-fg-emphasis: #ffffff;
-    -color-border-default: #283246;
-    -color-border-muted: #1c2432;
-    -color-border-subtle: #1c2432;
-    -color-accent-emphasis: #3976f6;
-    -color-accent-fg: #6cb6ff;
-    -color-accent-muted: #24467e;
-    -color-accent-subtle: #162a4a;
-    -color-neutral-emphasis: #5d6a80;
-    -color-neutral-muted: #283246;
-    -color-neutral-subtle: #1f2838;
-    -color-neutral-fg: #c3ccdb;
-    -color-chart-6: #79e6cf;
-    -color-success-fg: #4fd69c;
-    -color-success-emphasis: #1f9d68;
-    -color-success-muted: #1d5c42;
-    -color-success-subtle: #12301f;
-    -color-warning-fg: #f5c05a;
-    -color-warning-emphasis: #d99a2b;
-    -color-warning-muted: #5c4518;
-    -color-warning-subtle: #33280f;
-    -color-danger-fg: #ff7a85;
-    -color-danger-emphasis: #ec4a5a;
-    -color-danger-muted: #6a2530;
-    -color-danger-subtle: #3a1820;
+    -color-border-default: #2a2b2c;
+    -color-border-muted: #232425;
+    -color-border-subtle: #232425;
+    -color-accent-emphasis: #3994bc;
+    -color-accent-fg: #48a0c7;
+    -color-accent-muted: #24546a;
+    -color-accent-subtle: #1b3440;
+    -color-neutral-emphasis: #6b6e71;
+    -color-neutral-muted: #2a2b2c;
+    -color-neutral-subtle: #242526;
+    -color-neutral-fg: #bfbfbf;
+    -color-chart-6: #79c0ff;
+    -color-success-fg: #73c991;
+    -color-success-emphasis: #2f8f5b;
+    -color-success-muted: #24563a;
+    -color-success-subtle: #16271d;
+    -color-warning-fg: #e5ba7d;
+    -color-warning-emphasis: #cca700;
+    -color-warning-muted: #5a4a1a;
+    -color-warning-subtle: #2e2507;
+    -color-danger-fg: #f48771;
+    -color-danger-emphasis: #f14c4c;
+    -color-danger-muted: #6b2a26;
+    -color-danger-subtle: #3a1d1d;
 
-    -fx-base: #141a25;
-    -fx-background: #141a25;
-    -fx-control-inner-background: #141a25;
-    -fx-accent: #3976f6;
-    -fx-focus-color: #3976f6;
+    -fx-base: #121314;
+    -fx-background: #121314;
+    -fx-control-inner-background: #121314;
+    -fx-accent: #3994bc;
+    -fx-focus-color: #3994bc;
     -fx-faint-focus-color: transparent;
     -fx-background-color: -wb-editor;
     -fx-text-fill: -color-fg-default;
 }
 .workbench.light {
-    -wb-rail: #edf0f5;
-    -wb-sidebar: #f5f7fa;
+    /* Surfaces (VS Code Light 2026) */
+    -wb-rail: #fafafd;
+    -wb-sidebar: #fafafd;
     -wb-editor: #ffffff;
-    -wb-raised: #ffffff;
+    -wb-raised: #fafafd;
     -wb-input: #ffffff;
-    -wb-hover: #e8edf4;
-    -wb-pressed: #dce3ee;
-    -wb-selection: #d6e5fd;
-    -wb-selection-muted: #e6eefc;
-    -wb-current-line: #f4f7fc;
-    -wb-strong: #0b1220;
-    -wb-border-strong: #b9c3d3;
-    -wb-shadow: rgba(23, 35, 60, 0.18);
+    -wb-hover: rgba(0, 0, 0, 0.06);
+    -wb-pressed: rgba(0, 0, 0, 0.1);
+    -wb-selection: rgba(0, 0, 0, 0.11);
+    -wb-selection-muted: rgba(218, 218, 218, 0.6);
+    -wb-current-line: #f6f6f8;
+    -wb-strong: #000000;
+    -wb-border-strong: #d8d9dc;
+    -wb-shadow: rgba(0, 0, 0, 0.16);
+    -wb-button: #0069cc;
+    -wb-button-hover: #0063c0;
+    -wb-focus: #0069cc;
 
-    -wb-status: #edf0f5;
-    -wb-status-fg: #576275;
-    -wb-status-debug: #d9731f;
+    -wb-editor-fg: #202020;
+    -wb-editor-selection: rgba(0, 105, 204, 0.25);
+    -wb-editor-selection-inactive: rgba(0, 105, 204, 0.1);
+    -wb-line-number: #9a9a9a;
+    -wb-line-number-active: #202020;
+    -wb-cursor: #202020;
+    -wb-tab-active-border: #000000;
+    -wb-squiggle-error: #e51400;
+    -wb-squiggle-warning: #bf8803;
+    -wb-breakpoint: #e51400;
+    -wb-breakpoint-disabled: #848484;
+    -wb-stack-frame: #be8700;
+    -wb-stack-frame-line: rgba(255, 204, 0, 0.22);
+    -wb-find-match: rgba(0, 105, 204, 0.2);
+
+    -wb-status: #fafafd;
+    -wb-status-fg: #606060;
+    -wb-status-debug: #0069cc;
     -wb-status-debug-fg: #ffffff;
 
-    -wb-token-keyword: #1d5fd6;
-    -wb-token-register: #0b7f72;
-    -wb-token-directive: #8a3fd1;
-    -wb-token-number: #c2511b;
-    -wb-token-string: #2e7d32;
-    -wb-token-comment: #7d889b;
-    -wb-token-label: #9a5f00;
-    -wb-icon-folder: #c08a1e;
-    -wb-icon-folder-open: #b97c00;
-    -wb-icon-assembly: #1f7ae0;
+    -wb-token-keyword: #cf222e;
+    -wb-token-register: #0550ae;
+    -wb-token-directive: #953800;
+    -wb-token-number: #098658;
+    -wb-token-string: #0a3069;
+    -wb-token-comment: #6e7781;
+    -wb-token-label: #8250df;
+    -wb-icon-folder: #b08637;
+    -wb-icon-folder-open: #9c7428;
+    -wb-icon-assembly: #3b7fb0;
 
     -color-bg-default: #ffffff;
-    -color-bg-subtle: #f5f7fa;
-    -color-bg-inset: #edf0f5;
-    -color-bg-overlay: #ffffff;
-    -color-fg-default: #1e2633;
-    -color-fg-muted: #576275;
-    -color-fg-subtle: #8a94a6;
+    -color-bg-subtle: #fafafd;
+    -color-bg-inset: #f3f3f6;
+    -color-bg-overlay: #fafafd;
+    -color-fg-default: #202020;
+    -color-fg-muted: #606060;
+    -color-fg-subtle: #8b8b8f;
     -color-fg-emphasis: #ffffff;
-    -color-border-default: #d3dae5;
-    -color-border-muted: #e4e8ef;
-    -color-border-subtle: #e4e8ef;
-    -color-accent-emphasis: #2f6fed;
-    -color-accent-fg: #1d5fd6;
-    -color-accent-muted: #b7cefb;
-    -color-accent-subtle: #e3ecfe;
-    -color-neutral-emphasis: #8a94a6;
-    -color-neutral-muted: #d3dae5;
-    -color-neutral-subtle: #eef1f6;
-    -color-neutral-fg: #3c4657;
-    -color-chart-6: #0b7f72;
-    -color-success-fg: #17803d;
-    -color-success-emphasis: #16a34a;
-    -color-success-muted: #a9dfbd;
-    -color-success-subtle: #e3f6ea;
-    -color-warning-fg: #9a6200;
-    -color-warning-emphasis: #d48b07;
+    -color-border-default: #e4e5e6;
+    -color-border-muted: #f0f1f2;
+    -color-border-subtle: #f0f1f2;
+    -color-accent-emphasis: #0069cc;
+    -color-accent-fg: #0069cc;
+    -color-accent-muted: #a9c9ec;
+    -color-accent-subtle: #e6f0fa;
+    -color-neutral-emphasis: #8b8b8f;
+    -color-neutral-muted: #e4e5e6;
+    -color-neutral-subtle: #f0f1f2;
+    -color-neutral-fg: #3a3a3a;
+    -color-chart-6: #0550ae;
+    -color-success-fg: #116329;
+    -color-success-emphasis: #1a7f37;
+    -color-success-muted: #aceebb;
+    -color-success-subtle: #e6f4ea;
+    -color-warning-fg: #7d4e00;
+    -color-warning-emphasis: #bf8803;
     -color-warning-muted: #f2d496;
-    -color-warning-subtle: #fdf3dc;
-    -color-danger-fg: #c8283a;
-    -color-danger-emphasis: #dc3545;
-    -color-danger-muted: #f3b3ba;
-    -color-danger-subtle: #fde8ea;
+    -color-warning-subtle: #fdf4dc;
+    -color-danger-fg: #ad0707;
+    -color-danger-emphasis: #e51400;
+    -color-danger-muted: #f5b5b0;
+    -color-danger-subtle: #fdeceb;
 
     -fx-base: #ffffff;
     -fx-background: #ffffff;
     -fx-control-inner-background: #ffffff;
-    -fx-accent: #2f6fed;
-    -fx-focus-color: #2f6fed;
+    -fx-accent: #0069cc;
+    -fx-focus-color: #0069cc;
 }
 .workbench-shell { -fx-border-color: -color-border-default; -fx-border-width: 1; }
 
@@ -204,17 +244,16 @@
 }
 .toggle-button:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
 .workbench .button:default, .workbench .button.accent {
-    -fx-background-color: linear-gradient(to bottom, derive(-color-accent-emphasis, 12%), -color-accent-emphasis);
-    -fx-border-color: derive(-color-accent-emphasis, -8%);
+    -fx-background-color: -wb-button;
+    -fx-border-color: -wb-button;
     -fx-text-fill: white;
     -fx-font-family: "Inter Medium";
-    -fx-effect: dropshadow(gaussian, rgba(57, 118, 246, 0.30), 8, 0, 0, 2);
 }
 .workbench .button:default:hover, .workbench .button.accent:hover {
-    -fx-background-color: linear-gradient(to bottom, derive(-color-accent-emphasis, 22%), derive(-color-accent-emphasis, 8%));
-    -fx-border-color: -color-accent-emphasis;
+    -fx-background-color: -wb-button-hover;
+    -fx-border-color: -wb-button-hover;
 }
-.workbench .button:default:pressed, .workbench .button.accent:pressed { -fx-background-color: derive(-color-accent-emphasis, -10%); }
+.workbench .button:default:pressed, .workbench .button.accent:pressed { -fx-background-color: derive(-wb-button, -10%); }
 .workbench .button.success { -fx-background-color: -color-success-emphasis; -fx-border-color: -color-success-emphasis; -fx-text-fill: white; }
 .workbench .button.danger { -fx-text-fill: -color-danger-fg; }
 .workbench .button.button-outlined { -fx-background-color: transparent; }
@@ -225,7 +264,7 @@
 .workbench .button.button-icon { -fx-padding: 5 7; }
 .workbench .button:focus-visible, .workbench .toggle-button:focus-visible {
     -fx-border-color: -color-accent-emphasis;
-    -fx-effect: dropshadow(gaussian, rgba(57, 118, 246, 0.55), 6, 0.35, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(57, 148, 188, 0.6), 6, 0.35, 0, 0);
 }
 .workbench .button:disabled, .workbench .toggle-button:disabled { -fx-opacity: 0.4; }
 .workbench .button.accent .workbench-icon, .workbench .button:default .workbench-icon,
@@ -251,7 +290,7 @@
 .workbench .text-input:hover, .workbench .combo-box-base:hover, .workbench .choice-box:hover { -fx-border-color: -wb-border-strong; }
 .workbench .text-input:focused, .workbench .combo-box-base:focused, .workbench .combo-box-base:showing, .workbench .choice-box:focused {
     -fx-border-color: -color-accent-emphasis;
-    -fx-effect: dropshadow(gaussian, rgba(57, 118, 246, 0.40), 6, 0.3, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(57, 148, 188, 0.45), 6, 0.3, 0, 0);
 }
 .workbench .text-input:disabled, .workbench .combo-box-base:disabled { -fx-opacity: 0.5; }
 .workbench .combo-box-base > .list-cell { -fx-padding: 6 10; -fx-text-fill: -color-fg-default; -fx-background-color: transparent; }
@@ -288,7 +327,7 @@
 .workbench .check-box:hover > .box { -fx-border-color: -color-accent-emphasis; }
 .workbench .check-box:selected > .box { -fx-background-color: -color-accent-emphasis; -fx-border-color: -color-accent-emphasis; }
 .workbench .check-box:selected > .box > .mark { -fx-background-color: white; }
-.workbench .check-box:focus-visible > .box { -fx-effect: dropshadow(gaussian, rgba(57, 118, 246, 0.55), 6, 0.35, 0, 0); }
+.workbench .check-box:focus-visible > .box { -fx-effect: dropshadow(gaussian, rgba(57, 148, 188, 0.6), 6, 0.35, 0, 0); }
 .workbench .radio-button > .radio { -fx-background-color: -wb-input; -fx-border-color: -wb-border-strong; -fx-border-radius: 1em; -fx-background-radius: 1em; }
 .workbench .radio-button:selected > .radio { -fx-border-color: -color-accent-emphasis; }
 .workbench .radio-button:selected > .radio > .dot { -fx-background-color: -color-accent-emphasis; }
@@ -429,10 +468,10 @@
 .workbench .activity-button:hover { -fx-background-color: -wb-hover; -fx-border-color: transparent; }
 .activity-button:hover .workbench-icon { -wb-icon-color: -color-fg-default; }
 .workbench .activity-button:selected {
-    -fx-background-color: -color-accent-subtle;
-    -fx-border-color: -color-accent-muted;
+    -fx-background-color: -wb-selection;
+    -fx-border-color: transparent;
 }
-.activity-button:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
+.activity-button:selected .workbench-icon { -wb-icon-color: -color-fg-default; }
 .workbench .activity-button:focus-visible { -fx-border-color: -color-accent-emphasis; -fx-effect: null; }
 .workbench-shell:compact-height .activity-button { -fx-min-height: 34; -fx-pref-height: 34; -fx-padding: 6; }
 .workbench-shell:compact-height .activity-bar { -fx-spacing: 2; -fx-padding: 4 0 4 0; }
@@ -446,7 +485,7 @@
 
 /* ───────────────────────────── Sidebar: explorer and outline ───────────────────────────── */
 .sidebar, .project-explorer, .document-outline { -fx-background-color: -wb-sidebar; }
-.sidebar .tree-view, .sidebar .list-view { -fx-background-color: -wb-sidebar; -fx-border-width: 0; -fx-padding: 2 0; }
+.workbench .sidebar .tree-view, .workbench .sidebar .list-view { -fx-background-color: -wb-sidebar; -fx-border-width: 0; -fx-padding: 2 0; }
 .sidebar .tree-cell, .sidebar .list-cell {
     -fx-background-color: transparent;
     -fx-padding: 3 8;
@@ -482,7 +521,7 @@
 .document-outline { -fx-border-color: -color-border-muted transparent transparent transparent; -fx-border-width: 1 0 0 0; }
 .file-icon-assembly .workbench-icon { -wb-icon-color: -wb-icon-assembly; }
 .file-icon-include .workbench-icon { -wb-icon-color: -wb-token-directive; }
-.file-icon-config .workbench-icon { -wb-icon-color: -wb-token-label; }
+.file-icon-config .workbench-icon { -wb-icon-color: -color-fg-muted; }
 .file-icon-chip .workbench-icon { -wb-icon-color: -wb-token-register; }
 .file-icon-folder .workbench-icon { -wb-icon-color: -wb-icon-folder; }
 .file-icon-folder-open .workbench-icon { -wb-icon-color: -wb-icon-folder-open; }
@@ -526,44 +565,92 @@
 .workbench .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button { -fx-background-color: -color-fg-subtle; }
 .workbench .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover { -fx-background-color: -color-danger-fg; }
 
-/* Editor tabs: soft cards that open into the editor canvas, with a brand stripe on the active file. */
-.workbench .editor-tabs > .tab-header-area { -fx-padding: 6 8 0 6; }
+/*
+ * Editor tabs: VS Code's flat strip. The active file opens straight into the canvas under a thin accent line; the
+ * others recede into the frame. Hairlines separate the tabs, the close button appears on the active tab and under
+ * the pointer, and a dot takes its place while a file has unsaved changes.
+ */
+.workbench .editor-tabs > .tab-header-area { -fx-padding: 0; }
 .workbench .editor-tabs > .tab-header-area > .tab-header-background {
     -fx-background-color: -wb-sidebar;
-    -fx-border-color: transparent transparent -color-border-muted transparent;
+    -fx-border-color: transparent transparent -color-border-default transparent;
     -fx-border-width: 0 0 1 0;
 }
 .workbench .editor-tabs > .tab-header-area > .headers-region > .tab {
     -fx-background-color: transparent;
-    -fx-background-radius: 8 8 0 0;
-    -fx-border-radius: 8 8 0 0;
-    -fx-border-color: transparent;
-    -fx-border-width: 2 1 0 1;
-    -fx-padding: 6 12 7 12;
-    -fx-background-insets: 0 1 0 1;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-radius: 0;
+    -fx-border-color: transparent -color-border-default transparent transparent;
+    -fx-border-width: 2 1 0 0;
+    -fx-padding: 0 8 0 12;
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
 }
-.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-hover; }
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-editor; }
 .workbench .editor-tabs > .tab-header-area > .headers-region > .tab:selected {
     -fx-background-color: -wb-editor;
-    -fx-border-color: -color-accent-emphasis -color-border-muted transparent -color-border-muted;
+    -fx-border-color: -wb-tab-active-border -color-border-default transparent transparent;
 }
-.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:selected:hover { -fx-background-color: -wb-editor; }
-.workbench .editor-tabs .tab .tab-label { -fx-font-size: 12.5px; }
-.workbench .editor-tabs .tab:selected .tab-label { -fx-text-fill: -wb-strong; }
-.workbench .breadcrumbs { -fx-padding: 2 7; -fx-font-size: 11.5px; -fx-text-fill: -color-fg-muted; -fx-background-radius: 5; }
-.workbench .breadcrumbs:hover { -fx-background-color: -wb-hover; -fx-text-fill: -color-fg-default; }
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab > .tab-container { -fx-spacing: 6; }
+.workbench .editor-tabs .tab .tab-label { -fx-font-size: 12.5px; -fx-text-fill: -color-fg-muted; -fx-padding: 0 2 0 0; }
+.workbench .editor-tabs .tab:hover .tab-label { -fx-text-fill: -color-fg-default; }
+.workbench .editor-tabs .tab:selected .tab-label { -fx-text-fill: -wb-strong; -fx-font-family: "Inter"; }
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
+    -fx-background-color: -color-fg-muted;
+    -fx-shape: "M 0,0 H1 L 4,3 7,0 H8 V1 L 5,4 8,7 V8 H7 L 4,5 1,8 H0 V7 L 3,4 0,1 Z";
+    -fx-scale-shape: false;
+    -fx-padding: 4;
+    -fx-opacity: 0;
+}
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:hover > .tab-container > .tab-close-button,
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-close-button { -fx-opacity: 1; }
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover { -fx-background-color: -wb-strong; }
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab.modified > .tab-container > .tab-close-button {
+    -fx-shape: "M 4,0 A 4,4 0 1,1 4,8 A 4,4 0 1,1 4,0 Z";
+    -fx-background-color: -color-fg-default;
+    -fx-opacity: 1;
+}
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab.modified:hover > .tab-container > .tab-close-button {
+    -fx-shape: "M 0,0 H1 L 4,3 7,0 H8 V1 L 5,4 8,7 V8 H7 L 4,5 1,8 H0 V7 L 3,4 0,1 Z";
+}
+.workbench .editor-tabs .tab .focus-indicator { -fx-border-width: 0; }
+.workbench .editor-tabs .tab:focus-visible .focus-indicator { -fx-border-width: 1; -fx-border-color: -wb-focus; -fx-border-insets: 1; -fx-border-radius: 3; }
+
+/* Breadcrumbs: folder › file › segment › procedure, quiet until the pointer reaches them. */
 .editor-breadcrumb-bar {
-    -fx-padding: 3 12 3 14;
+    -fx-padding: 0 10 0 12;
     -fx-background-color: -wb-editor;
-    -fx-border-color: transparent transparent -color-border-muted transparent;
-    -fx-border-width: 0 0 1 0;
-    -fx-min-height: 28;
-    -fx-pref-height: 28;
+    -fx-border-width: 0;
+    -fx-min-height: 26;
+    -fx-pref-height: 26;
+    -fx-max-height: 26;
 }
-.workbench .minimap-toggle { -fx-padding: 3 6; -fx-background-color: transparent; -fx-border-color: transparent; }
+.workbench .breadcrumb {
+    -fx-padding: 1 4;
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-fg-muted;
+    -fx-background-radius: 4;
+    -fx-graphic-text-gap: 5;
+}
+.workbench .breadcrumb:hover { -fx-text-fill: -color-fg-default; -fx-background-color: -wb-hover; }
+.workbench .breadcrumb-procedure, .workbench .breadcrumb-segment { -fx-font-family: "JetBrains Mono"; -fx-font-size: 11.5px; }
+.breadcrumb-separator { -fx-padding: 0 1; }
+.breadcrumb-separator .workbench-icon { -wb-icon-color: -color-fg-subtle; }
+.breadcrumb-segment .workbench-icon { -wb-icon-color: -wb-token-directive; }
+.breadcrumb-procedure .breadcrumb-symbol-shape {
+    -fx-fill: transparent;
+    -fx-stroke: -wb-token-label;
+    -fx-stroke-width: 2.2;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+}
+.workbench .minimap-toggle { -fx-padding: 3 5; -fx-background-color: transparent; -fx-border-color: transparent; -fx-background-radius: 5; }
 .workbench .minimap-toggle:hover { -fx-background-color: -wb-hover; }
-.workbench .minimap-toggle:selected { -fx-background-color: -color-accent-subtle; -fx-border-color: transparent; }
-.minimap-toggle:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
+.workbench .minimap-toggle:selected { -fx-background-color: transparent; -fx-border-color: transparent; }
+.workbench .minimap-toggle:selected:hover { -fx-background-color: -wb-hover; }
+.minimap-toggle .workbench-icon { -wb-icon-color: -color-fg-subtle; }
+.minimap-toggle:selected .workbench-icon { -wb-icon-color: -color-fg-default; }
 .editor-area, .editor-root { -fx-background-color: -wb-editor; }
 
 /* ───────────────────────────── Bottom panel ───────────────────────────── */
@@ -587,11 +674,11 @@
 }
 .workbench .bottom-panel > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-hover; }
 .workbench .bottom-panel > .tab-header-area > .headers-region > .tab:selected {
-    -fx-background-color: -color-accent-subtle;
-    -fx-border-color: -color-accent-muted;
+    -fx-background-color: -wb-selection;
+    -fx-border-color: transparent;
 }
 .bottom-panel .tab .tab-label { -fx-font-family: "Inter Medium"; -fx-font-size: 12px; -fx-font-weight: normal; -fx-text-fill: -color-fg-muted; }
-.bottom-panel .tab:selected .tab-label { -fx-text-fill: -color-accent-fg; }
+.bottom-panel .tab:selected .tab-label { -fx-text-fill: -wb-strong; }
 .bottom-panel .tab .workbench-icon { -wb-icon-color: -color-fg-subtle; }
 .bottom-panel .tab:hover .workbench-icon { -wb-icon-color: -color-fg-default; }
 .bottom-panel .tab:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
@@ -600,13 +687,40 @@
 .workbench .text-area:focused { -fx-effect: null; }
 .bottom-panel .text-area { -fx-border-width: 0; }
 .bottom-panel .text-area .content { -fx-padding: 10 16; }
+/* Find widget: floats over the top-right corner of the code, hanging from the tab strip like VS Code's. */
 .editor-search {
-    -fx-padding: 8 12;
-    -fx-spacing: 6;
+    -fx-padding: 6 6 6 8;
+    -fx-spacing: 5;
     -fx-background-color: -wb-raised;
-    -fx-border-color: transparent transparent -color-border-default transparent;
-    -fx-effect: dropshadow(gaussian, -wb-shadow, 10, 0, 0, 3);
+    -fx-border-color: transparent -color-border-default -color-border-default -color-border-default;
+    -fx-border-width: 0 1 1 1;
+    -fx-background-radius: 0 0 7 7;
+    -fx-border-radius: 0 0 7 7;
+    -fx-effect: dropshadow(gaussian, -wb-shadow, 14, 0.1, 0, 4);
 }
+.workbench .editor-search .text-field {
+    -fx-padding: 4 8;
+    -fx-font-size: 12.5px;
+    -fx-background-color: -wb-input;
+    -fx-border-color: -wb-border-strong;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-effect: null;
+}
+.workbench .editor-search .text-field:focused { -fx-border-color: -wb-focus; -fx-effect: null; }
+.workbench .editor-search .button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 4 5;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-font-size: 12px;
+    -fx-min-height: 26;
+}
+.workbench .editor-search .button:hover { -fx-background-color: -wb-hover; }
+.editor-search .button .workbench-icon { -wb-icon-color: -color-fg-muted; }
+.editor-search .button:hover .workbench-icon { -wb-icon-color: -wb-strong; }
+.workbench .editor-search .label { -fx-text-fill: -color-fg-muted; -fx-font-size: 11.5px; -fx-padding: 0 4; }
 .workbench .shortcut-hint { -fx-text-fill: -color-fg-subtle; -fx-font-size: 11px; }
 
 /* ───────────────────────────── Lists and tables ───────────────────────────── */
@@ -830,9 +944,9 @@
 .welcome-icon-tile.tile-mint .workbench-icon { -wb-icon-color: -color-success-fg; }
 .welcome-icon-tile.tile-amber { -fx-background-color: -color-warning-subtle; }
 .welcome-icon-tile.tile-amber .workbench-icon { -wb-icon-color: -color-warning-fg; }
-.welcome-icon-tile.tile-violet { -fx-background-color: derive(-wb-token-directive, -72%); }
+.welcome-icon-tile.tile-violet { -fx-background-color: derive(-wb-token-label, -72%); }
 .workbench.light .welcome-icon-tile.tile-violet { -fx-background-color: #f1e8fc; }
-.welcome-icon-tile.tile-violet .workbench-icon { -wb-icon-color: -wb-token-directive; }
+.welcome-icon-tile.tile-violet .workbench-icon { -wb-icon-color: -wb-token-label; }
 .welcome-action:hover .welcome-icon-tile { -fx-background-color: -color-accent-emphasis; }
 .welcome-action:hover .welcome-icon-tile .workbench-icon { -wb-icon-color: white; }
 .workbench .keycap {
@@ -931,13 +1045,22 @@
     -fx-border-width: 0;
 }
 .command-palette .list-cell:filled:hover, .recent-picker .list-cell:filled:hover { -fx-background-color: -wb-hover; }
+/* The focused row is VS Code's quick-pick highlight: the button colour with white text. */
 .command-palette .list-cell:filled:selected, .recent-picker .list-cell:filled:selected {
-    -fx-background-color: -color-accent-subtle;
-    -fx-text-fill: -wb-strong;
+    -fx-background-color: -wb-button;
+    -fx-text-fill: white;
 }
-.command-palette .list-cell:filled:selected .label, .recent-picker .list-cell:filled:selected .label { -fx-text-fill: -wb-strong; }
-.command-palette .list-cell:filled:selected .command-category { -fx-text-fill: -color-accent-fg; -fx-background-color: -color-accent-muted; }
-.command-palette .list-cell:filled:selected .keycap { -fx-text-fill: -color-fg-default; }
+.command-palette .list-cell:filled:selected .label, .recent-picker .list-cell:filled:selected .label { -fx-text-fill: white; }
+.command-palette .list-cell:filled:selected .command-category, .recent-picker .list-cell:filled:selected .recent-kind {
+    -fx-text-fill: white;
+    -fx-background-color: rgba(255, 255, 255, 0.18);
+}
+.command-palette .list-cell:filled:selected .keycap {
+    -fx-text-fill: white;
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.35);
+}
+.recent-picker .list-cell:filled:selected .workbench-icon { -wb-icon-color: white; }
 .workbench .command-category {
     -fx-text-fill: -color-fg-muted;
     -fx-font-family: "Inter Medium";
@@ -1138,7 +1261,7 @@
     -fx-padding: 3 6;
 }
 .workbench .completion-list > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover { -fx-background-color: -wb-hover; }
-.workbench .completion-list > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected { -fx-background-color: -color-accent-subtle; }
+.workbench .completion-list > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected { -fx-background-color: -wb-selection; }
 .workbench .completion-label { -fx-font-family: "JetBrains Mono"; -fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: -wb-strong; }
 .workbench .completion-detail { -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; }
 .workbench .completion-list .kind-badge { -fx-font-family: "JetBrains Mono"; -fx-font-weight: bold; -fx-font-size: 9px; -fx-padding: 1 5; -fx-background-radius: 4; -fx-min-width: 34; -fx-alignment: center; }

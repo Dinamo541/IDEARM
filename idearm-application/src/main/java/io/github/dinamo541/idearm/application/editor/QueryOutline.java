@@ -26,7 +26,7 @@ public final class QueryOutline {
 
         // 1. Add segments
         for (SegmentNode seg : ast.segments()) {
-            rootItems.add(new OutlineItem(seg.name(), "segment", seg.line(), seg.column(), List.of()));
+            rootItems.add(new OutlineItem(seg.name(), "segment", seg.line(), seg.column(), List.of(), seg.endLine()));
         }
 
         // 2. Add procedures and nest internal labels
@@ -42,7 +42,8 @@ public final class QueryOutline {
                 return false;
             });
 
-            rootItems.add(new OutlineItem(proc.name(), "procedure", proc.line(), proc.column(), internalLabels));
+            rootItems.add(new OutlineItem(proc.name(), "procedure", proc.line(), proc.column(), internalLabels,
+                    proc.endLine()));
         }
 
         // 3. Add any standalone labels outside procedures

@@ -24,11 +24,13 @@ final class EditorActions {
         query.setId("editor-find");
         replacement.setId("editor-replace");
         search.getStyleClass().add("editor-search");
-        var first = new HBox(6, query, count, button("↑", () -> find(false)),
+        var first = new HBox(3, query, count, button("↑", () -> find(false)),
                 button("↓", () -> find(true)), button("×", this::hide));
+        first.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         HBox.setHgrow(query, Priority.ALWAYS);
-        replaceRow = new HBox(6, replacement, button("editor.replaceOne", this::replaceOne),
+        replaceRow = new HBox(3, replacement, button("editor.replaceOne", this::replaceOne),
                 button("editor.replaceAll", this::replaceAll));
+        replaceRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         HBox.setHgrow(replacement, Priority.ALWAYS);
         search.getChildren().addAll(first, replaceRow);
         hide();

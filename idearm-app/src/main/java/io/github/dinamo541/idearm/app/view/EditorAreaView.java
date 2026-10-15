@@ -24,6 +24,9 @@ public final class EditorAreaView extends StackPane {
     private final javafx.scene.control.ScrollPane emptyPlaceholder;
     private final javafx.beans.property.BooleanProperty minimapVisible = new javafx.beans.property.SimpleBooleanProperty(true);
     private final Map<EditorDocumentViewModel, Tab> tabMap = new HashMap<>();
+    private final Map<EditorDocumentViewModel, EditorBreadcrumbs> breadcrumbs = new HashMap<>();
+    private java.util.function.Function<String, java.util.List<io.github.dinamo541.idearm.application.editor.OutlineItem>>
+            outlineProvider = text -> java.util.List.of();
     private boolean updatingSelection = false;
     private java.util.function.Consumer<WelcomeView.Action> onWelcomeAction = action -> {};
 
@@ -60,15 +63,26 @@ public final class EditorAreaView extends StackPane {
                 if (change.wasAdded()) {
                     for (EditorDocumentViewModel doc : change.getAddedSubList()) {
                         Tab tab = new Tab();
-                        tab.textProperty().bind(doc.titleProperty());
-                        var breadcrumb = new Label();
-                        breadcrumb.getStyleClass().add("breadcrumbs");
-                        breadcrumb.textProperty().bind(javafx.beans.binding.Bindings.createStringBinding(() -> {
-                            var file = doc.getFilePath();
-                            String folder = file.getParent() != null && file.getParent().getFileName() != null
-                                    ? file.getParent().getFileName().toString() + "  ›  " : "";
-                            return folder + file.getFileName();
-                        }, doc.filePathProperty()));
+                        // As in VS Code, the name stays clean and a dot replaces the close button while the file
+                        // has unsaved changes; the tooltip names the full path and says so in words.
+                        tab.textProperty().bind(javafx.beans.binding.Bindings.createStringBinding(
+                                () -> doc.getFilePath().getFileName().toString(), doc.filePathProperty()));
+                        var tip = new javafx.scene.control.Tooltip();
+                        tip.textProperty().bind(javafx.beans.binding.Bindings.createStringBinding(
+                                () -> doc.isModified()
+                                        ? localization.get("editor.tab.unsaved", doc.getFilePath().toString())
+                                        : doc.getFilePath().toString(),
+                                doc.filePathProperty(), doc.modifiedProperty(), localization.localeProperty()));
+                        tip.setShowDelay(javafx.util.Duration.millis(600));
+                        tab.setTooltip(tip);
+                        Runnable markModified = () -> {
+                            if (!doc.isModified()) tab.getStyleClass().remove("modified");
+                            else if (!tab.getStyleClass().contains("modified")) tab.getStyleClass().add("modified");
+                        };
+                        doc.modifiedProperty().addListener((obs, before, after) -> markModified.run());
+                        markModified.run();
+                        var breadcrumb = new EditorBreadcrumbs(doc, text -> outlineProvider.apply(text));
+                        breadcrumbs.put(doc, breadcrumb);
                         var content = new javafx.scene.layout.BorderPane(doc.getEditor().getNode());
                         var spacer = new javafx.scene.layout.Region();
                         javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
@@ -96,6 +110,7 @@ public final class EditorAreaView extends StackPane {
                 if (change.wasRemoved()) {
                     for (EditorDocumentViewModel doc : change.getRemoved()) {
                         Tab tab = tabMap.remove(doc);
+                        breadcrumbs.remove(doc);
                         if (tab != null) {
                             var content = (javafx.scene.layout.BorderPane) tab.getContent();
                             var toggle = (javafx.scene.control.ToggleButton) content.lookup(".minimap-toggle");
@@ -132,6 +147,13 @@ public final class EditorAreaView extends StackPane {
     }
 
     void setOnWelcomeAction(java.util.function.Consumer<WelcomeView.Action> action) { onWelcomeAction = action; }
+
+    /** Supplies the document outline the breadcrumbs read the caret's segment and procedure from. */
+    void setOutlineProvider(java.util.function.Function<String, java.util.List<
+            io.github.dinamo541.idearm.application.editor.OutlineItem>> provider) {
+        outlineProvider = provider != null ? provider : text -> java.util.List.of();
+        breadcrumbs.values().forEach(EditorBreadcrumbs::refresh);
+    }
 
     public void cycle(int direction) {
         int size = tabPane.getTabs().size();
