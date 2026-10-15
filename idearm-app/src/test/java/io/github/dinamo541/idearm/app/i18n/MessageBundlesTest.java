@@ -127,9 +127,13 @@ class MessageBundlesTest {
         assertTrue(missing.isEmpty(), "Explorer codes without a translation: " + missing);
     }
 
-    /** Codes of reported problems, including editor save failures; each needs a text in both languages. */
+    /**
+     * Codes of reported problems, including editor save failures and diagnostics built directly (the debugger's
+     * session and cleanup failures); each needs a text in both languages.
+     */
     private static final Pattern PROBLEM_CODE = Pattern.compile(
-            "(?:new DomainException|\\bfail|\\berror|\\bfailure|\\bproblem)\\(\\s*\"([a-z][a-zA-Z0-9_.-]*)\""
+            "(?:(?:new DomainException|\\bfail|\\berror|\\bfailure|\\bproblem)\\("
+                    + "|new Diagnostic\\(\\s*Severity\\.[A-Z]+\\s*,)\\s*\"([a-z][a-zA-Z0-9_.-]*)\""
                     + "|\"((?:lint|explorer)\\.[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*|build\\.failed|build\\.timedOut)\"");
     private static final List<String> PROBLEM_MODULES = List.of("idearm-domain", "idearm-application",
             "idearm-infrastructure", "idearm-toolchain-dos", "idearm-toolchain-nasm", "idearm-language", "idearm-emu8086",
