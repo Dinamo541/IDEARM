@@ -67,7 +67,7 @@ public final class BottomPanelView extends TabPane {
         // 2. Build Tab
         this.buildArea = new TextArea();
         this.buildArea.setEditable(false);
-        this.buildArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
+        this.buildArea.setStyle("-fx-font-family: 'JetBrains Mono'; -fx-font-size: 12px;");
         this.buildArea.textProperty().bind(viewModel.buildTextProperty());
         this.buildArea.textProperty().addListener((obs, oldV, newV) -> buildArea.setScrollTop(Double.MAX_VALUE));
 
@@ -79,7 +79,7 @@ public final class BottomPanelView extends TabPane {
         // 3. Output Tab
         this.outputArea = new TextArea();
         this.outputArea.setEditable(false);
-        this.outputArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
+        this.outputArea.setStyle("-fx-font-family: 'JetBrains Mono'; -fx-font-size: 12px;");
         this.outputArea.textProperty().bind(viewModel.outputTextProperty());
         this.outputArea.textProperty().addListener((obs, oldV, newV) -> outputArea.setScrollTop(Double.MAX_VALUE));
 
@@ -201,7 +201,7 @@ public final class BottomPanelView extends TabPane {
             }
         };
         field.setId("program-input");
-        field.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
+        field.setStyle("-fx-font-family: 'JetBrains Mono'; -fx-font-size: 12px;");
         field.promptTextProperty().bind(Bindings.createStringBinding(() ->
                         viewModel.programInputProperty().get() == BottomPanelViewModel.ProgramInput.LINE
                                 ? localization.get("output.programInput.line")
@@ -440,7 +440,7 @@ public final class BottomPanelView extends TabPane {
                     setStyle("");
                 } else {
                     setText(item);
-                    setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 11px;");
+                    setStyle("-fx-font-family: 'JetBrains Mono'; -fx-font-size: 11px;");
                 }
             }
         });

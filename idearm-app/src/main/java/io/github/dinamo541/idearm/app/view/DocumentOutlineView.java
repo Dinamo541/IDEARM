@@ -104,7 +104,7 @@ public final class DocumentOutlineView extends BorderPane {
             this.badge.getStyleClass().add("outline-badge");
 
             this.nameLabel = new Label();
-            this.nameLabel.setStyle("-fx-font-family: 'JetBrains Mono', 'Consolas', monospace; -fx-font-size: 11px;");
+            this.nameLabel.setStyle("-fx-font-family: 'JetBrains Mono'; -fx-font-size: 11px;");
 
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);

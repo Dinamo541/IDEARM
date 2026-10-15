@@ -156,6 +156,10 @@ example uses the Windows API and is intended for Windows.
 
 Both the theme and interface language can be changed from the workbench.
 
+![The IDEARM welcome screen: action cards for new, open and recent projects, commands and the instruction reference](docs/images/welcome-dark.png)
+
+With no file open, the welcome screen offers the next steps, each with its keyboard shortcut.
+
 </details>
 
 | Capability | What you can do |

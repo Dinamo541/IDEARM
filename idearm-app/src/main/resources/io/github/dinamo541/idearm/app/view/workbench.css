@@ -1,211 +1,385 @@
-/* IDEARM workbench. VS Code Dark Modern / Dark+ ultra-fidelity surfaces and shared design system. */
-:root, .workbench {
-    -fx-font-family: "Segoe UI", "Segoe UI Variable Text", system-ui, sans-serif;
+/*
+ * IDEARM workbench — "Hexcore" visual system (ADR-012).
+ *
+ * The palette grows out of the brand mark: a cyan-to-blue frame (#52D6EF → #3976F6), a mint monogram (#79EFD2)
+ * and a deep navy field (#101B2D). Dark surfaces are tinted towards that navy instead of neutral grey, and the light
+ * theme uses the same hues on cool white. Inter sets the interface and JetBrains Mono sets code; both are bundled
+ * (WorkbenchFonts). JavaFX picks only regular or bold inside a family, so medium and semibold text names the
+ * "Inter Medium" and "Inter SemiBold" families with a normal weight.
+ *
+ * Layering, from back to front: rail (title and activity bars) → sidebar → editor → raised (cards, popups).
+ * Keyboard focus draws a ring through :focus-visible, so a mouse click never leaves a stray outline behind.
+ */
+
+/* ───────────────────────────── Tokens ───────────────────────────── */
+.workbench {
+    -fx-font-family: "Inter";
     -fx-font-size: 13px;
-    -color-bg-default: #1f1f1f;
-    -color-bg-subtle: #181818;
-    -color-bg-inset: #141414;
-    -color-fg-default: #cccccc;
-    -color-fg-muted: #9d9d9d;
-    -color-fg-subtle: #808080;
+
+    /* Brand */
+    -wb-brand-cyan: #52d6ef;
+    -wb-brand-blue: #3976f6;
+    -wb-brand-mint: #79efd2;
+    -wb-brand-gradient: linear-gradient(to right, #52d6ef 0%, #3976f6 100%);
+
+    /* Surfaces */
+    -wb-rail: #0c1018;
+    -wb-sidebar: #10151f;
+    -wb-editor: #141a25;
+    -wb-raised: #1a2130;
+    -wb-input: #182030;
+    -wb-hover: #1f2838;
+    -wb-pressed: #273246;
+    -wb-selection: #1c3a66;
+    -wb-selection-muted: #1a2a44;
+    -wb-current-line: #182030;
+    -wb-strong: #f4f7fc;
+    -wb-border-strong: #364158;
+    -wb-shadow: rgba(0, 0, 0, 0.55);
+
+    /* Status bar */
+    -wb-status: #0c1018;
+    -wb-status-fg: #8d99ae;
+    -wb-status-debug: #c8641e;
+    -wb-status-debug-fg: #ffffff;
+
+    /* Syntax: one hue per token family, tuned for the navy canvas. */
+    -wb-token-keyword: #6cb6ff;
+    -wb-token-register: #79e6cf;
+    -wb-token-directive: #c79bf2;
+    -wb-token-number: #f5a97f;
+    -wb-token-string: #a6da95;
+    -wb-token-comment: #66748c;
+    -wb-token-label: #ffd479;
+    -wb-icon-folder: #e3b660;
+    -wb-icon-folder-open: #f0c674;
+    -wb-icon-assembly: #52c6ff;
+
+    /* AtlantaFX semantic tokens, shared by every control the theme draws. */
+    -color-bg-default: #141a25;
+    -color-bg-subtle: #10151f;
+    -color-bg-inset: #0c1018;
+    -color-bg-overlay: #1a2130;
+    -color-fg-default: #d5ddea;
+    -color-fg-muted: #8d99ae;
+    -color-fg-subtle: #5d6a80;
     -color-fg-emphasis: #ffffff;
-    -color-border-default: #3c3c3c;
-    -color-border-muted: #2b2b2b;
-    -color-accent-emphasis: #0078d4;
-    -color-accent-fg: #75beff;
-    -color-accent-subtle: #04395e;
-    -color-chart-6: #9cdcfe;
-    -color-success-fg: #89d185;
-    -color-success-emphasis: #388a34;
-    -color-success-subtle: #233d25;
-    -color-warning-fg: #cca700;
-    -color-warning-emphasis: #cca700;
-    -color-warning-subtle: #3c3521;
-    -color-danger-fg: #f48771;
-    -color-danger-emphasis: #f14c4c;
-    -color-danger-subtle: #492b2b;
-    -wb-editor: #1f1f1f;
-    -wb-sidebar: #181818;
-    -wb-rail: #181818;
-    -wb-input: #282828;
-    -wb-hover: #2a2d2e;
-    -wb-selection: #04395e;
-    -wb-current-line: #282828;
-    -wb-status: #007acc;
-    -wb-status-fg: #ffffff;
-    -wb-status-debug: #cc6633;
-    -wb-token-keyword: #569cd6;
-    -wb-token-register: #9cdcfe;
-    -wb-token-directive: #c586c0;
-    -wb-token-number: #b5cea8;
-    -wb-token-string: #ce9178;
-    -wb-token-comment: #6a9955;
-    -wb-token-label: #dcdcaa;
-    -wb-icon-folder: #dcb67a;
-    -wb-icon-folder-open: #e5a00d;
+    -color-border-default: #283246;
+    -color-border-muted: #1c2432;
+    -color-border-subtle: #1c2432;
+    -color-accent-emphasis: #3976f6;
+    -color-accent-fg: #6cb6ff;
+    -color-accent-muted: #24467e;
+    -color-accent-subtle: #162a4a;
+    -color-neutral-emphasis: #5d6a80;
+    -color-neutral-muted: #283246;
+    -color-neutral-subtle: #1f2838;
+    -color-neutral-fg: #c3ccdb;
+    -color-chart-6: #79e6cf;
+    -color-success-fg: #4fd69c;
+    -color-success-emphasis: #1f9d68;
+    -color-success-muted: #1d5c42;
+    -color-success-subtle: #12301f;
+    -color-warning-fg: #f5c05a;
+    -color-warning-emphasis: #d99a2b;
+    -color-warning-muted: #5c4518;
+    -color-warning-subtle: #33280f;
+    -color-danger-fg: #ff7a85;
+    -color-danger-emphasis: #ec4a5a;
+    -color-danger-muted: #6a2530;
+    -color-danger-subtle: #3a1820;
+
+    -fx-base: #141a25;
+    -fx-background: #141a25;
+    -fx-control-inner-background: #141a25;
+    -fx-accent: #3976f6;
+    -fx-focus-color: #3976f6;
+    -fx-faint-focus-color: transparent;
     -fx-background-color: -wb-editor;
     -fx-text-fill: -color-fg-default;
-    -fx-base: #1f1f1f;
-    -fx-background: #1f1f1f;
-    -fx-control-inner-background: #1f1f1f;
 }
-:root.light, .workbench.light {
+.workbench.light {
+    -wb-rail: #edf0f5;
+    -wb-sidebar: #f5f7fa;
+    -wb-editor: #ffffff;
+    -wb-raised: #ffffff;
+    -wb-input: #ffffff;
+    -wb-hover: #e8edf4;
+    -wb-pressed: #dce3ee;
+    -wb-selection: #d6e5fd;
+    -wb-selection-muted: #e6eefc;
+    -wb-current-line: #f4f7fc;
+    -wb-strong: #0b1220;
+    -wb-border-strong: #b9c3d3;
+    -wb-shadow: rgba(23, 35, 60, 0.18);
+
+    -wb-status: #edf0f5;
+    -wb-status-fg: #576275;
+    -wb-status-debug: #d9731f;
+    -wb-status-debug-fg: #ffffff;
+
+    -wb-token-keyword: #1d5fd6;
+    -wb-token-register: #0b7f72;
+    -wb-token-directive: #8a3fd1;
+    -wb-token-number: #c2511b;
+    -wb-token-string: #2e7d32;
+    -wb-token-comment: #7d889b;
+    -wb-token-label: #9a5f00;
+    -wb-icon-folder: #c08a1e;
+    -wb-icon-folder-open: #b97c00;
+    -wb-icon-assembly: #1f7ae0;
+
+    -color-bg-default: #ffffff;
+    -color-bg-subtle: #f5f7fa;
+    -color-bg-inset: #edf0f5;
+    -color-bg-overlay: #ffffff;
+    -color-fg-default: #1e2633;
+    -color-fg-muted: #576275;
+    -color-fg-subtle: #8a94a6;
+    -color-fg-emphasis: #ffffff;
+    -color-border-default: #d3dae5;
+    -color-border-muted: #e4e8ef;
+    -color-border-subtle: #e4e8ef;
+    -color-accent-emphasis: #2f6fed;
+    -color-accent-fg: #1d5fd6;
+    -color-accent-muted: #b7cefb;
+    -color-accent-subtle: #e3ecfe;
+    -color-neutral-emphasis: #8a94a6;
+    -color-neutral-muted: #d3dae5;
+    -color-neutral-subtle: #eef1f6;
+    -color-neutral-fg: #3c4657;
+    -color-chart-6: #0b7f72;
+    -color-success-fg: #17803d;
+    -color-success-emphasis: #16a34a;
+    -color-success-muted: #a9dfbd;
+    -color-success-subtle: #e3f6ea;
+    -color-warning-fg: #9a6200;
+    -color-warning-emphasis: #d48b07;
+    -color-warning-muted: #f2d496;
+    -color-warning-subtle: #fdf3dc;
+    -color-danger-fg: #c8283a;
+    -color-danger-emphasis: #dc3545;
+    -color-danger-muted: #f3b3ba;
+    -color-danger-subtle: #fde8ea;
+
     -fx-base: #ffffff;
     -fx-background: #ffffff;
     -fx-control-inner-background: #ffffff;
-    -color-bg-default: #ffffff;
-    -color-bg-subtle: #f8f8f8;
-    -color-bg-inset: #f0f0f0;
-    -color-fg-default: #3b3b3b;
-    -color-fg-muted: #616161;
-    -color-fg-subtle: #727272;
-    -color-fg-emphasis: #181818;
-    -color-border-default: #cecece;
-    -color-border-muted: #e5e5e5;
-    -color-accent-emphasis: #0078d4;
-    -color-accent-fg: #005fb8;
-    -color-accent-subtle: #e3effb;
-    -color-success-fg: #287d35;
-    -color-success-emphasis: #287d35;
-    -color-success-subtle: #e4f2e5;
-    -color-warning-fg: #856300;
-    -color-warning-emphasis: #856300;
-    -color-warning-subtle: #fff4ce;
-    -color-danger-fg: #c42b1c;
-    -color-danger-emphasis: #c42b1c;
-    -color-danger-subtle: #fce7e5;
-    -wb-editor: #ffffff;
-    -wb-sidebar: #f8f8f8;
-    -wb-rail: #f8f8f8;
-    -wb-input: #ffffff;
-    -wb-hover: #e8e8e8;
-    -wb-selection: #d6e8fa;
-    -wb-current-line: #f4f4f4;
-    -wb-status: #007acc;
-    -wb-status-fg: #ffffff;
-    -wb-status-debug: #cc6633;
-    -wb-token-keyword: #0000ff;
-    -wb-token-register: #0451a5;
-    -wb-token-directive: #af00db;
-    -wb-token-number: #098658;
-    -wb-token-string: #a31515;
-    -wb-token-comment: #427a32;
-    -wb-token-label: #795e26;
-    -wb-icon-folder: #856300;
-    -wb-icon-folder-open: #b28500;
+    -fx-accent: #2f6fed;
+    -fx-focus-color: #2f6fed;
 }
 .workbench-shell { -fx-border-color: -color-border-default; -fx-border-width: 1; }
 
-/* Controls share metrics, focus rings and legible selected/disabled states. */
+/* ───────────────────────────── Typography ───────────────────────────── */
 .workbench .label { -fx-text-fill: -color-fg-default; }
 .workbench .text-muted { -fx-text-fill: -color-fg-muted; }
+.workbench .text-bold, .workbench .title-4, .workbench .title-3 { -fx-font-family: "Inter SemiBold"; -fx-font-weight: normal; }
+.workbench .title-1, .workbench .title-2 { -fx-font-family: "Inter SemiBold"; -fx-font-weight: normal; -fx-text-fill: -wb-strong; }
+.workbench .mono-text, .workbench .console-text, .workbench .code-font { -fx-font-family: "JetBrains Mono"; }
+.workbench .mono-text, .workbench .console-text { -fx-font-size: 12.5px; }
+
+/* ───────────────────────────── Buttons ───────────────────────────── */
 .workbench .button, .workbench .toggle-button {
     -fx-cursor: hand;
     -fx-background-color: -wb-input;
-    -fx-background-radius: 3;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
     -fx-border-color: -color-border-default;
-    -fx-border-radius: 3;
+    -fx-border-radius: 7;
     -fx-border-width: 1;
-    -fx-padding: 5 12;
+    -fx-padding: 6 14;
     -fx-text-fill: -color-fg-default;
-    -fx-graphic-text-gap: 7;
+    -fx-graphic-text-gap: 8;
+    -fx-effect: null;
 }
-.workbench .button:hover, .workbench .toggle-button:hover { -fx-background-color: -wb-hover; }
-.workbench .button:pressed, .workbench .toggle-button:selected { -fx-background-color: -wb-selection; }
+.workbench .button:hover, .workbench .toggle-button:hover {
+    -fx-background-color: -wb-hover;
+    -fx-border-color: -wb-border-strong;
+}
+.workbench .button:pressed, .workbench .toggle-button:pressed { -fx-background-color: -wb-pressed; }
+.workbench .toggle-button:selected {
+    -fx-background-color: -color-accent-subtle;
+    -fx-border-color: -color-accent-muted;
+    -fx-text-fill: -color-accent-fg;
+}
+.toggle-button:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
 .workbench .button:default, .workbench .button.accent {
-    -fx-background-color: -color-accent-emphasis;
-    -fx-border-color: -color-accent-emphasis;
+    -fx-background-color: linear-gradient(to bottom, derive(-color-accent-emphasis, 12%), -color-accent-emphasis);
+    -fx-border-color: derive(-color-accent-emphasis, -8%);
     -fx-text-fill: white;
+    -fx-font-family: "Inter Medium";
+    -fx-effect: dropshadow(gaussian, rgba(57, 118, 246, 0.30), 8, 0, 0, 2);
 }
-.workbench .button:default:hover, .workbench .button.accent:hover { -fx-background-color: derive(-color-accent-emphasis, 12%); }
-.workbench .button:focused, .workbench .toggle-button:focused { -fx-border-color: -color-accent-fg; }
-.workbench .button:disabled, .workbench .toggle-button:disabled { -fx-opacity: 0.42; }
+.workbench .button:default:hover, .workbench .button.accent:hover {
+    -fx-background-color: linear-gradient(to bottom, derive(-color-accent-emphasis, 22%), derive(-color-accent-emphasis, 8%));
+    -fx-border-color: -color-accent-emphasis;
+}
+.workbench .button:default:pressed, .workbench .button.accent:pressed { -fx-background-color: derive(-color-accent-emphasis, -10%); }
+.workbench .button.success { -fx-background-color: -color-success-emphasis; -fx-border-color: -color-success-emphasis; -fx-text-fill: white; }
+.workbench .button.danger { -fx-text-fill: -color-danger-fg; }
+.workbench .button.button-outlined { -fx-background-color: transparent; }
+.workbench .button.button-outlined:hover { -fx-background-color: -wb-hover; }
+.workbench .button.flat { -fx-background-color: transparent; -fx-border-color: transparent; }
+.workbench .button.flat:hover { -fx-background-color: -wb-hover; }
+.workbench .button.small, .workbench .toggle-button.small { -fx-padding: 3 9; -fx-font-size: 12px; }
+.workbench .button.button-icon { -fx-padding: 5 7; }
+.workbench .button:focus-visible, .workbench .toggle-button:focus-visible {
+    -fx-border-color: -color-accent-emphasis;
+    -fx-effect: dropshadow(gaussian, rgba(57, 118, 246, 0.55), 6, 0.35, 0, 0);
+}
+.workbench .button:disabled, .workbench .toggle-button:disabled { -fx-opacity: 0.4; }
+.workbench .button.accent .workbench-icon, .workbench .button:default .workbench-icon,
+.workbench .button.success .workbench-icon { -wb-icon-color: white; }
+.workbench .hyperlink { -fx-text-fill: -color-accent-fg; -fx-border-color: transparent; -fx-padding: 0; }
+.workbench .hyperlink:hover { -fx-underline: true; }
+
+/* ───────────────────────────── Inputs ───────────────────────────── */
 .workbench .text-input, .workbench .combo-box-base, .workbench .choice-box {
     -fx-background-color: -wb-input;
-    -fx-background-radius: 3;
+    -fx-background-radius: 7;
+    -fx-background-insets: 0;
     -fx-border-color: -color-border-default;
-    -fx-border-radius: 3;
+    -fx-border-radius: 7;
     -fx-border-width: 1;
     -fx-text-fill: -color-fg-default;
-    -fx-prompt-text-fill: -color-fg-muted;
+    -fx-prompt-text-fill: -color-fg-subtle;
     -fx-highlight-fill: -wb-selection;
-    -fx-highlight-text-fill: -color-fg-default;
+    -fx-highlight-text-fill: -wb-strong;
+    -fx-effect: null;
 }
-.workbench .text-field { -fx-padding: 6 9; }
-.workbench .text-input:focused, .workbench .combo-box-base:focused, .workbench .choice-box:focused { -fx-border-color: -color-accent-fg; }
-.workbench .combo-box-base > .list-cell { -fx-padding: 5 9; -fx-text-fill: -color-fg-default; -fx-background-color: transparent; }
-.workbench .check-box > .box { -fx-background-color: -wb-input; -fx-border-color: -color-border-default; -fx-background-radius: 3; -fx-border-radius: 3; }
+.workbench .text-field { -fx-padding: 7 10; }
+.workbench .text-input:hover, .workbench .combo-box-base:hover, .workbench .choice-box:hover { -fx-border-color: -wb-border-strong; }
+.workbench .text-input:focused, .workbench .combo-box-base:focused, .workbench .combo-box-base:showing, .workbench .choice-box:focused {
+    -fx-border-color: -color-accent-emphasis;
+    -fx-effect: dropshadow(gaussian, rgba(57, 118, 246, 0.40), 6, 0.3, 0, 0);
+}
+.workbench .text-input:disabled, .workbench .combo-box-base:disabled { -fx-opacity: 0.5; }
+.workbench .combo-box-base > .list-cell { -fx-padding: 6 10; -fx-text-fill: -color-fg-default; -fx-background-color: transparent; }
+.workbench .combo-box-base > .arrow-button { -fx-background-color: transparent; -fx-padding: 0 10 0 4; }
+.workbench .combo-box-base > .arrow-button > .arrow, .workbench .choice-box > .open-button > .arrow { -fx-background-color: -color-fg-muted; }
+.workbench .combo-box-popup > .list-view, .workbench.combo-box-popup > .list-view {
+    -fx-background-color: -wb-raised;
+    -fx-border-color: -color-border-default;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(gaussian, -wb-shadow, 18, 0.15, 0, 6);
+}
+.workbench .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
+    -fx-background-color: transparent;
+    -fx-background-radius: 5;
+    -fx-padding: 6 10;
+}
+.workbench .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover {
+    -fx-background-color: -wb-hover;
+}
+.workbench .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
+    -fx-background-color: -color-accent-subtle;
+    -fx-text-fill: -color-accent-fg;
+}
+.workbench .check-box { -fx-label-padding: 0 0 0 8; }
+.workbench .check-box > .box {
+    -fx-background-color: -wb-input;
+    -fx-border-color: -wb-border-strong;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-padding: 3;
+}
+.workbench .check-box:hover > .box { -fx-border-color: -color-accent-emphasis; }
 .workbench .check-box:selected > .box { -fx-background-color: -color-accent-emphasis; -fx-border-color: -color-accent-emphasis; }
 .workbench .check-box:selected > .box > .mark { -fx-background-color: white; }
-.workbench .check-box:focused > .box { -fx-border-color: -color-accent-fg; }
+.workbench .check-box:focus-visible > .box { -fx-effect: dropshadow(gaussian, rgba(57, 118, 246, 0.55), 6, 0.35, 0, 0); }
+.workbench .radio-button > .radio { -fx-background-color: -wb-input; -fx-border-color: -wb-border-strong; -fx-border-radius: 1em; -fx-background-radius: 1em; }
+.workbench .radio-button:selected > .radio { -fx-border-color: -color-accent-emphasis; }
+.workbench .radio-button:selected > .radio > .dot { -fx-background-color: -color-accent-emphasis; }
 .workbench .separator .line { -fx-border-color: -color-border-muted; -fx-border-width: 1 0 0 0; }
 .workbench .separator:vertical .line { -fx-border-width: 0 0 0 1; }
-.workbench-icon { -wb-icon-color: -color-fg-default; }
-.workbench .icon-button, .workbench .subtle-button { -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 5 7; }
-.workbench .icon-button:hover, .workbench .subtle-button:hover { -fx-background-color: -wb-hover; }
-.workbench .icon-button:pressed, .workbench .subtle-button:pressed { -fx-background-color: -wb-selection; }
-.workbench .icon-button:focused, .workbench .subtle-button:focused { -fx-border-color: -color-accent-fg; }
-.run-action .workbench-icon { -wb-icon-color: -color-success-fg; }
-.stop-action .workbench-icon { -wb-icon-color: -color-danger-fg; }
+.workbench .progress-bar > .bar { -fx-background-color: -wb-brand-gradient; -fx-background-radius: 4; }
+.workbench .progress-bar > .track { -fx-background-color: -wb-hover; -fx-background-radius: 4; }
 
-/* Title bar: a quiet centered command center, sleek menu bar and window actions. */
+/* ───────────────────────────── Icons and icon buttons ───────────────────────────── */
+.workbench-icon { -wb-icon-color: -color-fg-default; }
+.workbench .icon-button, .workbench .subtle-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+    -fx-padding: 5 7;
+}
+.workbench .icon-button:hover, .workbench .subtle-button:hover { -fx-background-color: -wb-hover; -fx-border-color: transparent; }
+.workbench .icon-button:pressed, .workbench .subtle-button:pressed { -fx-background-color: -wb-pressed; }
+.workbench .icon-button:focus-visible, .workbench .subtle-button:focus-visible { -fx-border-color: -color-accent-emphasis; -fx-effect: null; }
+.icon-button .workbench-icon, .subtle-button .workbench-icon { -wb-icon-color: -color-fg-muted; }
+.icon-button:hover .workbench-icon, .subtle-button:hover .workbench-icon { -wb-icon-color: -wb-strong; }
+.run-action .workbench-icon, .run-action:hover .workbench-icon { -wb-icon-color: -color-success-fg; }
+.stop-action .workbench-icon, .stop-action:hover .workbench-icon { -wb-icon-color: -color-danger-fg; }
+.debug-action .workbench-icon, .debug-action:hover .workbench-icon { -wb-icon-color: -color-warning-fg; }
+
+/* ───────────────────────────── Title bar ───────────────────────────── */
 .workbench-header {
     -fx-alignment: center-left;
     -fx-background-color: -wb-rail;
     -fx-border-color: transparent transparent -color-border-muted transparent;
     -fx-border-width: 0 0 1 0;
-    -fx-min-height: 38;
-    -fx-pref-height: 38;
+    -fx-min-height: 42;
+    -fx-pref-height: 42;
 }
 .workbench .menu-bar, .workbench-toolbar {
     -fx-background-color: transparent;
-    -fx-padding: 2 4;
-    -fx-min-height: 38;
-    -fx-pref-height: 38;
+    -fx-padding: 3 4;
+    -fx-min-height: 42;
+    -fx-pref-height: 42;
+    -fx-spacing: 2;
 }
-.workbench .menu-bar .menu {
-    -fx-padding: 4 8;
-}
-.workbench .menu-bar .menu:hover, .workbench .menu-bar .menu:showing {
-    -fx-background-color: -wb-hover;
-    -fx-background-radius: 4;
-}
+.workbench .menu-bar { -fx-border-color: transparent; }
+.workbench .menu-bar .menu { -fx-padding: 5 9; -fx-background-radius: 6; -fx-background-color: transparent; }
+.workbench .menu-bar .menu > .label { -fx-text-fill: -color-fg-muted; -fx-font-size: 13px; }
+.workbench .menu-bar .menu:hover, .workbench .menu-bar .menu:showing { -fx-background-color: -wb-hover; }
+.workbench .menu-bar .menu:hover > .label, .workbench .menu-bar .menu:showing > .label { -fx-text-fill: -wb-strong; }
 .workbench-toolbar .button {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-background-radius: 4;
-    -fx-border-radius: 4;
-    -fx-padding: 4 6;
-    -fx-min-height: 26;
-    -fx-pref-height: 26;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+    -fx-padding: 5 6;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
 }
-.workbench-toolbar .button:hover {
-    -fx-background-color: -wb-hover;
-}
+.workbench-toolbar .button:hover { -fx-background-color: -wb-hover; }
+.workbench-toolbar .run-action { -fx-background-color: -color-success-subtle; }
+.workbench-toolbar .run-action:hover { -fx-background-color: -color-success-muted; }
 .workbench-toolbar .command-center {
     -fx-border-color: -color-border-default;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
     -fx-background-color: -wb-input;
     -fx-text-fill: -color-fg-muted;
-    -fx-pref-width: 380;
     -fx-min-width: 140;
-    -fx-font-size: 12px;
-    -fx-padding: 4 12;
+    -fx-font-size: 12.5px;
+    -fx-padding: 5 14;
     -fx-alignment: center;
-    -fx-graphic-text-gap: 8;
+    -fx-graphic-text-gap: 9;
 }
+.workbench-toolbar .command-center .workbench-icon { -wb-icon-color: -color-fg-muted; }
 .workbench-toolbar .command-center:hover {
     -fx-background-color: -wb-hover;
-    -fx-border-color: #4a4a4a;
+    -fx-border-color: -color-accent-muted;
     -fx-text-fill: -color-fg-default;
 }
-.workbench-toolbar .command-center:focused {
-    -fx-border-color: -color-accent-emphasis;
+.workbench-toolbar .command-center:hover .workbench-icon { -wb-icon-color: -color-accent-fg; }
+.workbench-toolbar .command-center:focus-visible { -fx-border-color: -color-accent-emphasis; }
+.workbench-toolbar .separator { -fx-padding: 0 4; }
+.workbench-toolbar .separator .line { -fx-border-color: -color-border-default; }
+.workbench-toolbar .language-button {
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-size: 10.5px;
+    -fx-padding: 4 7;
+    -fx-text-fill: -color-fg-muted;
+    -fx-border-color: -color-border-default;
 }
-.workbench-toolbar .separator { -fx-padding: 0 3; }
-.workbench-toolbar .language-button { -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 4 6; }
-.title-logo { -fx-padding: 0 8 0 10; -fx-min-width: 40; }
+.workbench-toolbar .language-button:hover { -fx-text-fill: -wb-strong; -fx-border-color: -wb-border-strong; }
+.workbench-toolbar .overflow-button > .arrow { -fx-background-color: -color-fg-muted; }
+.title-logo { -fx-padding: 0 8 0 12; -fx-min-width: 44; }
 .window-controls { -fx-alignment: center-right; -fx-min-width: 176; }
 .workbench .window-button {
     -fx-background-color: transparent;
@@ -215,94 +389,117 @@
     -fx-min-width: 46;
     -fx-pref-width: 46;
     -fx-max-width: 46;
-    -fx-min-height: 38;
-    -fx-pref-height: 38;
-    -fx-padding: 9 14;
+    -fx-min-height: 42;
+    -fx-pref-height: 42;
+    -fx-padding: 10 14;
 }
+.window-button .workbench-icon { -wb-icon-color: -color-fg-muted; }
 .workbench .window-button:hover { -fx-background-color: -wb-hover; }
-.workbench .window-close:hover, .workbench .window-close:pressed { -fx-background-color: #e81123; }
+.window-button:hover .workbench-icon { -wb-icon-color: -wb-strong; }
+.workbench .window-close:hover, .workbench .window-close:pressed { -fx-background-color: #e5283b; }
 .window-close:hover .workbench-icon { -wb-icon-color: white; }
-.workbench-header .window-button:focused { -fx-border-color: -color-accent-emphasis; -fx-border-insets: 2; }
+.workbench-header .window-button:focus-visible { -fx-border-color: -color-accent-emphasis; -fx-border-insets: 3; -fx-effect: null; }
 
-/* Navigation: full-height active markers and compact, readable tree rows. */
+/* ───────────────────────────── Activity bar ───────────────────────────── */
 .activity-bar {
-    -fx-min-width: 48;
-    -fx-pref-width: 48;
-    -fx-max-width: 48;
-    -fx-padding: 0;
-    -fx-spacing: 0;
+    -fx-min-width: 52;
+    -fx-pref-width: 52;
+    -fx-max-width: 52;
+    -fx-padding: 8 0 8 0;
+    -fx-spacing: 4;
+    -fx-alignment: top-center;
     -fx-background-color: -wb-rail;
     -fx-border-color: transparent -color-border-muted transparent transparent;
     -fx-border-width: 0 1 0 0;
 }
 .workbench .activity-button {
     -fx-background-color: transparent;
-    -fx-background-radius: 0;
-    -fx-border-radius: 0;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
     -fx-border-color: transparent;
-    -fx-border-width: 0 0 0 2;
-    -fx-min-width: 48;
-    -fx-max-width: 48;
-    -fx-pref-height: 48;
-    -fx-min-height: 48;
-    -fx-padding: 12 11;
+    -fx-border-width: 1;
+    -fx-min-width: 40;
+    -fx-pref-width: 40;
+    -fx-max-width: 40;
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-padding: 8;
 }
-.activity-button .workbench-icon { -wb-icon-color: rgba(255, 255, 255, 0.45); }
-.workbench.light .activity-button .workbench-icon { -wb-icon-color: #616161; }
-.workbench .activity-button:hover { -fx-background-color: transparent; }
-.workbench .activity-button:hover .workbench-icon { -wb-icon-color: rgba(255, 255, 255, 0.85); }
-.workbench.light .activity-button:hover .workbench-icon { -wb-icon-color: #1f1f1f; }
+.activity-button .workbench-icon { -wb-icon-color: -color-fg-subtle; }
+.workbench .activity-button:hover { -fx-background-color: -wb-hover; -fx-border-color: transparent; }
+.activity-button:hover .workbench-icon { -wb-icon-color: -color-fg-default; }
 .workbench .activity-button:selected {
-    -fx-border-color: -color-accent-emphasis;
-    -fx-border-width: 0 0 0 2;
-    -fx-background-color: transparent;
+    -fx-background-color: -color-accent-subtle;
+    -fx-border-color: -color-accent-muted;
 }
-.activity-button:selected .workbench-icon { -wb-icon-color: #ffffff; }
-.workbench.light .activity-button:selected .workbench-icon { -wb-icon-color: -color-fg-default; }
-.workbench .activity-button:focused { -fx-background-color: -wb-hover; }
-.workbench-shell:compact-height .activity-button { -fx-min-height: 40; -fx-pref-height: 40; -fx-padding: 8 11; }
-.workbench .split-pane { -fx-background-color: -wb-editor; -fx-padding: 0; }
-.workbench .split-pane-divider { -fx-background-color: -color-border-muted; -fx-padding: 0 1; }
-.workbench .split-pane:vertical > .split-pane-divider { -fx-padding: 1 0; }
-.workbench .split-pane-divider:hover { -fx-background-color: -color-accent-emphasis; }
+.activity-button:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
+.workbench .activity-button:focus-visible { -fx-border-color: -color-accent-emphasis; -fx-effect: null; }
+.workbench-shell:compact-height .activity-button { -fx-min-height: 34; -fx-pref-height: 34; -fx-padding: 6; }
+.workbench-shell:compact-height .activity-bar { -fx-spacing: 2; -fx-padding: 4 0 4 0; }
+
+/* ───────────────────────────── Split panes ───────────────────────────── */
+.workbench .split-pane { -fx-background-color: -wb-editor; -fx-padding: 0; -fx-background-insets: 0; }
+.workbench .split-pane-divider { -fx-background-color: -color-border-muted; -fx-padding: 0 1 0 0; -fx-background-insets: 0; }
+.workbench .split-pane:vertical > .split-pane-divider { -fx-padding: 1 0 0 0; }
+.workbench .split-pane-divider:hover, .workbench .split-pane-divider:pressed { -fx-background-color: -color-accent-emphasis; }
 .workbench .split-pane-divider .horizontal-grabber, .workbench .split-pane-divider .vertical-grabber { -fx-background-color: transparent; -fx-padding: 0; }
+
+/* ───────────────────────────── Sidebar: explorer and outline ───────────────────────────── */
 .sidebar, .project-explorer, .document-outline { -fx-background-color: -wb-sidebar; }
-.sidebar .tree-view, .sidebar .list-view { -fx-background-color: -wb-sidebar; -fx-border-width: 0; -fx-padding: 0; }
+.sidebar .tree-view, .sidebar .list-view { -fx-background-color: -wb-sidebar; -fx-border-width: 0; -fx-padding: 2 0; }
 .sidebar .tree-cell, .sidebar .list-cell {
     -fx-background-color: transparent;
     -fx-padding: 3 8;
     -fx-text-fill: -color-fg-default;
-    -fx-min-height: 24;
-    -fx-pref-height: 24;
-    -fx-background-radius: 4;
-    -fx-background-insets: 1 4;
+    -fx-min-height: 26;
+    -fx-pref-height: 26;
+    -fx-background-radius: 6;
+    -fx-background-insets: 1 6;
+    -fx-border-insets: 1 6;
+    -fx-border-radius: 6;
 }
 .sidebar .tree-cell:filled:hover, .sidebar .list-cell:filled:hover { -fx-background-color: -wb-hover; }
 .sidebar .tree-cell:filled:selected, .sidebar .list-cell:filled:selected {
-    -fx-background-color: -wb-selection;
-    -fx-text-fill: #ffffff;
+    -fx-background-color: -wb-selection-muted;
+    -fx-text-fill: -wb-strong;
 }
+.sidebar .tree-view:focused .tree-cell:filled:selected, .sidebar .list-view:focused .list-cell:filled:selected {
+    -fx-background-color: -wb-selection;
+}
+.workbench .tree-cell > .tree-disclosure-node { -fx-padding: 4 6 4 2; }
+.workbench .tree-cell > .tree-disclosure-node > .arrow { -fx-background-color: -color-fg-subtle; }
+.workbench .tree-cell:hover > .tree-disclosure-node > .arrow { -fx-background-color: -color-fg-default; }
 .workbench .sidebar-heading {
     -fx-text-fill: -color-fg-muted;
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-weight: normal;
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-graphic-text-gap: 6;
+    -fx-graphic-text-gap: 7;
 }
-.explorer-header { -fx-padding: 8 8 4 12; -fx-spacing: 6; }
-.document-outline > .sidebar-heading { -fx-padding: 8 12; }
-.file-icon-assembly .workbench-icon { -wb-icon-color: #4fc1ff; }
+.sidebar-heading .workbench-icon { -wb-icon-color: -color-fg-subtle; }
+.explorer-header { -fx-padding: 10 8 6 14; -fx-spacing: 4; }
+.document-outline > .sidebar-heading { -fx-padding: 10 14; }
+.document-outline { -fx-border-color: -color-border-muted transparent transparent transparent; -fx-border-width: 1 0 0 0; }
+.file-icon-assembly .workbench-icon { -wb-icon-color: -wb-icon-assembly; }
 .file-icon-include .workbench-icon { -wb-icon-color: -wb-token-directive; }
-.file-icon-config .workbench-icon { -wb-icon-color: -wb-icon-folder-open; }
+.file-icon-config .workbench-icon { -wb-icon-color: -wb-token-label; }
 .file-icon-chip .workbench-icon { -wb-icon-color: -wb-token-register; }
 .file-icon-folder .workbench-icon { -wb-icon-color: -wb-icon-folder; }
 .file-icon-folder-open .workbench-icon { -wb-icon-color: -wb-icon-folder-open; }
 .file-icon-file .workbench-icon { -wb-icon-color: -color-fg-muted; }
-.outline-badge { -fx-font-family: "Consolas"; -fx-font-size: 10px; -fx-padding: 1 4; -fx-background-radius: 2; -fx-background-color: -wb-hover; }
-.workbench .outline-procedure { -fx-text-fill: -wb-token-label; }
+.outline-badge {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 9.5px;
+    -fx-padding: 1 5;
+    -fx-background-radius: 4;
+    -fx-background-color: -wb-hover;
+    -fx-text-fill: -color-fg-muted;
+}
+.workbench .outline-procedure { -fx-text-fill: -wb-token-label; -fx-background-color: derive(-wb-hover, 2%); }
 .workbench .outline-segment { -fx-text-fill: -wb-token-directive; }
 .workbench .outline-label { -fx-text-fill: -color-accent-fg; }
 
-/* Editors and nested panel tabs keep different levels of emphasis. */
+/* ───────────────────────────── Tabs (shared) ───────────────────────────── */
 .workbench .tab-pane > .tab-header-area { -fx-padding: 0; }
 .workbench .tab-pane > .tab-header-area > .tab-header-background {
     -fx-background-color: -wb-sidebar;
@@ -312,7 +509,7 @@
 .workbench .tab-pane > .tab-header-area > .headers-region > .tab {
     -fx-background-color: transparent;
     -fx-background-radius: 0;
-    -fx-padding: 6 12;
+    -fx-padding: 7 12;
     -fx-border-color: transparent;
     -fx-border-width: 0 0 2 0;
 }
@@ -320,395 +517,645 @@
     -fx-border-color: transparent transparent -color-accent-emphasis transparent;
 }
 .workbench .tab-pane > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-hover; }
-.workbench .editor-tabs > .tab-header-area > .headers-region > .tab {
+.workbench .tab .tab-label { -fx-font-size: 12.5px; -fx-text-fill: -color-fg-muted; }
+.workbench .tab:selected .tab-label { -fx-text-fill: -wb-strong; -fx-font-family: "Inter Medium"; }
+.workbench .tab .focus-indicator { -fx-border-width: 0; }
+.workbench .tab:focus-visible .focus-indicator { -fx-border-width: 1; -fx-border-color: -color-accent-emphasis; -fx-border-insets: -2; -fx-border-radius: 6; }
+.workbench .tab-pane > .tab-header-area > .control-buttons-tab > .container > .tab-down-button > .arrow { -fx-background-color: -color-fg-muted; }
+.workbench .tab-pane > .tab-header-area > .control-buttons-tab > .container > .tab-down-button { -fx-background-color: transparent; -fx-padding: 4 6; }
+.workbench .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button { -fx-background-color: -color-fg-subtle; }
+.workbench .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover { -fx-background-color: -color-danger-fg; }
+
+/* Editor tabs: soft cards that open into the editor canvas, with a brand stripe on the active file. */
+.workbench .editor-tabs > .tab-header-area { -fx-padding: 6 8 0 6; }
+.workbench .editor-tabs > .tab-header-area > .tab-header-background {
     -fx-background-color: -wb-sidebar;
-    -fx-border-color: transparent -color-border-muted -color-border-muted transparent;
-    -fx-border-width: 2 1 1 0;
-    -fx-padding: 7 14;
+    -fx-border-color: transparent transparent -color-border-muted transparent;
+    -fx-border-width: 0 0 1 0;
 }
-.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:selected {
-    -fx-background-color: -wb-editor;
-    -fx-border-color: -color-accent-emphasis -color-border-muted transparent transparent;
-    -fx-border-width: 2 1 0 0;
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8 8 0 0;
+    -fx-border-radius: 8 8 0 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 2 1 0 1;
+    -fx-padding: 6 12 7 12;
+    -fx-background-insets: 0 1 0 1;
 }
 .workbench .editor-tabs > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-hover; }
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: -wb-editor;
+    -fx-border-color: -color-accent-emphasis -color-border-muted transparent -color-border-muted;
+}
 .workbench .editor-tabs > .tab-header-area > .headers-region > .tab:selected:hover { -fx-background-color: -wb-editor; }
-.workbench .tab .tab-label { -fx-font-size: 12.5px; -fx-text-fill: -color-fg-muted; }
-.workbench .tab:selected .tab-label { -fx-text-fill: -color-fg-emphasis; }
-.workbench .tab .focus-indicator { -fx-border-width: 0; }
-.workbench .tab:focused .focus-indicator { -fx-border-width: 1; -fx-border-color: -color-accent-fg; -fx-border-insets: -2; }
-.workbench .breadcrumbs { -fx-padding: 1 5; -fx-font-size: 11.5px; -fx-text-fill: -color-fg-muted; -fx-background-radius: 3; }
+.workbench .editor-tabs .tab .tab-label { -fx-font-size: 12.5px; }
+.workbench .editor-tabs .tab:selected .tab-label { -fx-text-fill: -wb-strong; }
+.workbench .breadcrumbs { -fx-padding: 2 7; -fx-font-size: 11.5px; -fx-text-fill: -color-fg-muted; -fx-background-radius: 5; }
 .workbench .breadcrumbs:hover { -fx-background-color: -wb-hover; -fx-text-fill: -color-fg-default; }
 .editor-breadcrumb-bar {
-    -fx-padding: 2 14;
+    -fx-padding: 3 12 3 14;
     -fx-background-color: -wb-editor;
     -fx-border-color: transparent transparent -color-border-muted transparent;
     -fx-border-width: 0 0 1 0;
-    -fx-min-height: 24;
-    -fx-pref-height: 24;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
 }
-.workbench .minimap-toggle { -fx-padding: 3 6; }
-.workbench .minimap-toggle:selected { -fx-background-color: -wb-hover; }
+.workbench .minimap-toggle { -fx-padding: 3 6; -fx-background-color: transparent; -fx-border-color: transparent; }
+.workbench .minimap-toggle:hover { -fx-background-color: -wb-hover; }
+.workbench .minimap-toggle:selected { -fx-background-color: -color-accent-subtle; -fx-border-color: transparent; }
 .minimap-toggle:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
-.editor-area { -fx-background-color: -wb-editor; }
+.editor-area, .editor-root { -fx-background-color: -wb-editor; }
 
-/* Bottom Panel: Uppercase aesthetic, 2px bottom accent indicator, muted headers */
+/* ───────────────────────────── Bottom panel ───────────────────────────── */
+/* Segmented pills: the active tool reads as selected without competing with the editor's accent stripe. */
 .bottom-panel { -fx-background-color: -wb-editor; }
-.bottom-panel > .tab-header-area { -fx-padding: 0; }
-.bottom-panel > .tab-header-area > .tab-header-background {
+.workbench .bottom-panel > .tab-header-area { -fx-padding: 5 8 5 8; }
+.workbench .bottom-panel > .tab-header-area > .tab-header-background {
     -fx-background-color: -wb-sidebar;
-    -fx-border-color: transparent transparent -color-border-muted transparent;
-    -fx-border-width: 0 0 1 0;
+    -fx-border-color: -color-border-muted transparent -color-border-muted transparent;
+    -fx-border-width: 1 0 1 0;
 }
-.bottom-panel > .tab-header-area > .headers-region > .tab {
+.workbench .bottom-panel > .tab-header-area > .headers-region > .tab {
     -fx-background-color: transparent;
-    -fx-background-radius: 0;
-    -fx-padding: 5 10;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+    -fx-background-insets: 0 2 0 2;
+    -fx-border-insets: 0 2 0 2;
+    -fx-padding: 4 10;
     -fx-border-color: transparent;
-    -fx-border-width: 0 0 2 0;
+    -fx-border-width: 1;
 }
-.bottom-panel > .tab-header-area > .headers-region > .tab:selected {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent transparent -color-accent-emphasis transparent;
-    -fx-border-width: 0 0 2 0;
+.workbench .bottom-panel > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-hover; }
+.workbench .bottom-panel > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: -color-accent-subtle;
+    -fx-border-color: -color-accent-muted;
 }
-.bottom-panel > .tab-header-area > .headers-region > .tab:hover {
-    -fx-background-color: -wb-hover;
-}
-.bottom-panel .tab .tab-label {
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-text-fill: -color-fg-muted;
-}
-.bottom-panel .tab:selected .tab-label {
-    -fx-text-fill: -color-fg-emphasis;
-}
-.bottom-panel .tab .workbench-icon { -wb-icon-color: -color-fg-muted; }
-.bottom-panel .tab:selected .workbench-icon { -wb-icon-color: -color-fg-emphasis; }
+.bottom-panel .tab .tab-label { -fx-font-family: "Inter Medium"; -fx-font-size: 12px; -fx-font-weight: normal; -fx-text-fill: -color-fg-muted; }
+.bottom-panel .tab:selected .tab-label { -fx-text-fill: -color-accent-fg; }
+.bottom-panel .tab .workbench-icon { -wb-icon-color: -color-fg-subtle; }
+.bottom-panel .tab:hover .workbench-icon { -wb-icon-color: -color-fg-default; }
+.bottom-panel .tab:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
 .workbench .text-area, .workbench .text-area .content { -fx-background-color: -wb-editor; -fx-background-radius: 0; }
+.workbench .text-area { -fx-border-width: 0; -fx-effect: null; }
+.workbench .text-area:focused { -fx-effect: null; }
 .bottom-panel .text-area { -fx-border-width: 0; }
-.bottom-panel .text-area .content { -fx-padding: 10 14; }
-.workbench .mono-text, .workbench .console-text { -fx-font-family: "Consolas"; -fx-font-size: 13px; }
-.editor-search { -fx-padding: 8 12; -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-default transparent; }
-.workbench .shortcut-hint { -fx-text-fill: -color-fg-muted; -fx-font-size: 11px; }
+.bottom-panel .text-area .content { -fx-padding: 10 16; }
+.editor-search {
+    -fx-padding: 8 12;
+    -fx-spacing: 6;
+    -fx-background-color: -wb-raised;
+    -fx-border-color: transparent transparent -color-border-default transparent;
+    -fx-effect: dropshadow(gaussian, -wb-shadow, 10, 0, 0, 3);
+}
+.workbench .shortcut-hint { -fx-text-fill: -color-fg-subtle; -fx-font-size: 11px; }
 
-/* Lists, tables and all tool panels use the same selection and density. */
-.workbench .table-view { -fx-fixed-cell-size: 28; }
-.workbench .table-view, .workbench .list-view { -fx-border-color: -color-border-muted; -fx-border-width: 1; -fx-background-color: -wb-editor; -fx-padding: 0; }
+/* ───────────────────────────── Lists and tables ───────────────────────────── */
+.workbench .table-view { -fx-fixed-cell-size: 30; }
+.workbench .table-view, .workbench .list-view, .workbench .tree-view {
+    -fx-border-color: -color-border-muted;
+    -fx-border-width: 1;
+    -fx-background-color: -wb-editor;
+    -fx-padding: 0;
+    -fx-background-insets: 0;
+    -fx-effect: null;
+}
 .bottom-panel .table-view, .bottom-panel .list-view { -fx-border-width: 0; }
 .workbench .table-view .column-header-background, .workbench .table-view .filler { -fx-background-color: -wb-sidebar; }
-.workbench .table-view .column-header { -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-muted transparent; -fx-padding: 5 10; }
-.workbench .table-view .column-header .label { -fx-alignment: center-left; -fx-font-size: 11px; -fx-font-weight: normal; -fx-text-fill: -color-fg-muted; }
-.workbench .table-row-cell, .workbench .list-cell { -fx-background-color: -wb-editor; -fx-text-fill: -color-fg-default; }
-.workbench .table-cell { -fx-padding: 5 10; -fx-border-width: 0; -fx-text-fill: -color-fg-default; }
+.workbench .table-view .column-header-background { -fx-border-color: transparent transparent -color-border-muted transparent; -fx-border-width: 0 0 1 0; }
+.workbench .table-view .column-header { -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 6 10; -fx-size: 30; }
+.workbench .table-view .column-header .label {
+    -fx-alignment: center-left;
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-size: 11px;
+    -fx-font-weight: normal;
+    -fx-text-fill: -color-fg-muted;
+}
+.workbench .table-view .column-resize-line { -fx-background-color: -color-accent-emphasis; }
+.workbench .table-row-cell, .workbench .list-cell { -fx-background-color: transparent; -fx-text-fill: -color-fg-default; }
+.workbench .table-row-cell { -fx-background-color: -wb-editor; -fx-border-width: 0; }
+.workbench .table-row-cell:filled:odd { -fx-background-color: derive(-wb-editor, 1.5%); }
+.workbench.light .table-row-cell:filled:odd { -fx-background-color: #fafbfd; }
+.workbench .table-cell { -fx-padding: 5 10; -fx-border-width: 0; -fx-text-fill: -color-fg-default; -fx-alignment: center-left; }
 .workbench .list-cell { -fx-padding: 6 10; }
 .workbench .table-row-cell:filled:hover, .workbench .list-cell:filled:hover { -fx-background-color: -wb-hover; }
 .workbench .table-row-cell:filled:selected, .workbench .list-cell:filled:selected { -fx-background-color: -wb-selection; }
-.workbench .table-view .placeholder .label, .workbench .list-view .placeholder .label { -fx-text-fill: -color-fg-muted; -fx-font-size: 12px; }
-.panel-empty { -fx-padding: 14 24; -fx-spacing: 8; -fx-alignment: center; }
-.panel-empty .workbench-icon { -wb-icon-color: -color-fg-muted; }
-.workbench .empty-description { -fx-font-size: 12px; -fx-text-fill: -color-fg-muted; -fx-text-alignment: center; }
+.workbench .table-row-cell:filled:selected .table-cell, .workbench .list-cell:filled:selected { -fx-text-fill: -wb-strong; }
+.workbench .table-view .placeholder .label, .workbench .list-view .placeholder .label { -fx-text-fill: -color-fg-muted; -fx-font-size: 12.5px; -fx-font-family: "Inter"; -fx-wrap-text: true; -fx-text-alignment: center; -fx-padding: 0 16; }
+.workbench .list-cell, .workbench .tree-cell { -fx-border-color: transparent; -fx-border-width: 1; }
+.workbench .list-view:focused, .workbench .table-view:focused, .workbench .tree-view:focused { -fx-border-color: -color-border-muted; }
+.workbench .list-view:focus-visible, .workbench .table-view:focus-visible { -fx-border-color: -color-accent-muted; }
+.workbench .list-view:focused .list-cell:filled:focused, .workbench .tree-view:focused .tree-cell:filled:focused,
+.workbench .table-view:focused .table-row-cell:filled:focused { -fx-border-color: -color-accent-muted; }
+.sidebar .tree-view:focused, .sidebar .list-view:focused { -fx-border-color: transparent; }
+
+/* ───────────────────────────── Empty states ───────────────────────────── */
+.panel-empty { -fx-padding: 18 24; -fx-spacing: 10; -fx-alignment: center; }
+.panel-empty .workbench-icon { -wb-icon-color: -color-fg-subtle; }
+.workbench .empty-description { -fx-font-size: 12.5px; -fx-text-fill: -color-fg-muted; -fx-text-alignment: center; }
+.workbench .panel-empty > .label:first-child, .workbench .empty-title { -fx-font-family: "Inter Medium"; -fx-text-fill: -color-fg-default; }
+
+/* ───────────────────────────── Debugger ───────────────────────────── */
 .debugger-panel { -fx-background-color: -wb-editor; }
 .debugger-split-pane { -fx-background-color: -wb-editor; -fx-padding: 0; }
-.debugger-split-pane > .split-pane-divider { -fx-background-color: -color-border-muted; -fx-padding: 0 1; }
+.debugger-split-pane > .split-pane-divider { -fx-background-color: -color-border-muted; -fx-padding: 0 1 0 0; }
 .debugger-split-pane > .split-pane-divider:hover { -fx-background-color: -color-accent-emphasis; }
-.debugger-panel .debug-section { -fx-padding: 6 8; -fx-spacing: 5; }
-.workbench .debug-heading { -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; -fx-font-weight: bold; }
-.debug-controls { -fx-hgap: 2; -fx-vgap: 2; }
-.workbench .debug-controls .button { -fx-padding: 4 6; -fx-min-height: 26; -fx-pref-height: 26; }
+.debugger-panel .debug-section { -fx-padding: 8 10; -fx-spacing: 6; }
+.workbench .debug-heading { -fx-font-family: "Inter SemiBold"; -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; -fx-font-weight: normal; }
+.debug-controls { -fx-hgap: 2; -fx-vgap: 2; -fx-padding: 2; -fx-background-color: -wb-sidebar; -fx-background-radius: 9; -fx-border-color: -color-border-muted; -fx-border-radius: 9; }
+.workbench .debug-controls .button {
+    -fx-padding: 4 7;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 7;
+}
+.workbench .debug-controls .button:hover { -fx-background-color: -wb-hover; }
 .workbench .debug-controls .success .workbench-icon { -wb-icon-color: -color-success-fg; }
 .workbench .debug-controls .danger .workbench-icon { -wb-icon-color: -color-danger-fg; }
-.debug-flags { -fx-hgap: 3; -fx-vgap: 3; }
+.debug-flags { -fx-hgap: 4; -fx-vgap: 4; }
 .debug-flag {
-    -fx-font-family: "Consolas";
+    -fx-font-family: "JetBrains Mono";
     -fx-font-size: 11px;
-    -fx-padding: 2 6;
-    -fx-background-color: -color-bg-subtle;
-    -fx-text-fill: -color-fg-muted;
-    -fx-background-radius: 4;
-    -fx-border-radius: 4;
-    -fx-border-width: 1.5;
-    -fx-border-color: transparent;
+    -fx-padding: 3 7;
+    -fx-background-color: -wb-sidebar;
+    -fx-text-fill: -color-fg-subtle;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-width: 1;
+    -fx-border-color: -color-border-muted;
     -fx-alignment: center;
 }
 .debug-flag.active {
     -fx-background-color: -color-accent-emphasis;
+    -fx-border-color: -color-accent-emphasis;
     -fx-text-fill: white;
+    -fx-font-family: "JetBrains Mono";
     -fx-font-weight: bold;
 }
-.debug-flag.changed {
-    -fx-border-color: -color-danger-emphasis;
-}
+.debug-flag.changed { -fx-border-color: -color-warning-emphasis; -fx-border-width: 1.5; }
 .debugger-tab-pane { -fx-background-color: -wb-editor; }
-.debugger-tab-pane > .tab-header-area { -fx-padding: 0; }
-.debugger-tab-pane > .tab-header-area > .tab-header-background { -fx-background-color: -wb-sidebar; }
-.debugger-tab-pane > .tab-header-area > .headers-region > .tab { -fx-background-color: transparent; -fx-background-radius: 0; -fx-padding: 3 4; -fx-graphic-text-gap: 4; -fx-border-color: transparent; -fx-border-width: 0 0 2 0; }
-.debugger-tab-pane > .tab-header-area > .headers-region > .tab:selected { -fx-background-color: -wb-editor; -fx-border-color: transparent transparent -color-accent-emphasis transparent; }
-.debugger-tab-pane > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-hover; }
-.debugger-tab-pane .tab .tab-label { -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; }
-.debugger-tab-pane .tab:selected .tab-label { -fx-text-fill: -color-fg-emphasis; -fx-font-weight: bold; }
-.debug-register-table .column-header-background { -fx-background-color: -wb-sidebar; }
-.debug-register-table .column-header { -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-muted transparent; -fx-padding: 4 6; }
-.debug-register-table .column-header .label { -fx-alignment: center-left; -fx-font-size: 11px; -fx-font-weight: normal; -fx-text-fill: -color-fg-muted; }
-.debug-register-table .table-cell { -fx-padding: 3 6; -fx-font-family: "Consolas"; -fx-font-size: 11.5px; }
-.panel-toolbar { -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-muted transparent; -fx-padding: 5 12; }
-.console-input { -fx-padding: 8 12; -fx-background-color: -wb-editor; -fx-border-color: -color-border-muted transparent transparent transparent; }
-.terminal-badge {
-    -fx-font-size: 10px;
-    -fx-background-radius: 3;
-    -fx-padding: 2 6;
-    -fx-background-color: -color-bg-subtle;
-    -fx-text-fill: -color-fg-muted;
+.workbench .debugger-tab-pane > .tab-header-area { -fx-padding: 4 6 4 6; }
+.workbench .debugger-tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: -wb-editor;
+    -fx-border-color: transparent transparent -color-border-muted transparent;
+    -fx-border-width: 0 0 1 0;
 }
-.terminal-badge.running {
-    -fx-background-color: -color-success-subtle;
-    -fx-text-fill: -color-success-fg;
-}
-
-/* Status Bar: The iconic VS Code signature surface with white typography and interactive pills. */
-.workbench .status-bar {
-    -fx-background-color: -wb-status;
-    -fx-border-color: transparent;
-    -fx-padding: 1 8;
-    -fx-min-height: 24;
-    -fx-pref-height: 24;
-}
-.workbench .status-bar .label {
-    -fx-text-fill: -wb-status-fg;
-    -fx-font-size: 11.5px;
+.workbench .debugger-tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 3 8;
     -fx-graphic-text-gap: 5;
-    -fx-alignment: center-left;
-}
-.workbench .status-bar .workbench-icon {
-    -wb-icon-color: -wb-status-fg;
-}
-.workbench .status-bar:debugging {
-    -wb-status: -wb-status-debug;
-}
-.workbench .status-bar .status-message {
-    -fx-text-fill: -wb-status-fg;
-    -fx-font-size: 11.5px;
-}
-.workbench .status-bar .status-item-pill {
-    -fx-padding: 2 7;
-    -fx-background-radius: 3;
-    -fx-cursor: hand;
-}
-.workbench .status-bar .status-item-pill:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.18);
-}
-.workbench .status-bar .separator .line {
     -fx-border-color: transparent;
     -fx-border-width: 0;
+    -fx-background-insets: 0 1 0 1;
 }
+.workbench .debugger-tab-pane > .tab-header-area > .headers-region > .tab:selected { -fx-background-color: -wb-hover; }
+.workbench .debugger-tab-pane > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-hover; }
+.debugger-tab-pane .tab .tab-label { -fx-font-size: 11.5px; -fx-text-fill: -color-fg-muted; }
+.debugger-tab-pane .tab:selected .tab-label { -fx-text-fill: -wb-strong; -fx-font-family: "Inter Medium"; -fx-font-weight: normal; }
+.debugger-tab-pane .tab .workbench-icon { -wb-icon-color: -color-fg-subtle; }
+.debugger-tab-pane .tab:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
+.debug-register-table { -fx-border-color: -color-border-muted; -fx-border-radius: 8; -fx-background-radius: 8; }
+.debug-register-table .column-header-background { -fx-background-color: -wb-sidebar; -fx-background-radius: 8 8 0 0; }
+.debug-register-table .column-header { -fx-background-color: transparent; -fx-padding: 4 8; }
+.debug-register-table .column-header .label { -fx-alignment: center-left; -fx-font-size: 10.5px; -fx-text-fill: -color-fg-muted; }
+.workbench .debug-register-table { -fx-fixed-cell-size: 25; }
+.debug-register-table .table-cell { -fx-padding: 3 6; -fx-font-family: "JetBrains Mono"; -fx-font-size: 11.5px; }
+.panel-toolbar { -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-muted transparent; -fx-padding: 6 12; -fx-spacing: 6; }
+.console-input { -fx-padding: 8 12; -fx-background-color: -wb-sidebar; -fx-border-color: -color-border-muted transparent transparent transparent; }
+.workbench .console-input .text-field { -fx-background-color: -wb-input; }
+.terminal-badge {
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-size: 10px;
+    -fx-background-radius: 20;
+    -fx-padding: 2 9;
+    -fx-background-color: -wb-hover;
+    -fx-text-fill: -color-fg-muted;
+}
+.terminal-badge.running { -fx-background-color: -color-success-subtle; -fx-text-fill: -color-success-fg; }
+.terminal-prompt .workbench-icon { -wb-icon-color: -color-accent-fg; }
 
-/* Scrollbars: slim, floating, unobtrusive overlay scrollbars like VS Code Monaco. */
-.workbench .scroll-bar {
-    -fx-background-color: transparent;
-    -fx-pref-width: 10;
-    -fx-pref-height: 10;
+/* ───────────────────────────── Status bar ───────────────────────────── */
+.workbench .status-bar {
+    -fx-background-color: -wb-status;
+    -fx-border-color: -color-border-muted transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 1 8;
+    -fx-min-height: 26;
+    -fx-pref-height: 26;
 }
+.workbench .status-bar .label { -fx-text-fill: -wb-status-fg; -fx-font-size: 11.5px; -fx-graphic-text-gap: 6; -fx-alignment: center-left; }
+.workbench .status-bar .workbench-icon { -wb-icon-color: -wb-status-fg; }
+.workbench .status-bar .status-message { -fx-text-fill: -color-fg-default; }
+.workbench .status-bar .status-message .workbench-icon { -wb-icon-color: -wb-icon-assembly; }
+.workbench .status-bar:debugging {
+    -fx-background-color: linear-gradient(to right, -wb-status-debug, derive(-wb-status-debug, 18%));
+    -fx-border-color: transparent;
+    -wb-status-fg: -wb-status-debug-fg;
+}
+.workbench .status-bar:debugging .status-message, .workbench .status-bar:debugging .label { -fx-text-fill: -wb-status-debug-fg; }
+.workbench .status-bar:debugging .status-message .workbench-icon { -wb-icon-color: -wb-status-debug-fg; }
+.workbench .status-bar .status-item-pill { -fx-padding: 2 8; -fx-background-radius: 5; -fx-cursor: hand; }
+.workbench .status-bar .status-item-pill:hover { -fx-background-color: -wb-hover; }
+.workbench .status-bar:debugging .status-item-pill:hover { -fx-background-color: rgba(255, 255, 255, 0.18); }
+.workbench .status-bar .separator .line { -fx-border-color: transparent; -fx-border-width: 0; }
+
+/* ───────────────────────────── Scrollbars ───────────────────────────── */
+.workbench .scroll-bar { -fx-background-color: transparent; -fx-pref-width: 11; -fx-pref-height: 11; -fx-padding: 0; }
+.workbench .scroll-bar .track, .workbench .scroll-bar .track-background { -fx-background-color: transparent; -fx-border-color: transparent; }
 .workbench .scroll-bar .thumb {
     -fx-background-color: -color-fg-muted;
-    -fx-opacity: 0.25;
-    -fx-background-radius: 3;
-    -fx-background-insets: 1;
+    -fx-opacity: 0.22;
+    -fx-background-radius: 8;
+    -fx-background-insets: 2;
 }
-.workbench .scroll-bar .thumb:hover, .workbench .scroll-bar .thumb:pressed {
-    -fx-opacity: 0.65;
-}
-.workbench .scroll-bar .increment-button, .workbench .scroll-bar .decrement-button { -fx-padding: 0; }
+.workbench .scroll-bar:hover .thumb { -fx-opacity: 0.38; }
+.workbench .scroll-bar .thumb:hover, .workbench .scroll-bar .thumb:pressed { -fx-opacity: 0.6; }
+.workbench .scroll-bar .increment-button, .workbench .scroll-bar .decrement-button { -fx-padding: 0; -fx-background-color: transparent; }
 .workbench .scroll-bar .increment-arrow, .workbench .scroll-bar .decrement-arrow { -fx-padding: 0; -fx-shape: ""; }
-.workbench .scroll-pane, .workbench .scroll-pane > .viewport { -fx-background-color: -wb-editor; -fx-border-width: 0; }
+.workbench .scroll-pane, .workbench .scroll-pane > .viewport { -fx-background-color: -wb-editor; -fx-border-width: 0; -fx-background-insets: 0; }
+.workbench .scroll-pane > .corner, .workbench .virtualized-scroll-pane > .corner { -fx-background-color: transparent; }
 
-/* Welcome screen: useful entry points with visible keyboard shortcuts. */
-.editor-welcome { -fx-padding: 32 24; -fx-spacing: 22; -fx-max-width: 780; }
-.welcome-brand { -fx-spacing: 18; -fx-alignment: center-left; }
-.workbench .welcome-title { -fx-font-size: 32px; -fx-font-weight: normal; -fx-text-fill: -color-fg-emphasis; }
-.workbench .welcome-hint { -fx-text-fill: -color-fg-muted; -fx-font-size: 14px; }
-.workbench .welcome-section-title { -fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default; -fx-padding: 6 0 4 0; }
-.workbench .welcome-action {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-padding: 7 10;
-    -fx-alignment: center-left;
-    -fx-background-radius: 4;
+/* ───────────────────────────── Welcome ───────────────────────────── */
+.editor-welcome { -fx-padding: 36 40; -fx-spacing: 22; -fx-max-width: 860; }
+.welcome-brand { -fx-spacing: 20; -fx-alignment: center-left; }
+.welcome-logo { -fx-effect: dropshadow(gaussian, rgba(57, 118, 246, 0.45), 28, 0.1, 0, 4); }
+.workbench .welcome-title {
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-weight: normal;
+    -fx-font-size: 38px;
+    -fx-text-fill: -wb-brand-gradient;
 }
-.workbench .welcome-action:hover { -fx-background-color: -wb-hover; }
-.workbench .welcome-action:focused { -fx-border-color: -color-accent-emphasis; }
-.workbench .welcome-action .label { -fx-text-fill: -color-accent-fg; -fx-font-size: 13.5px; }
-.welcome-action .workbench-icon { -wb-icon-color: -color-accent-fg; }
+.workbench .welcome-hint { -fx-text-fill: -color-fg-muted; -fx-font-size: 15px; }
+.workbench .welcome-section-title {
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-weight: normal;
+    -fx-font-size: 11.5px;
+    -fx-text-fill: -color-fg-subtle;
+    -fx-padding: 0 0 4 2;
+}
+.workbench .welcome-action {
+    -fx-background-color: -wb-raised;
+    -fx-border-color: -color-border-muted;
+    -fx-border-width: 1;
+    -fx-padding: 12 14;
+    -fx-alignment: center-left;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+.workbench.light .welcome-action { -fx-background-color: #f8fafd; }
+.workbench .welcome-action:hover {
+    -fx-background-color: -wb-hover;
+    -fx-border-color: -color-accent-muted;
+    -fx-effect: dropshadow(gaussian, -wb-shadow, 14, 0, 0, 4);
+}
+.workbench .welcome-action:pressed { -fx-background-color: -wb-pressed; }
+.workbench .welcome-action:focus-visible { -fx-border-color: -color-accent-emphasis; -fx-effect: null; }
+.workbench .welcome-action .label { -fx-text-fill: -color-fg-default; }
+.workbench .welcome-action .welcome-action-label { -fx-font-family: "Inter Medium"; -fx-font-size: 13.5px; -fx-text-fill: -wb-strong; }
+.workbench .welcome-action .welcome-action-description { -fx-font-size: 12px; -fx-text-fill: -color-fg-muted; }
+.welcome-icon-tile {
+    -fx-background-color: -color-accent-subtle;
+    -fx-background-radius: 10;
+    -fx-min-width: 38;
+    -fx-min-height: 38;
+    -fx-max-width: 38;
+    -fx-max-height: 38;
+    -fx-alignment: center;
+}
+.welcome-icon-tile .workbench-icon { -wb-icon-color: -color-accent-fg; }
+.welcome-icon-tile.tile-mint { -fx-background-color: -color-success-subtle; }
+.welcome-icon-tile.tile-mint .workbench-icon { -wb-icon-color: -color-success-fg; }
+.welcome-icon-tile.tile-amber { -fx-background-color: -color-warning-subtle; }
+.welcome-icon-tile.tile-amber .workbench-icon { -wb-icon-color: -color-warning-fg; }
+.welcome-icon-tile.tile-violet { -fx-background-color: derive(-wb-token-directive, -72%); }
+.workbench.light .welcome-icon-tile.tile-violet { -fx-background-color: #f1e8fc; }
+.welcome-icon-tile.tile-violet .workbench-icon { -wb-icon-color: -wb-token-directive; }
+.welcome-action:hover .welcome-icon-tile { -fx-background-color: -color-accent-emphasis; }
+.welcome-action:hover .welcome-icon-tile .workbench-icon { -wb-icon-color: white; }
 .workbench .keycap {
     -fx-text-fill: -color-fg-muted;
-    -fx-font-size: 11px;
-    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 10.5px;
     -fx-background-color: -wb-sidebar;
     -fx-border-color: -color-border-default;
-    -fx-border-radius: 3;
-    -fx-background-radius: 3;
+    -fx-border-width: 1 1 2 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
     -fx-padding: 2 6;
 }
-.workbench .welcome-footer { -fx-text-fill: -color-fg-muted; -fx-font-size: 12px; -fx-padding: 12 0 0 0; }
-
-/* Form windows and overlays have a shared title, content and footer rhythm. */
-.workbench-dialog { -fx-background-color: -wb-editor; }
-.dialog-heading { -fx-padding: 18 24 14 24; -fx-alignment: center-left; -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-muted transparent; }
-.dialog-heading .workbench-icon { -wb-icon-color: -color-accent-fg; }
-.workbench .dialog-title { -fx-font-size: 19px; -fx-font-weight: normal; }
-.workbench .dialog-description { -fx-text-fill: -color-fg-muted; -fx-font-size: 12px; }
-.form-grid { -fx-padding: 20 24; -fx-hgap: 20; -fx-vgap: 12; }
-.workbench .form-label { -fx-font-weight: normal; -fx-text-fill: -color-fg-muted; }
-.dialog-footer { -fx-background-color: -wb-sidebar; -fx-border-color: -color-border-muted transparent transparent transparent; -fx-padding: 12 24; -fx-spacing: 8; }
-.workbench .dialog-footer .button { -fx-min-width: 90; }
-.dialog-body { -fx-padding: 20 24; -fx-spacing: 12; }
-
-/* Command palette & Quick Pick: Floating elevated card with subtle border and deep shadow. */
-.command-palette, .recent-picker {
-    -fx-border-color: -color-border-default;
-    -fx-border-width: 1;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
+.workbench .welcome-action .keycap { -fx-text-fill: -color-fg-muted; -fx-font-size: 10.5px; }
+.workbench .welcome-footer { -fx-text-fill: -color-fg-muted; -fx-font-size: 12px; }
+.welcome-tips {
     -fx-background-color: -wb-sidebar;
-    -fx-padding: 12 16 16 16;
+    -fx-background-radius: 12;
+    -fx-border-color: -color-border-muted;
+    -fx-border-radius: 12;
+    -fx-padding: 12 16;
     -fx-spacing: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.65), 24, 0.25, 0, 8);
+    -fx-alignment: center-left;
+}
+.welcome-tips .workbench-icon { -wb-icon-color: -wb-token-label; }
+
+/* ───────────────────────────── Dialogs and forms ───────────────────────────── */
+.workbench-dialog { -fx-background-color: -wb-editor; }
+.dialog-heading {
+    -fx-padding: 20 24 18 24;
+    -fx-alignment: center-left;
+    -fx-background-color: linear-gradient(to bottom, -wb-sidebar, -wb-editor);
+    -fx-border-color: transparent transparent -color-border-muted transparent;
+}
+.dialog-icon-tile {
+    -fx-background-color: -color-accent-subtle;
+    -fx-background-radius: 12;
+    -fx-border-color: -color-accent-muted;
+    -fx-border-radius: 12;
+    -fx-min-width: 48;
+    -fx-min-height: 48;
+    -fx-max-width: 48;
+    -fx-max-height: 48;
+    -fx-alignment: center;
+}
+.dialog-heading .workbench-icon { -wb-icon-color: -color-accent-fg; }
+.workbench .dialog-title { -fx-font-family: "Inter SemiBold"; -fx-font-size: 18px; -fx-font-weight: normal; -fx-text-fill: -wb-strong; }
+.workbench .dialog-description { -fx-text-fill: -color-fg-muted; -fx-font-size: 12.5px; }
+.form-grid { -fx-padding: 22 24; -fx-hgap: 20; -fx-vgap: 12; }
+.workbench .form-label { -fx-font-family: "Inter Medium"; -fx-font-weight: normal; -fx-text-fill: -color-fg-muted; -fx-font-size: 12.5px; }
+.dialog-footer {
+    -fx-background-color: -wb-sidebar;
+    -fx-border-color: -color-border-muted transparent transparent transparent;
+    -fx-padding: 14 24;
+    -fx-spacing: 10;
+    -fx-alignment: center-right;
+}
+.workbench .dialog-footer .button { -fx-min-width: 96; }
+.dialog-body { -fx-padding: 20 24; -fx-spacing: 12; }
+.workbench .dialog-pane { -fx-background-color: -wb-editor; -fx-padding: 0; }
+.workbench .dialog-pane > .header-panel {
+    -fx-background-color: -wb-sidebar;
+    -fx-padding: 16 20;
+    -fx-border-color: transparent transparent -color-border-muted transparent;
+}
+.workbench .dialog-pane > .header-panel .label { -fx-font-family: "Inter SemiBold"; -fx-font-size: 15px; }
+.workbench .dialog-pane > .content { -fx-padding: 18 20; }
+.workbench .dialog-pane > .button-bar > .container { -fx-padding: 12 20 16 20; }
+
+/* ───────────────────────────── Command palette and quick pickers ───────────────────────────── */
+.command-palette, .recent-picker {
+    -fx-border-color: -wb-border-strong;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-background-color: -wb-raised;
+    -fx-padding: 14 14 12 14;
+    -fx-spacing: 10;
+    -fx-effect: dropshadow(gaussian, -wb-shadow, 28, 0.2, 0, 10);
 }
 .command-palette .text-field, .recent-picker .text-field {
     -fx-background-color: -wb-input;
     -fx-border-color: -color-border-default;
-    -fx-border-radius: 4;
-    -fx-background-radius: 4;
-    -fx-padding: 7 10;
-    -fx-font-size: 13px;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 9 12;
+    -fx-font-size: 14px;
     -fx-text-fill: -color-fg-default;
 }
-.command-palette .text-field:focused, .recent-picker .text-field:focused {
-    -fx-border-color: -color-accent-emphasis;
-}
+.command-palette .text-field:focused, .recent-picker .text-field:focused { -fx-border-color: -color-accent-emphasis; }
 .command-palette .list-view, .recent-picker .list-view { -fx-border-width: 0; -fx-background-color: transparent; }
 .command-palette .list-cell, .recent-picker .list-cell {
-    -fx-padding: 5 10;
-    -fx-background-radius: 4;
+    -fx-padding: 6 10;
+    -fx-background-radius: 7;
     -fx-background-color: transparent;
+    -fx-border-width: 0;
 }
-.command-palette .list-cell:filled:hover, .recent-picker .list-cell:filled:hover {
-    -fx-background-color: -wb-hover;
-}
+.command-palette .list-cell:filled:hover, .recent-picker .list-cell:filled:hover { -fx-background-color: -wb-hover; }
 .command-palette .list-cell:filled:selected, .recent-picker .list-cell:filled:selected {
-    -fx-background-color: -wb-selection;
-    -fx-text-fill: #ffffff;
+    -fx-background-color: -color-accent-subtle;
+    -fx-text-fill: -wb-strong;
 }
+.command-palette .list-cell:filled:selected .label, .recent-picker .list-cell:filled:selected .label { -fx-text-fill: -wb-strong; }
+.command-palette .list-cell:filled:selected .command-category { -fx-text-fill: -color-accent-fg; -fx-background-color: -color-accent-muted; }
+.command-palette .list-cell:filled:selected .keycap { -fx-text-fill: -color-fg-default; }
 .workbench .command-category {
     -fx-text-fill: -color-fg-muted;
-    -fx-font-size: 11px;
-    -fx-padding: 1 5;
+    -fx-font-family: "Inter Medium";
+    -fx-font-size: 10.5px;
+    -fx-padding: 1 6;
     -fx-background-color: -wb-hover;
-    -fx-background-radius: 3;
+    -fx-background-radius: 5;
 }
-.workbench .picker-hint { -fx-text-fill: -color-fg-muted; -fx-font-size: 11px; -fx-padding: 6 4 0 4; }
-.workbench .recent-heading { -fx-font-size: 16px; -fx-font-weight: normal; }
-.workbench .recent-filter { -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 4 10; -fx-font-size: 12px; }
-.workbench .recent-filter:selected { -fx-background-color: -wb-selection; -fx-text-fill: -color-accent-fg; }
-.workbench .recent-name { -fx-font-size: 13px; -fx-font-weight: normal; }
+.workbench .picker-hint { -fx-text-fill: -color-fg-subtle; -fx-font-size: 11px; -fx-padding: 6 4 0 4; }
+.workbench .recent-heading { -fx-font-family: "Inter SemiBold"; -fx-font-size: 16px; -fx-font-weight: normal; -fx-text-fill: -wb-strong; }
+.workbench .recent-filter {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 4 11;
+    -fx-font-size: 12px;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+}
+.workbench .recent-filter:selected { -fx-background-color: -color-accent-subtle; -fx-border-color: -color-accent-muted; -fx-text-fill: -color-accent-fg; }
+.workbench .recent-name { -fx-font-family: "Inter Medium"; -fx-font-size: 13px; -fx-font-weight: normal; }
 .workbench .recent-path { -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; }
-.workbench .recent-kind { -fx-font-size: 10px; -fx-text-fill: -color-fg-muted; -fx-padding: 2 5; -fx-background-radius: 3; -fx-background-color: -wb-sidebar; }
+.workbench .recent-kind { -fx-font-size: 10px; -fx-text-fill: -color-fg-muted; -fx-padding: 2 7; -fx-background-radius: 20; -fx-background-color: -wb-hover; }
 .workbench .recent-message { -fx-text-fill: -color-warning-fg; -fx-font-size: 12px; }
-.dictionary-toolbar { -fx-padding: 12 16; -fx-spacing: 8; -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-muted transparent; }
-.dictionary-detail { -fx-padding: 24; -fx-spacing: 12; -fx-background-color: -wb-editor; -fx-border-color: -color-border-muted; -fx-border-width: 0 0 0 1; }
+
+/* ───────────────────────────── Academic Center and dictionary ───────────────────────────── */
+.dictionary-toolbar {
+    -fx-padding: 12 16;
+    -fx-spacing: 8;
+    -fx-background-color: -wb-sidebar;
+    -fx-border-color: transparent transparent -color-border-muted transparent;
+}
+.dictionary-detail { -fx-padding: 26 28; -fx-spacing: 14; -fx-background-color: -wb-editor; -fx-border-color: -color-border-muted; -fx-border-width: 0 0 0 1; }
 .dictionary-list { -fx-background-color: -wb-sidebar; }
-.dictionary-list .list-cell { -fx-padding: 8 12; }
-
-/* The three layers of the Academic Center share the sidebar colour, so the tab header reads as part of the list. */
-.academic-layers { -fx-background-color: -wb-sidebar; }
-.academic-layers > .tab-header-area { -fx-padding: 4 0 0 0; }
-.workbench .academic-layers > .tab-header-area > .headers-region > .tab { -fx-padding: 6 7; }
-.workbench .academic-layers > .tab-header-area > .headers-region > .tab .tab-label { -fx-font-size: 11.5px; }
-.academic-layers > .tab-header-area > .tab-header-background { -fx-background-color: -wb-sidebar; }
-.workbench .dictionary-mnemonic { -fx-font-family: "Consolas"; -fx-font-size: 28px; -fx-text-fill: -color-accent-fg; }
-.code-example { -fx-background-color: -wb-sidebar; -fx-border-color: -color-border-muted; -fx-border-radius: 4; -fx-background-radius: 4; -fx-padding: 14; }
-.workbench .code-font { -fx-font-family: "Consolas"; }
-.workbench .code-example .text-area { -fx-background-radius: 3; -fx-border-radius: 3; }
-.workbench .dialog-pane { -fx-background-color: -wb-editor; -fx-padding: 16; }
-.workbench .dialog-pane > .header-panel { -fx-background-color: -wb-sidebar; }
-.workbench .context-menu, .workbench.context-menu { -fx-background-color: -wb-editor; -fx-border-color: -color-border-default; -fx-border-width: 1; -fx-padding: 5; -fx-background-radius: 4; -fx-border-radius: 4; }
-.workbench .menu-item { -fx-padding: 5 10; -fx-background-radius: 3; }
-.workbench .menu-item:focused { -fx-background-color: -wb-selection; }
-.workbench .menu-item:focused .label { -fx-text-fill: -color-fg-default; }
-.workbench.tooltip, .workbench .tooltip { -fx-background-color: -wb-editor; -fx-text-fill: -color-fg-default; -fx-border-color: -color-border-default; -fx-border-width: 1; -fx-background-radius: 3; -fx-border-radius: 3; -fx-padding: 8 10; -fx-font-size: 12px; }
-
-.workbench .button.accent .workbench-icon, .workbench .button:default .workbench-icon { -wb-icon-color: white; }
-.workbench .welcome-action .keycap { -fx-text-fill: -color-fg-muted; -fx-font-size: 11px; }
-
-/* Academic metadata wraps independently of the title; list summaries yield to identifiers. */
-.academic-center .rounded { -fx-background-radius: 3; -fx-border-radius: 3; }
-.instruction-detail-header { -fx-spacing: 12; -fx-padding: 0 0 16 0; -fx-border-color: transparent transparent -color-border-muted transparent; }
-.workbench .instruction-detail-header .title-4 { -fx-font-size: 14px; }
-.workbench .academic-section-title { -fx-font-size: 14px; -fx-padding: 10 0 2 0; }
-.workbench .academic-badge { -fx-padding: 4 8; -fx-graphic-text-gap: 7; -fx-alignment: center-left; -fx-background-color: -wb-sidebar; -fx-border-color: -color-border-default; -fx-background-radius: 3; -fx-border-radius: 3; -fx-border-width: 1; }
-.academic-badge .workbench-icon, .academic-entity-row .workbench-icon { -wb-icon-color: -color-fg-muted; }
+.dictionary-list .list-view { -fx-background-color: -wb-sidebar; -fx-border-width: 0; }
+.dictionary-list .list-cell {
+    -fx-padding: 8 12;
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-background-insets: 1 6;
+    -fx-border-insets: 1 6;
+    -fx-border-radius: 8;
+}
+.dictionary-list .list-cell:filled:hover { -fx-background-color: -wb-hover; }
+.dictionary-list .list-cell:filled:selected { -fx-background-color: -color-accent-subtle; }
 .dictionary-list .list-cell:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
-.register-family-row { -fx-background-color: -wb-sidebar; -fx-background-radius: 3; -fx-border-radius: 3; -fx-border-color: -color-border-muted; -fx-padding: 6 10; }
+.academic-layers { -fx-background-color: -wb-sidebar; }
+.workbench .academic-layers > .tab-header-area { -fx-padding: 6 6 0 6; }
+.workbench .academic-layers > .tab-header-area > .headers-region > .tab { -fx-padding: 6 9; }
+.workbench .academic-layers > .tab-header-area > .headers-region > .tab .tab-label { -fx-font-size: 12px; }
+.workbench .academic-layers > .tab-header-area > .tab-header-background { -fx-background-color: -wb-sidebar; }
+.workbench .dictionary-mnemonic {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-weight: bold;
+    -fx-font-size: 30px;
+    -fx-text-fill: -wb-brand-gradient;
+}
+.code-example {
+    -fx-background-color: -wb-sidebar;
+    -fx-border-color: -color-border-muted;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 14;
+}
+.workbench .code-example .text-area { -fx-background-radius: 6; -fx-border-radius: 6; }
+.workbench .code-example .text-area, .workbench .code-example .text-area .content { -fx-background-color: -wb-sidebar; }
+.academic-center .rounded { -fx-background-radius: 6; -fx-border-radius: 6; }
+.instruction-detail-header { -fx-spacing: 12; -fx-padding: 0 0 18 0; -fx-border-color: transparent transparent -color-border-muted transparent; }
+.workbench .instruction-detail-header .title-4 { -fx-font-size: 14px; }
+.workbench .academic-section-title { -fx-font-family: "Inter SemiBold"; -fx-font-weight: normal; -fx-font-size: 14px; -fx-padding: 12 0 2 0; -fx-text-fill: -wb-strong; }
+.workbench .academic-badge {
+    -fx-padding: 4 10;
+    -fx-graphic-text-gap: 7;
+    -fx-alignment: center-left;
+    -fx-background-color: -wb-sidebar;
+    -fx-border-color: -color-border-default;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-font-size: 12px;
+}
+.academic-badge .workbench-icon, .academic-entity-row .workbench-icon { -wb-icon-color: -color-fg-muted; }
+.register-family-row { -fx-background-color: -wb-sidebar; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: -color-border-muted; -fx-padding: 6 10; }
 .workbench .academic-badge.button:hover, .workbench .register-family-button:hover, .workbench .recent-filter:hover { -fx-background-color: -wb-hover; }
-.workbench .academic-badge.button:pressed, .workbench .register-family-button:pressed { -fx-background-color: -wb-selection; }
-.workbench .academic-badge.button:focused, .workbench .register-family-button:focused, .workbench .recent-filter:focused, .workbench .welcome-action:focused { -fx-border-color: -color-accent-fg; }
+.workbench .academic-badge.button:pressed, .workbench .register-family-button:pressed { -fx-background-color: -wb-pressed; }
+.workbench .academic-badge.button:focus-visible, .workbench .register-family-button:focus-visible,
+.workbench .recent-filter:focus-visible { -fx-border-color: -color-accent-emphasis; }
 .workbench .register-family-button:disabled { -fx-opacity: 1; }
 .workbench .workbench-toolbar .button, .workbench .debug-controls .button { -fx-alignment: center; }
-.workbench .list-view:focused, .workbench .table-view:focused { -fx-border-color: -color-accent-fg; }
-.workbench .list-cell, .workbench .tree-cell, .workbench .table-row-cell { -fx-border-color: transparent; -fx-border-width: 1; }
-.workbench .list-view:focused .list-cell:filled:focused, .workbench .tree-view:focused .tree-cell:filled:focused, .workbench .table-view:focused .table-row-cell:filled:focused { -fx-border-color: -color-accent-fg; }
-
-.terminal-prompt .workbench-icon { -wb-icon-color: -color-accent-fg; }
-
-/* Doctor dialog status cell styles */
-.workbench .table-cell.tool-ready {
-    -fx-text-fill: -color-success-fg;
-}
-.workbench .table-cell.tool-unusable {
-    -fx-text-fill: -color-danger-fg;
-    -fx-font-weight: bold;
-}
-
-/* Diagnostic severity table cell styles */
-.workbench .table-cell.diag-error {
-    -fx-text-fill: -color-danger-fg;
-    -fx-font-weight: bold;
-}
-.workbench .table-cell.diag-warning {
-    -fx-text-fill: -color-warning-fg;
-}
-.workbench .table-cell.diag-info {
-    -fx-text-fill: -color-accent-fg;
-}
-
-/* Debugger register and disassembly row styles */
-.workbench .table-cell.reg-changed,
-.debug-register-table .table-cell.reg-changed {
-    -fx-text-fill: -color-warning-fg;
-    -fx-font-weight: bold;
-}
-.workbench .list-cell.disasm-current,
-.debug-section .list-cell.disasm-current {
-    -fx-background-color: -color-warning-subtle;
-    -fx-font-weight: bold;
-}
-
-/* Academic Center flag pill styles */
 .academic-flag-pill {
-    -fx-background-color: -color-bg-subtle;
-    -fx-background-radius: 4px;
-    -fx-padding: 4px 8px;
-    -fx-min-width: 32px;
+    -fx-background-color: -wb-sidebar;
+    -fx-border-color: -color-border-muted;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 5 9;
+    -fx-min-width: 36;
+    -fx-alignment: center;
 }
-.academic-flag-name {
-    -fx-font-weight: bold;
-    -fx-font-size: 11px;
-}
-.academic-flag-eff {
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-}
+.academic-flag-name { -fx-font-family: "JetBrains Mono"; -fx-font-weight: bold; -fx-font-size: 11px; }
+.academic-flag-eff { -fx-font-family: "JetBrains Mono"; -fx-font-size: 11px; -fx-font-weight: bold; }
 .academic-flag-eff.eff-modified { -fx-text-fill: -color-warning-fg; }
 .academic-flag-eff.eff-set { -fx-text-fill: -color-success-fg; }
 .academic-flag-eff.eff-cleared { -fx-text-fill: -color-accent-fg; }
 .academic-flag-eff.eff-undefined { -fx-text-fill: -color-danger-fg; }
-.academic-flag-eff.eff-unaffected { -fx-text-fill: -color-fg-muted; }
+.academic-flag-eff.eff-unaffected { -fx-text-fill: -color-fg-subtle; }
+
+/* ───────────────────────────── Menus, popups and tooltips ───────────────────────────── */
+.workbench .context-menu, .workbench.context-menu {
+    -fx-background-color: -wb-raised;
+    -fx-border-color: -wb-border-strong;
+    -fx-border-width: 1;
+    -fx-padding: 5;
+    -fx-background-radius: 9;
+    -fx-border-radius: 9;
+    -fx-effect: dropshadow(gaussian, -wb-shadow, 20, 0.15, 0, 6);
+}
+.workbench .menu-item { -fx-padding: 6 12; -fx-background-radius: 6; }
+.workbench .menu-item .label { -fx-text-fill: -color-fg-default; }
+.workbench .menu-item .accelerator-text { -fx-text-fill: -color-fg-subtle; -fx-font-size: 11.5px; }
+.workbench .menu-item:focused { -fx-background-color: -color-accent-emphasis; }
+.workbench .menu-item:focused .label, .workbench .menu-item:focused .accelerator-text { -fx-text-fill: white; }
+.workbench .menu-item:focused .workbench-icon { -wb-icon-color: white; }
+.workbench .menu-item:disabled .label { -fx-opacity: 0.45; }
+.workbench .menu > .right-container > .arrow, .workbench .menu-item > .right-container > .arrow { -fx-background-color: -color-fg-muted; }
+.workbench .menu-item:focused > .right-container > .arrow { -fx-background-color: white; }
+.workbench .context-menu .separator { -fx-padding: 4 6; }
+.workbench .context-menu .separator .line { -fx-border-color: -color-border-default; }
+.workbench .check-menu-item:checked > .left-container > .check, .workbench .radio-menu-item:checked > .left-container > .radio { -fx-background-color: -color-accent-fg; }
+.workbench .check-menu-item:focused:checked > .left-container > .check { -fx-background-color: white; }
+.workbench.tooltip, .workbench .tooltip {
+    -fx-background-color: -wb-raised;
+    -fx-text-fill: -color-fg-default;
+    -fx-border-color: -wb-border-strong;
+    -fx-border-width: 1;
+    -fx-background-radius: 7;
+    -fx-border-radius: 7;
+    -fx-padding: 8 11;
+    -fx-font-size: 12px;
+    -fx-effect: dropshadow(gaussian, -wb-shadow, 14, 0.1, 0, 4);
+}
+
+/* Editor hover card and completion list: popups drawn with the workbench tokens. */
+.hover-card {
+    -fx-background-color: -wb-raised;
+    -fx-border-color: -wb-border-strong;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, -wb-shadow, 18, 0.12, 0, 6);
+}
+.workbench .hover-card-title { -fx-font-family: "Inter SemiBold"; -fx-font-weight: normal; -fx-font-size: 13.5px; -fx-text-fill: -wb-strong; }
+.workbench .hover-card-section { -fx-font-family: "Inter SemiBold"; -fx-font-weight: normal; -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; }
+.workbench .hover-card-text { -fx-font-size: 12.5px; -fx-line-spacing: 2px; }
+.workbench .hover-card-code {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 11.5px;
+    -fx-background-color: -wb-sidebar;
+    -fx-border-color: -color-border-muted;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 6 9;
+    -fx-text-fill: -color-fg-default;
+}
+.hover-card .separator { -fx-padding: 2 0; }
+.hover-card .separator .line { -fx-border-color: -color-border-muted; }
+.workbench .hover-card-code.small { -fx-font-size: 10.5px; -fx-padding: 4 7; }
+.workbench .kind-badge {
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-weight: normal;
+    -fx-font-size: 10px;
+    -fx-padding: 2 8;
+    -fx-background-radius: 20;
+    -fx-background-color: -color-accent-subtle;
+    -fx-text-fill: -color-accent-fg;
+}
+.workbench .kind-badge.kind-success { -fx-background-color: -color-success-subtle; -fx-text-fill: -color-success-fg; }
+.workbench .kind-badge.kind-warning { -fx-background-color: -color-warning-subtle; -fx-text-fill: -color-warning-fg; }
+.workbench .kind-badge.kind-danger { -fx-background-color: -color-danger-subtle; -fx-text-fill: -color-danger-fg; }
+.workbench .kind-badge.kind-neutral { -fx-background-color: -color-neutral-subtle; -fx-text-fill: -color-neutral-fg; }
+.workbench .kind-badge.kind-violet { -fx-background-color: derive(-wb-token-directive, -72%); -fx-text-fill: -wb-token-directive; }
+.workbench.light .kind-badge.kind-violet { -fx-background-color: #f1e8fc; }
+.workbench .kind-badge.kind-teal { -fx-background-color: derive(-wb-token-register, -72%); -fx-text-fill: -wb-token-register; }
+.workbench.light .kind-badge.kind-teal { -fx-background-color: #e0f4f1; }
+.workbench .kind-badge.kind-pink { -fx-background-color: derive(#ec4899, -70%); -fx-text-fill: #f472b6; }
+.workbench.light .kind-badge.kind-pink { -fx-background-color: #fce7f3; -fx-text-fill: #be185d; }
+
+.completion-list {
+    -fx-background-color: -wb-raised;
+    -fx-border-color: -wb-border-strong;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(gaussian, -wb-shadow, 18, 0.12, 0, 6);
+}
+.workbench .completion-list > .virtual-flow > .clipped-container > .sheet > .list-cell {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-padding: 3 6;
+}
+.workbench .completion-list > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover { -fx-background-color: -wb-hover; }
+.workbench .completion-list > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected { -fx-background-color: -color-accent-subtle; }
+.workbench .completion-label { -fx-font-family: "JetBrains Mono"; -fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: -wb-strong; }
+.workbench .completion-detail { -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; }
+.workbench .completion-list .kind-badge { -fx-font-family: "JetBrains Mono"; -fx-font-weight: bold; -fx-font-size: 9px; -fx-padding: 1 5; -fx-background-radius: 4; -fx-min-width: 34; -fx-alignment: center; }
+
+/* ───────────────────────────── Severity and state cells ───────────────────────────── */
+.workbench .table-cell.tool-ready { -fx-text-fill: -color-success-fg; }
+.workbench .table-cell.tool-unusable { -fx-text-fill: -color-danger-fg; }
+.workbench .table-cell.diag-error { -fx-text-fill: -color-danger-fg; -fx-font-family: "Inter SemiBold"; }
+.workbench .table-cell.diag-warning { -fx-text-fill: -color-warning-fg; }
+.workbench .table-cell.diag-info { -fx-text-fill: -color-accent-fg; }
+.workbench .table-cell.reg-changed, .debug-register-table .table-cell.reg-changed {
+    -fx-text-fill: -color-warning-fg;
+    -fx-font-weight: bold;
+    -fx-background-color: -color-warning-subtle;
+}
+.workbench .list-cell.disasm-current, .debug-section .list-cell.disasm-current {
+    -fx-background-color: -color-warning-emphasis, -color-warning-subtle;
+    -fx-background-insets: 0, 0 0 0 3;
+    -fx-font-weight: bold;
+}

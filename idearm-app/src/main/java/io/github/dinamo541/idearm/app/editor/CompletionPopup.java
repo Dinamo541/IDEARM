@@ -50,15 +50,8 @@ public final class CompletionPopup extends Popup {
         this.listView.setPrefWidth(350);
         this.listView.setPrefHeight(220);
         this.listView.setMaxHeight(260);
-        this.listView.getStyleClass().add(Styles.DENSE);
-        this.listView.setStyle(
-                "-fx-background-color: -color-bg-default; " +
-                "-fx-border-color: -color-border-default; " +
-                "-fx-border-width: 1px; " +
-                "-fx-border-radius: 6px; " +
-                "-fx-background-radius: 6px; " +
-                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.35), 10, 0, 0, 4);"
-        );
+        // The look lives in workbench.css (.completion-list), which WorkbenchTheme applies on showing.
+        this.listView.getStyleClass().addAll(Styles.DENSE, "completion-list");
 
         this.listView.setCellFactory(lv -> new CompletionListCell(this::commitSelection));
 
@@ -305,33 +298,25 @@ public final class CompletionPopup extends Popup {
         CompletionListCell(Runnable onCommit) {
             this.onCommit = onCommit;
             this.badge = new Label();
-            this.badge.setStyle(
-                    "-fx-font-family: 'Consolas'; " +
-                    "-fx-font-size: 9px; " +
-                    "-fx-font-weight: bold; " +
-                    "-fx-padding: 1 4; " +
-                    "-fx-background-radius: 3px;"
-            );
+            this.badge.getStyleClass().add("kind-badge");
+            this.badge.setMinWidth(Region.USE_PREF_SIZE);
 
             this.label = new Label();
-            this.label.setStyle("-fx-font-family: 'Consolas'; -fx-font-weight: bold; -fx-font-size: 11px;");
+            this.label.getStyleClass().add("completion-label");
 
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
             this.detail = new Label();
-            this.detail.setStyle("-fx-font-size: 10px; -fx-text-fill: -color-fg-muted;");
+            this.detail.getStyleClass().add("completion-detail");
+            this.detail.setMinWidth(0);
 
             this.cpuBadge = new Label();
-            this.cpuBadge.setStyle(
-                    "-fx-font-size: 9px; " +
-                    "-fx-padding: 1 3; " +
-                    "-fx-background-color: -color-warning-subtle; " +
-                    "-fx-text-fill: -color-warning-fg; " +
-                    "-fx-background-radius: 3px;"
-            );
+            this.cpuBadge.getStyleClass().addAll("kind-badge", "kind-warning");
+            this.cpuBadge.setMinWidth(Region.USE_PREF_SIZE);
 
-            this.root = new HBox(6, badge, label, spacer, detail, cpuBadge);
+            this.root = new HBox(8, badge, label, spacer, detail, cpuBadge);
+            this.root.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
             this.root.setPadding(new Insets(2, 4, 2, 4));
 
             this.root.setOnMouseClicked(event -> {
@@ -372,36 +357,27 @@ public final class CompletionPopup extends Popup {
         }
 
         private void configureBadge(CompletionKind kind) {
-            switch (kind) {
-                case INSTRUCTION -> {
-                    badge.setText("INS");
-                    badge.setStyle(badge.getStyle() + "-fx-background-color: -color-accent-subtle; -fx-text-fill: -color-accent-fg;");
-                }
-                case REGISTER -> {
-                    badge.setText("REG");
-                    badge.setStyle(badge.getStyle() + "-fx-background-color: -color-success-subtle; -fx-text-fill: -color-success-fg;");
-                }
-                case DIRECTIVE -> {
-                    badge.setText("DIR");
-                    badge.setStyle(badge.getStyle() + "-fx-background-color: rgba(180, 100, 255, 0.2); -fx-text-fill: #a855f7;");
-                }
-                case PROCEDURE -> {
-                    badge.setText("PROC");
-                    badge.setStyle(badge.getStyle() + "-fx-background-color: -color-warning-subtle; -fx-text-fill: -color-warning-fg;");
-                }
-                case VARIABLE -> {
-                    badge.setText("VAR");
-                    badge.setStyle(badge.getStyle() + "-fx-background-color: rgba(6, 182, 212, 0.2); -fx-text-fill: #06b6d4;");
-                }
-                case CONSTANT -> {
-                    badge.setText("CONST");
-                    badge.setStyle(badge.getStyle() + "-fx-background-color: rgba(236, 72, 153, 0.2); -fx-text-fill: #ec4899;");
-                }
-                case LABEL -> {
-                    badge.setText("LBL");
-                    badge.setStyle(badge.getStyle() + "-fx-background-color: -color-bg-subtle; -fx-text-fill: -color-fg-default;");
-                }
-            }
+            badge.getStyleClass().removeAll("kind-success", "kind-warning", "kind-violet", "kind-teal",
+                    "kind-pink", "kind-neutral");
+            String tone = switch (kind) {
+                case INSTRUCTION -> null;
+                case REGISTER -> "kind-success";
+                case DIRECTIVE -> "kind-violet";
+                case PROCEDURE -> "kind-warning";
+                case VARIABLE -> "kind-teal";
+                case CONSTANT -> "kind-pink";
+                case LABEL -> "kind-neutral";
+            };
+            badge.setText(switch (kind) {
+                case INSTRUCTION -> "INS";
+                case REGISTER -> "REG";
+                case DIRECTIVE -> "DIR";
+                case PROCEDURE -> "PROC";
+                case VARIABLE -> "VAR";
+                case CONSTANT -> "CONST";
+                case LABEL -> "LBL";
+            });
+            if (tone != null) badge.getStyleClass().add(tone);
         }
     }
 }

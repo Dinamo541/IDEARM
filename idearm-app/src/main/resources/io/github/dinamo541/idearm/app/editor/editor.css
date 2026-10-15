@@ -1,25 +1,18 @@
-/* IDEARM Assembly Editor Styling */
-* {
-    -color-bg-default: #1f1f1f;
-    -color-bg-subtle: #181818;
-    -color-bg-inset: #141414;
-    -color-fg-default: #cccccc;
-    -color-fg-muted: #9d9d9d;
-    -color-border-muted: #2b2b2b;
-    -color-accent-emphasis: #0078d4;
-    -color-accent-fg: #75beff;
-    -color-chart-6: #9cdcfe;
-    -color-danger-fg: #f48771;
-    -color-success-fg: #89d185;
-    -color-warning-fg: #cca700;
-    -fx-base: -color-bg-default;
-    -fx-background: -color-bg-default;
-    -fx-control-inner-background: -color-bg-default;
-}
+/*
+ * IDEARM Assembly editor.
+ *
+ * Colours come from the workbench tokens (workbench.css), inherited from the .workbench root, so the editor follows
+ * the light and the dark theme without its own palette. An earlier "*" block here pinned dark values on every node
+ * inside the editor and painted identifiers light grey on the light theme's white canvas.
+ *
+ * Code is set in the bundled JetBrains Mono (WorkbenchFonts): Consolas and Cascadia Code do not exist on Linux, and
+ * the proportional fallback misaligned every column of Assembly.
+ */
 
+/* Minimap: the same token hues as the code, drawn at a glance-size. */
 .code-minimap { -fx-background-color: -color-bg-subtle; -fx-border-color: transparent transparent transparent -color-border-muted; -fx-border-width: 0 0 0 1; -fx-cursor: hand; }
 .code-minimap:focused { -fx-border-color: -color-accent-emphasis; -fx-border-width: 1; }
-.minimap-viewport { -fx-background-color: -color-accent-fg; -fx-opacity: 0.10; -fx-border-color: -color-accent-fg; -fx-border-width: 1; -fx-background-radius: 2; -fx-border-radius: 2; }
+.minimap-viewport { -fx-background-color: -color-accent-fg; -fx-opacity: 0.10; -fx-border-color: -color-accent-fg; -fx-border-width: 1; -fx-background-radius: 3; -fx-border-radius: 3; }
 .code-minimap:hover .minimap-viewport, .code-minimap:focused .minimap-viewport { -fx-opacity: 0.22; }
 .code-minimap .minimap-plain { -fx-fill: -color-fg-muted; }
 .code-minimap .minimap-instruction, .code-minimap .minimap-number, .code-minimap .minimap-caret { -fx-fill: -color-accent-fg; }
@@ -35,11 +28,12 @@
 .workbench .idearm-code-area .directive, .workbench .code-minimap .minimap-directive { -fx-fill: -wb-token-directive; -fx-font-weight: normal; }
 .workbench .idearm-code-area .number, .workbench .code-minimap .minimap-number { -fx-fill: -wb-token-number; }
 .workbench .idearm-code-area .string, .workbench .code-minimap .minimap-string { -fx-fill: -wb-token-string; }
-.workbench .idearm-code-area .comment, .workbench .code-minimap .minimap-comment { -fx-fill: -wb-token-comment; -fx-font-style: normal; }
+.workbench .idearm-code-area .comment, .workbench .code-minimap .minimap-comment { -fx-fill: -wb-token-comment; }
+.workbench .idearm-code-area .comment { -fx-font-style: italic; }
 .workbench .idearm-code-area .label, .workbench .code-minimap .minimap-label { -fx-fill: -wb-token-label; }
 
 .idearm-code-area {
-    -fx-font-family: "Consolas";
+    -fx-font-family: "JetBrains Mono";
     -fx-font-size: 14px;
     -fx-background-color: -color-bg-default;
 }
@@ -48,12 +42,12 @@
 .idearm-code-area .lineno {
     -fx-background-color: -color-bg-subtle;
     -fx-text-fill: -color-fg-muted;
-    -fx-font-family: "Consolas";
+    -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
-    -fx-padding: 0 10 0 5;
+    -fx-padding: 0 12 0 6;
     -fx-alignment: center-right;
-    -fx-border-color: transparent -color-border-muted transparent transparent;
-    -fx-border-width: 0 1 0 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
 }
 
 /* Plain text. RichTextFX paints text black unless told otherwise, which vanishes on the dark theme. */
@@ -61,44 +55,20 @@
     -fx-fill: -color-fg-default;
 }
 
-/* Token Syntax Highlighting. Theme colours, so both the light and the dark theme stay readable; the
-   .idearm-code-area prefix outranks the plain-text rule above and keeps .label away from JavaFX labels. */
-.idearm-code-area .instruction {
-    -fx-fill: -color-accent-fg;
-    -fx-font-weight: bold;
-}
-
-.idearm-code-area .register {
-    -fx-fill: -color-chart-6;
-}
-
-.idearm-code-area .directive {
-    -fx-fill: -color-danger-fg;
-    -fx-font-weight: bold;
-}
-
-.idearm-code-area .label {
-    -fx-fill: -color-warning-fg;
-}
-
-.idearm-code-area .number {
-    -fx-fill: -color-accent-fg;
-}
-
-.idearm-code-area .string {
-    -fx-fill: -color-success-fg;
-}
-
-.idearm-code-area .comment {
-    -fx-fill: -color-fg-muted;
-    -fx-font-style: italic;
-}
+/* Token Syntax Highlighting outside the workbench (bare AtlantaFX tokens). Inside it the -wb-token rules above win. */
+.idearm-code-area .instruction { -fx-fill: -color-accent-fg; }
+.idearm-code-area .register { -fx-fill: -color-chart-6; }
+.idearm-code-area .directive { -fx-fill: -color-danger-fg; }
+.idearm-code-area .label { -fx-fill: -color-warning-fg; }
+.idearm-code-area .number { -fx-fill: -color-accent-fg; }
+.idearm-code-area .string { -fx-fill: -color-success-fg; }
+.idearm-code-area .comment { -fx-fill: -color-fg-muted; -fx-font-style: italic; }
 
 /* Diagnostic underlines. RichTextFX draws the wave itself through -rtfx-underline-wave-radius, so the familiar
    squiggle needs no custom node; theme colours keep it readable on the light and the dark theme alike. */
 .idearm-code-area .idearm-diagnostic-error {
     -rtfx-underline-color: -color-danger-fg;
-    -rtfx-underline-width: 1;
+    -rtfx-underline-width: 1.2;
     -rtfx-underline-offset: 1;
     -rtfx-underline-wave-radius: 2;
     -rtfx-underline-cap: round;
@@ -106,7 +76,7 @@
 
 .idearm-code-area .idearm-diagnostic-warning {
     -rtfx-underline-color: -color-warning-fg;
-    -rtfx-underline-width: 1;
+    -rtfx-underline-width: 1.2;
     -rtfx-underline-offset: 1;
     -rtfx-underline-wave-radius: 2;
     -rtfx-underline-cap: round;
@@ -115,8 +85,8 @@
 /* Breakpoint Gutter Column */
 .idearm-compound-gutter {
     -fx-background-color: -color-bg-subtle;
-    -fx-border-color: transparent -color-border-muted transparent transparent;
-    -fx-border-width: 0 1 0 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
 }
 
 .idearm-gutter-breakpoint {
@@ -125,62 +95,43 @@
 }
 
 /* Theme tokens, not fixed colours: the gutter has to stay readable in the light and the dark theme alike. */
-.idearm-breakpoint-active {
-    -fx-text-fill: -color-danger-emphasis;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-}
-
-.idearm-breakpoint-disabled {
-    -fx-text-fill: -color-danger-fg;
-    -fx-opacity: 0.7;
-    -fx-font-size: 13px;
-}
-
-.idearm-breakpoint-ghost {
-    -fx-text-fill: -color-danger-fg;
-    -fx-opacity: 0.4;
-    -fx-font-size: 13px;
-}
-
-.idearm-execution-arrow {
-    -fx-text-fill: -color-warning-emphasis;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-}
+.idearm-breakpoint-active { -fx-text-fill: -color-danger-emphasis; -fx-font-size: 13px; -fx-font-weight: bold; }
+.idearm-breakpoint-disabled { -fx-text-fill: -color-danger-fg; -fx-opacity: 0.7; -fx-font-size: 13px; }
+.idearm-breakpoint-ghost { -fx-text-fill: -color-danger-fg; -fx-opacity: 0.4; -fx-font-size: 13px; }
+.idearm-execution-arrow { -fx-text-fill: -color-warning-emphasis; -fx-font-size: 13px; -fx-font-weight: bold; }
 
 /*
  * The row of the instruction about to run. While stepping, this is what the eye follows; the arrow in the margin
  * alone is too small to find on a full screen of code.
  */
 .idearm-execution-line {
-    -fx-background-color: -color-warning-subtle;
+    -fx-background-color: -color-warning-emphasis, -color-warning-subtle;
+    -fx-background-insets: 0, 0 0 0 3;
 }
 
 /* Workbench geometry belongs here because this sheet is nearest to the RichTextFX control. */
 .workbench .idearm-code-area {
     -fx-background-color: -wb-editor;
-    -fx-padding: 6 0 12 0;
-    -fx-font-family: "Cascadia Code", "Consolas", "Courier New", monospace;
+    -fx-padding: 8 0 16 0;
+    -fx-font-family: "JetBrains Mono";
     -fx-font-size: 13.5px;
 }
-.workbench .idearm-code-area .paragraph-box { -fx-padding: 1 0; }
+.workbench .idearm-code-area .paragraph-box { -fx-padding: 1.5 0; }
 .workbench .idearm-code-area .paragraph-box:has-caret { -fx-background-color: -wb-current-line; }
 .workbench .idearm-code-area .lineno, .workbench .idearm-compound-gutter {
     -fx-background-color: -wb-editor;
     -fx-border-width: 0;
-    -fx-text-fill: #858585;
+    -fx-text-fill: -color-fg-subtle;
     -fx-font-style: normal;
-    -fx-font-family: "Cascadia Code", "Consolas", "Courier New", monospace;
+    -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
 }
 .workbench .idearm-code-area .paragraph-box:has-caret .lineno {
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: -color-accent-fg;
     -fx-font-weight: bold;
 }
-.workbench.light .idearm-code-area .lineno { -fx-text-fill: #727272; }
-.workbench.light .idearm-code-area .paragraph-box:has-caret .lineno { -fx-text-fill: #1f1f1f; }
-.workbench .idearm-code-area .caret { -fx-stroke: -color-fg-default; }
+.workbench .idearm-code-area .caret { -fx-stroke: -color-accent-fg; -fx-stroke-width: 2; }
+.workbench.light .idearm-code-area .caret { -fx-stroke: -color-accent-emphasis; }
 .workbench .idearm-code-area .selection {
     -fx-fill: -wb-selection;
     -fx-stroke: -wb-selection;
@@ -189,17 +140,18 @@
     -fx-stroke-line-cap: round;
     -fx-stroke-type: centered;
 }
-.workbench .code-minimap { -fx-background-color: -wb-editor; -fx-border-color: transparent; }
+.workbench .code-minimap { -fx-background-color: -wb-editor; -fx-border-color: transparent transparent transparent -color-border-muted; -fx-border-width: 0 0 0 1; }
 .workbench .minimap-viewport {
-    -fx-background-color: rgba(255, 255, 255, 0.12);
-    -fx-border-color: rgba(255, 255, 255, 0.20);
+    -fx-background-color: rgba(108, 182, 255, 0.10);
+    -fx-border-color: rgba(108, 182, 255, 0.28);
     -fx-border-width: 1;
-    -fx-background-radius: 2;
-    -fx-border-radius: 2;
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+    -fx-opacity: 1;
 }
 .workbench.light .minimap-viewport {
-    -fx-background-color: rgba(0, 0, 0, 0.10);
-    -fx-border-color: rgba(0, 0, 0, 0.18);
+    -fx-background-color: rgba(47, 111, 237, 0.08);
+    -fx-border-color: rgba(47, 111, 237, 0.25);
 }
 
 /* The editor gutter uses the same PNG assets and token-driven tint as workbench controls. */

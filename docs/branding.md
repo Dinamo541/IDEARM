@@ -32,16 +32,43 @@ a JavaFX window icon cannot replace the icon embedded in that separate executabl
 | `#79EFD2` | Assembly monogram |
 | `#52C6FF` | Code brackets |
 
+## Workbench palette and typography
+
+The workbench colours grow out of the mark (ADR-012, "Hexcore" addendum). Dark surfaces are tinted towards the
+navy field instead of neutral grey; the light theme uses the same hues on cool white. All values are tokens in
+`idearm-app/src/main/resources/io/github/dinamo541/idearm/app/view/workbench.css`.
+
+| Token | Dark | Light | Role |
+|---|---|---|---|
+| `-wb-rail` | `#0C1018` | `#EDF0F5` | Title bar, activity bar, status bar |
+| `-wb-sidebar` | `#10151F` | `#F5F7FA` | Explorer, outline, panel headers |
+| `-wb-editor` | `#141A25` | `#FFFFFF` | Editor canvas and panels |
+| `-wb-raised` | `#1A2130` | `#FFFFFF` | Cards, menus, popups |
+| `-color-accent-emphasis` | `#3976F6` | `#2F6FED` | Primary buttons, focus, active markers (brand blue) |
+| `-color-accent-fg` | `#6CB6FF` | `#1D5FD6` | Accent text and icons |
+| `-wb-brand-gradient` | `#52D6EF` → `#3976F6` | same | Welcome title and dictionary mnemonic |
+| `-wb-token-register` | `#79E6CF` | `#0B7F72` | Registers (the mint monogram) |
+
+Syntax colours keep one hue per token family: instructions blue, registers mint, directives violet, numbers
+peach, strings green, labels amber and comments slate italic.
+
+The interface is set in **Inter** and code in **JetBrains Mono**. Both are bundled under the SIL Open Font
+License 1.1 in `idearm-app/src/main/resources/io/github/dinamo541/idearm/app/fonts/`, with their license files,
+and loaded by `app.ui.WorkbenchFonts` before the first scene. Linux has neither Segoe UI nor Consolas, so without
+bundled faces the editor fell back to a proportional font. JavaFX picks only a regular or a bold face within a
+family; style sheets name "Inter Medium" and "Inter SemiBold" as families for the weights in between. The Inter
+files are the 4.1.1 `inter-ui` web faces unpacked to TrueType; JetBrains Mono 2.305 ships as TrueType upstream.
+
 ## README screenshots
 
-`docs/images/workbench-dark.png` and `docs/images/workbench-light-es.png` are unedited copies of the real
-workbench captures from the 2026-09-17 visual smoke run. They show the repository's `hello` example in English
-and Spanish respectively. The README reuses the original SVG logo directly from the app's branding folder.
+`docs/images/workbench-dark.png`, `docs/images/workbench-light-es.png` and `docs/images/welcome-dark.png` are
+unedited copies of the real captures from the 2026-10-15 design smoke run (`IDEARM_DESIGN_SMOKE`). They show the
+repository's `hello` example in English and Spanish, and the welcome screen. The README reuses the original SVG
+logo directly from the app's branding folder.
 
-When refreshing these screenshots, use the visual smoke workflow described in
-[workbench-shortcuts.md](workbench-shortcuts.md#maintenance-and-verification), inspect both images, and copy
-only the workbench captures into `docs/images/`. Keep recent-history captures and local machine paths out of
-the public README images.
+When refreshing these screenshots, run the design smoke described in ADR-012 against a copy of `examples/hello`
+in a folder named `hello`, inspect the images, and copy only the workbench and welcome captures into
+`docs/images/`. Keep recent-history captures and local machine paths out of the public README images.
 
 ## Workbench icons
 

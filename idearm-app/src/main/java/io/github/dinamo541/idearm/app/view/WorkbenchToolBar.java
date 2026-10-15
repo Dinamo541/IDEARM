@@ -12,14 +12,17 @@ public final class WorkbenchToolBar extends ToolBar {
     private Runnable onCommandPaletteRequested = () -> {};
     private Runnable onThemeRequested = () -> {};
     private Runnable onRecentRequested = () -> {};
+    /** Width of the action buttons, separators and spacing beside the search box. */
+    private static final double RESERVED_WIDTH = 320;
+    /** Width of one stepping button, shown only while a debug session is paused. */
+    private static final double STEP_WIDTH = 32;
     public WorkbenchToolBar(WorkbenchViewModel model, Localization text) {
         getStyleClass().add("workbench-toolbar");
         var command = new Button(null, WorkbenchIcons.SEARCH.create(14));
         var compact = widthProperty().lessThan(450);
         command.textProperty().bind(javafx.beans.binding.Bindings.when(compact).then("")
                 .otherwise(text.text("workbench.commandCenter")));
-        command.minWidthProperty().bind(javafx.beans.binding.Bindings.when(compact).then(32).otherwise(180));
-        command.prefWidthProperty().bind(javafx.beans.binding.Bindings.when(compact).then(32).otherwise(380));
+        command.minWidthProperty().bind(javafx.beans.binding.Bindings.when(compact).then(32).otherwise(140));
         command.getStyleClass().add("command-center");
         HoverHelp.install(command, text, "help.commands", "Ctrl+Shift+P");
         command.setOnAction(e -> onCommandPaletteRequested.run());
@@ -49,6 +52,7 @@ public final class WorkbenchToolBar extends ToolBar {
         var debug = action(WorkbenchIcons.DEBUG, "help.debug", text, () -> {
             if (model.getBottomPanel().getDebugViewModel().pausedProperty().get()) model.resumeDebug(); else model.debug();
         });
+        debug.getStyleClass().add("debug-action");
         debug.disableProperty().bind(model.currentProjectProperty().isNull().or(model.busyProperty()
                 .and(model.getBottomPanel().getDebugViewModel().pausedProperty().not())));
         // The stepping controls appear only while a session that can step is running, so the toolbar stays compact
@@ -61,6 +65,15 @@ public final class WorkbenchToolBar extends ToolBar {
         var stepOver = stepAction(WorkbenchIcons.STEP_OVER, "tooltip.stepOver", text, model::stepOver, steppable);
         var stepInto = stepAction(WorkbenchIcons.STEP_INTO, "tooltip.stepInto", text, model::stepInto, steppable);
         var stepOut = stepAction(WorkbenchIcons.STEP_OUT, "tooltip.stepOut", text, model::stepOut, steppable);
+        // The search box takes what the actions leave, so the theme and language buttons never fall into the
+        // overflow menu: a ToolBar overflows by preferred widths, and Spanish menu names are longer.
+        var steps = java.util.List.of(pause, stepOver, stepInto, stepOut);
+        var reserved = javafx.beans.binding.Bindings.createDoubleBinding(
+                () -> RESERVED_WIDTH + STEP_WIDTH * steps.stream().filter(javafx.scene.Node::isManaged).count(),
+                pause.managedProperty(), stepOver.managedProperty(), stepInto.managedProperty(), stepOut.managedProperty());
+        command.prefWidthProperty().bind(javafx.beans.binding.Bindings.when(compact).then(32.0).otherwise(
+                javafx.beans.binding.Bindings.createDoubleBinding(
+                        () -> Math.max(160, Math.min(320, getWidth() - reserved.get())), widthProperty(), reserved)));
         var stop = action(WorkbenchIcons.STOP, "tooltip.stop", text, model::stop);
         stop.getStyleClass().add("stop-action");
         stop.disableProperty().bind(model.busyProperty().not());

@@ -36,7 +36,7 @@ import java.util.function.Consumer;
  */
 public final class DebuggerPanelView extends StackPane {
 
-    private static final String MONOSPACED = "-fx-font-family: 'Consolas';";
+    private static final String MONOSPACED = "-fx-font-family: 'JetBrains Mono';";
 
     private final DebugViewModel viewModel;
     private final Localization localization;

@@ -58,6 +58,8 @@ public class App extends Application {
             localization.localeProperty().set(Localization.ENGLISH);
         }
 
+        // The bundled typefaces must exist before the first style sheet names them.
+        io.github.dinamo541.idearm.app.ui.WorkbenchFonts.load();
         boolean isLight = "light".equalsIgnoreCase(session.theme());
         Application.setUserAgentStylesheet(isLight
                 ? new PrimerLight().getUserAgentStylesheet()

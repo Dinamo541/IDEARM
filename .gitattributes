@@ -12,6 +12,7 @@ fixtures/** -text
 *.png binary
 *.jpg binary
 *.ico binary
+*.ttf binary
 *.exe binary
 *.com binary
 *.obj binary

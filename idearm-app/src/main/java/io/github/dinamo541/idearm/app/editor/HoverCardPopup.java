@@ -1,6 +1,5 @@
 package io.github.dinamo541.idearm.app.editor;
 
-import atlantafx.base.theme.Styles;
 import io.github.dinamo541.idearm.app.i18n.Localization;
 import io.github.dinamo541.idearm.application.editor.HoverInfo;
 import io.github.dinamo541.idearm.application.editor.HoverKind;
@@ -49,80 +48,50 @@ public final class HoverCardPopup extends Popup {
         setHideOnEscape(true);
         setOnHiding(event -> cleanUpListeners());
 
-        this.rootBox = new VBox(6);
-        this.rootBox.setPadding(new Insets(10, 12, 10, 12));
-        this.rootBox.setMaxWidth(440);
-        this.rootBox.setStyle(
-                "-fx-background-color: -color-bg-default; " +
-                "-fx-border-color: -color-border-default; " +
-                "-fx-border-width: 1px; " +
-                "-fx-border-radius: 6px; " +
-                "-fx-background-radius: 6px; " +
-                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.35), 10, 0, 0, 4);"
-        );
+        // The look lives in workbench.css (.hover-card and friends), which WorkbenchTheme applies on showing.
+        this.rootBox = new VBox(8);
+        this.rootBox.setPadding(new Insets(12, 14, 12, 14));
+        this.rootBox.setMaxWidth(460);
+        this.rootBox.getStyleClass().add("hover-card");
 
         // Header
         this.titleLabel = new Label();
-        this.titleLabel.getStyleClass().addAll(Styles.TEXT_BOLD);
-        this.titleLabel.setStyle("-fx-font-size: 13px;");
+        this.titleLabel.getStyleClass().add("hover-card-title");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         this.kindBadge = new Label();
-        this.kindBadge.setStyle(
-                "-fx-background-color: -color-accent-subtle; " +
-                "-fx-text-fill: -color-accent-fg; " +
-                "-fx-padding: 2 6; " +
-                "-fx-background-radius: 4px; " +
-                "-fx-font-size: 10px; " +
-                "-fx-font-weight: bold;"
-        );
+        this.kindBadge.getStyleClass().add("kind-badge");
 
         HBox header = new HBox(8, titleLabel, spacer, kindBadge);
+        header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         // Syntax block
         this.syntaxLabel = new Label();
-        this.syntaxLabel.setStyle(
-                "-fx-font-family: 'Consolas'; " +
-                "-fx-background-color: -color-bg-subtle; " +
-                "-fx-padding: 4 8; " +
-                "-fx-background-radius: 4px; " +
-                "-fx-font-size: 11px;"
-        );
+        this.syntaxLabel.getStyleClass().add("hover-card-code");
+        this.syntaxLabel.setMaxWidth(Double.MAX_VALUE);
         this.syntaxLabel.setWrapText(true);
 
         // Description
         this.descLabel = new Label();
         this.descLabel.setWrapText(true);
         this.descLabel.setMaxWidth(420);
-        this.descLabel.setStyle("-fx-font-size: 12px; -fx-line-spacing: 2px;");
+        this.descLabel.getStyleClass().add("hover-card-text");
 
         // Flags Box
         this.flagsTitle = new Label("Flags:");
-        this.flagsTitle.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_SMALL);
+        this.flagsTitle.getStyleClass().add("hover-card-section");
         this.flagsContent = new Label();
-        this.flagsContent.setStyle(
-                "-fx-font-family: 'Consolas'; " +
-                "-fx-background-color: -color-bg-subtle; " +
-                "-fx-padding: 4 8; " +
-                "-fx-background-radius: 4px; " +
-                "-fx-font-size: 11px;"
-        );
-        this.flagsBox = new VBox(3, flagsTitle, flagsContent);
+        this.flagsContent.getStyleClass().add("hover-card-code");
+        this.flagsBox = new VBox(4, flagsTitle, flagsContent);
 
         // Example Box
         this.exampleTitle = new Label("Example:");
-        this.exampleTitle.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_SMALL);
+        this.exampleTitle.getStyleClass().add("hover-card-section");
         this.exampleContent = new Label();
-        this.exampleContent.setStyle(
-                "-fx-font-family: 'Consolas'; " +
-                "-fx-background-color: -color-bg-subtle; " +
-                "-fx-padding: 4 8; " +
-                "-fx-background-radius: 4px; " +
-                "-fx-font-size: 11px;"
-        );
-        this.exampleBox = new VBox(3, exampleTitle, exampleContent);
+        this.exampleContent.getStyleClass().add("hover-card-code");
+        this.exampleBox = new VBox(4, exampleTitle, exampleContent);
 
         getContent().add(rootBox);
     }
@@ -175,27 +144,25 @@ public final class HoverCardPopup extends Popup {
                         : ("Also x86 instruction: " + sec.title());
             }
             Label secTitle = new Label(secPrefix);
-            secTitle.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_SMALL);
-            secTitle.setStyle("-fx-font-size: 11px;");
+            secTitle.getStyleClass().add("hover-card-section");
 
             VBox secBox = new VBox(4, secTitle);
             if (sec.syntax() != null && !sec.syntax().isBlank()) {
                 Label secSyntax = new Label(sec.syntax());
-                secSyntax.setStyle("-fx-font-family: 'Consolas'; -fx-background-color: -color-bg-subtle; -fx-padding: 3 6; -fx-background-radius: 4px; -fx-font-size: 10px;");
+                secSyntax.getStyleClass().addAll("hover-card-code", "small");
                 secBox.getChildren().add(secSyntax);
             }
             if (sec.description() != null && !sec.description().isBlank()) {
                 Label secDesc = new Label(sec.description());
                 secDesc.setWrapText(true);
-                secDesc.setStyle("-fx-font-size: 11px; -fx-line-spacing: 1px;");
+                secDesc.getStyleClass().add("hover-card-text");
                 secBox.getChildren().add(secDesc);
             }
             if (sec.example() != null && !sec.example().isBlank()) {
                 Label secExTitle = new Label(localization != null ? localization.get("hover.example") : "Example:");
-                secExTitle.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_SMALL);
-                secExTitle.setStyle("-fx-font-size: 10px;");
+                secExTitle.getStyleClass().add("hover-card-section");
                 Label secExample = new Label(sec.example());
-                secExample.setStyle("-fx-font-family: 'Consolas'; -fx-background-color: -color-bg-subtle; -fx-padding: 3 6; -fx-background-radius: 4px; -fx-font-size: 10px;");
+                secExample.getStyleClass().addAll("hover-card-code", "small");
                 secBox.getChildren().addAll(secExTitle, secExample);
             }
             rootBox.getChildren().addAll(new Separator(), secBox);
@@ -271,57 +238,19 @@ public final class HoverCardPopup extends Popup {
         }
         kindBadge.setText(text);
 
-        String bg;
-        String fg;
-        switch (kind) {
-            case INSTRUCTION -> {
-                bg = "-color-accent-subtle";
-                fg = "-color-accent-fg";
-            }
-            case DIRECTIVE -> {
-                bg = "-color-warning-subtle";
-                fg = "-color-warning-fg";
-            }
-            case REGISTER -> {
-                bg = "-color-success-subtle";
-                fg = "-color-success-fg";
-            }
-            case NUMBER_CONVERSION -> {
-                bg = "-color-neutral-subtle";
-                fg = "-color-neutral-fg";
-            }
-            case INTERRUPT_SERVICE -> {
-                bg = "-color-danger-subtle";
-                fg = "-color-danger-fg";
-            }
-            case SYMBOL_INFO -> {
-                bg = "-color-accent-subtle";
-                fg = "-color-accent-fg";
-            }
-            case OPERATOR -> {
-                bg = "-color-neutral-subtle";
-                fg = "-color-neutral-fg";
-            }
-            case PREDEFINED_SYMBOL, KEYWORD, CONCEPT -> {
-                bg = "-color-accent-subtle";
-                fg = "-color-accent-fg";
-            }
-            case DIAGNOSTIC -> {
-                bg = "-color-danger-subtle";
-                fg = "-color-danger-fg";
-            }
-            default -> {
-                bg = "-color-accent-subtle";
-                fg = "-color-accent-fg";
-            }
-        }
-        kindBadge.setStyle(
-                "-fx-background-color: " + bg + "; " +
-                "-fx-text-fill: " + fg + "; " +
-                "-fx-padding: 2 6; " +
-                "-fx-background-radius: 4px; " +
-                "-fx-font-size: 10px; " +
-                "-fx-font-weight: bold;"
-        );
+        kindBadge.getStyleClass().removeAll("kind-warning", "kind-success", "kind-neutral", "kind-danger");
+        String tone = switch (kind) {
+            case INSTRUCTION -> null;
+            case DIRECTIVE -> "kind-warning";
+            case REGISTER -> "kind-success";
+            case NUMBER_CONVERSION -> "kind-neutral";
+            case INTERRUPT_SERVICE -> "kind-danger";
+            case SYMBOL_INFO -> null;
+            case OPERATOR -> "kind-neutral";
+            case PREDEFINED_SYMBOL, KEYWORD, CONCEPT -> null;
+            case DIAGNOSTIC -> "kind-danger";
+            default -> null;
+        };
+        if (tone != null) kindBadge.getStyleClass().add(tone);
     }
 }

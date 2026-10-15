@@ -36,7 +36,9 @@ public final class DialogWindow {
         var labels = new javafx.scene.layout.VBox(5, title, description);
         labels.setMinWidth(0);
         javafx.scene.layout.HBox.setHgrow(labels, javafx.scene.layout.Priority.ALWAYS);
-        var heading = new javafx.scene.layout.HBox(14, icon.create(28), labels);
+        var tile = new javafx.scene.layout.StackPane(icon.create(24));
+        tile.getStyleClass().add("dialog-icon-tile");
+        var heading = new javafx.scene.layout.HBox(16, tile, labels);
         heading.getStyleClass().add("dialog-heading");
         return heading;
     }

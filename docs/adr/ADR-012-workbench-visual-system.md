@@ -80,3 +80,39 @@ explicitly retaining IDEARM's existing brand PNG. This supersedes the earlier ha
   theme/language and academic captures. Offline tests pass (832 tests, 2 skipped); design smoke passes with
   86 captures. The galleries and major surfaces were inspected for icon clarity, theme contrast, compact
   layout and unchanged brand appearance.
+
+## Addendum: "Hexcore" visual refresh — 2026-10-15
+
+The user asked for the most modern, attractive, intuitive and ergonomic interface the workbench can have. This
+supersedes the VS Code-neutral palette above; the structure, tokens-first approach and icon assets remain.
+
+- **Palette from the brand.** Surfaces are tinted towards the mark's navy field, in four layers: rail (title,
+  activity and status bars), sidebar, editor and raised (cards, menus, popups). The accent is the brand blue
+  `#3976F6`; registers use the mint of the monogram; the welcome title and the dictionary mnemonic use the
+  frame's cyan-to-blue gradient. The light theme repeats the hues on cool white. `docs/branding.md` lists the
+  main tokens.
+- **Bundled typefaces.** Inter for the interface and JetBrains Mono for code, both under the SIL OFL 1.1 and
+  loaded by `WorkbenchFonts` at startup. Linux has neither Segoe UI nor Consolas, and the editor had fallen back
+  to a proportional font that misaligned every column. Inline `'Consolas'` and `'Segoe UI'` styles now name
+  the bundled families.
+- **Shape and depth.** Controls use 7 px radii, cards 10–12 px; menus, popups, the palette and the hover card
+  carry soft drop shadows. Primary buttons have a subtle vertical gradient. Editor tabs open into the canvas
+  with a brand stripe; panel tabs are segmented pills; the activity bar marks the active view with a tinted
+  pill instead of a thin edge.
+- **Focus only when it helps.** Keyboard focus draws an accent ring through `:focus-visible`, so clicking a
+  toolbar or card button no longer leaves an outline. Text fields keep a focus glow while typing.
+- **Welcome cards.** Each entry is a card with an icon tile, a one-line description (new `welcome.*.description`
+  texts in both bundles) and its shortcut as a keycap. The two groups sit side by side and stack below 640 px.
+- **Fixes found on the way.** `editor.css` pinned dark colour tokens on every node through a `*` rule, which
+  painted identifiers light grey on the light theme's white canvas; the rule is gone and the editor inherits the
+  workbench tokens. Selected explorer rows no longer use white text on the light selection. The command centre
+  takes only the width the actions leave, so the theme and language buttons no longer fall into the toolbar's
+  overflow menu with the longer Spanish menu names. The hover card and completion list use style classes
+  instead of inline styles; the completion badge no longer appends a style string on every cell reuse.
+- **Status bar.** Quiet, on the rail colour, with hover pills; while debugging it turns into a warm gradient so
+  the session state is visible at a glance.
+
+Verification: the app module's tests pass under Xvfb (203 tests, 15 skipped), including the icon-tint test with
+the new palette values. The design smoke passes with 90 captures; the four theme/language combinations,
+welcome, debugger, consoles, dialogs, palette, hover and completion popups, Academic Center and the 800 × 600
+compact layout were inspected in both themes.

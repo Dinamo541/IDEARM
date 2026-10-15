@@ -40,7 +40,7 @@ public final class TerminalPanelView extends BorderPane {
         // Output Area
         terminalArea.setEditable(false);
         terminalArea.setWrapText(true);
-        terminalArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
+        terminalArea.setStyle("-fx-font-family: 'JetBrains Mono'; -fx-font-size: 12px;");
         if (viewModel != null) {
             terminalArea.textProperty().bind(viewModel.terminalTextProperty());
             terminalArea.textProperty().addListener((obs, oldV, newV) -> terminalArea.setScrollTop(Double.MAX_VALUE));
@@ -115,7 +115,7 @@ public final class TerminalPanelView extends BorderPane {
         promptSymbol.getStyleClass().add("terminal-prompt");
 
         inputField.promptTextProperty().bind(localization.text("terminal.input.placeholder"));
-        inputField.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
+        inputField.setStyle("-fx-font-family: 'JetBrains Mono'; -fx-font-size: 12px;");
         HBox.setHgrow(inputField, Priority.ALWAYS);
 
         inputField.setOnKeyPressed(event -> {
