@@ -691,14 +691,20 @@ public final class Cpu8086 {
     private int adc8(int a, int b) {
         int c = registers.isCf() ? 1 : 0;
         int res = a + b + c;
-        setFlagsAdd8(a, b + c, res);
+        setZfSfPf8(res);
+        registers.setCf(res > 0xFF);
+        registers.setAf(((a & 0x0F) + (b & 0x0F) + c) > 0x0F);
+        registers.setOf(((a ^ res) & (b ^ res) & 0x80) != 0);
         return res & 0xFF;
     }
 
     private int adc16(int a, int b) {
         int c = registers.isCf() ? 1 : 0;
         int res = a + b + c;
-        setFlagsAdd16(a, b + c, res);
+        setZfSfPf16(res);
+        registers.setCf(res > 0xFFFF);
+        registers.setAf(((a & 0x0F) + (b & 0x0F) + c) > 0x0F);
+        registers.setOf(((a ^ res) & (b ^ res) & 0x8000) != 0);
         return res & 0xFFFF;
     }
 
@@ -717,14 +723,20 @@ public final class Cpu8086 {
     private int sbb8(int a, int b) {
         int c = registers.isCf() ? 1 : 0;
         int res = a - (b + c);
-        setFlagsSub8(a, b + c, res);
+        setZfSfPf8(res);
+        registers.setCf(res < 0);
+        registers.setAf((a & 0x0F) < ((b & 0x0F) + c));
+        registers.setOf(((a ^ b) & (a ^ res) & 0x80) != 0);
         return res & 0xFF;
     }
 
     private int sbb16(int a, int b) {
         int c = registers.isCf() ? 1 : 0;
         int res = a - (b + c);
-        setFlagsSub16(a, b + c, res);
+        setZfSfPf16(res);
+        registers.setCf(res < 0);
+        registers.setAf((a & 0x0F) < ((b & 0x0F) + c));
+        registers.setOf(((a ^ b) & (a ^ res) & 0x8000) != 0);
         return res & 0xFFFF;
     }
 
@@ -1436,7 +1448,7 @@ public final class Cpu8086 {
                 }
                 case 7 -> { // IDIV AX
                     if (src == 0) { divideError(); return; }
-                    long num = (((long) (registers.dx & 0xFFFF)) << 16) | (registers.ax & 0xFFFF);
+                    long num = (int) ((registers.dx << 16) | (registers.ax & 0xFFFF));
                     int den = (short) src;
                     long quot = num / den;
                     long rem = num % den;
@@ -1455,6 +1467,10 @@ public final class Cpu8086 {
             ModRmDecoder.writeRm8(registers, memory, ea, inc8(ModRmDecoder.readRm8(registers, memory, ea)));
         } else if (opType == 1) { // DEC rm8
             ModRmDecoder.writeRm8(registers, memory, ea, dec8(ModRmDecoder.readRm8(registers, memory, ea)));
+        } else {
+            fail("emu.invalid-opcode",
+                    String.format("The built-in emulator does not implement opcode FEh sub-function %d.", opType),
+                    "FE:" + opType);
         }
     }
 
@@ -1485,6 +1501,9 @@ public final class Cpu8086 {
                 registers.cs = memory.read16(ea.segment(), (ea.offset() + 2) & 0xFFFF);
             }
             case 6 -> memory.push(registers, ModRmDecoder.readRm16(registers, memory, ea)); // PUSH rm16
+            default -> fail("emu.invalid-opcode",
+                    String.format("The built-in emulator does not implement opcode FFh sub-function %d.", opType),
+                    "FF:" + opType);
         }
     }
 

@@ -14,19 +14,33 @@ public final class WorkbenchToolBar extends ToolBar {
     private Runnable onRecentRequested = () -> {};
     public WorkbenchToolBar(WorkbenchViewModel model, Localization text) {
         getStyleClass().add("workbench-toolbar");
-        var command = new Button(null, WorkbenchIcons.SEARCH.create());
-        command.textProperty().bind(text.text("workbench.commandCenter"));
+        var command = new Button(null, WorkbenchIcons.SEARCH.create(14));
+        var compact = widthProperty().lessThan(450);
+        command.textProperty().bind(javafx.beans.binding.Bindings.when(compact).then("")
+                .otherwise(text.text("workbench.commandCenter")));
+        command.minWidthProperty().bind(javafx.beans.binding.Bindings.when(compact).then(32).otherwise(180));
+        command.prefWidthProperty().bind(javafx.beans.binding.Bindings.when(compact).then(32).otherwise(380));
         command.getStyleClass().add("command-center");
         HoverHelp.install(command, text, "help.commands", "Ctrl+Shift+P");
         command.setOnAction(e -> onCommandPaletteRequested.run());
-        var spacer = new Region();
-        spacer.setId("title-drag-area");
-        spacer.setPickOnBounds(true);
-        spacer.setMinHeight(28);
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        var leftSpacer = new Region();
+        leftSpacer.setId("title-drag-area-left");
+        leftSpacer.setPickOnBounds(true);
+        leftSpacer.setMinHeight(28);
+        io.github.dinamo541.idearm.app.ui.WindowChrome.draggable(leftSpacer);
+        HBox.setHgrow(leftSpacer, Priority.ALWAYS);
+
+        var rightSpacer = new Region();
+        rightSpacer.setId("title-drag-area");
+        rightSpacer.setPickOnBounds(true);
+        rightSpacer.setMinHeight(28);
+        io.github.dinamo541.idearm.app.ui.WindowChrome.draggable(rightSpacer);
+        HBox.setHgrow(rightSpacer, Priority.ALWAYS);
+
         var recent = action(WorkbenchIcons.HISTORY, "help.recent", text, () -> onRecentRequested.run());
         recent.setId("recent-action");
-        var run = action(WorkbenchIcons.RUN, "tooltip.run", text, () -> model.run(false));
+        var run = action(WorkbenchIcons.RUN, "tooltip.run", text, model::run);
         run.setId("run-action");
         run.getStyleClass().add("run-action");
         run.disableProperty().bind(model.busyProperty().or(model.currentProjectProperty().isNull()));
@@ -59,7 +73,7 @@ public final class WorkbenchToolBar extends ToolBar {
         language.setOnAction(e -> text.localeProperty().set(text.localeProperty().get().equals(Localization.ENGLISH)
                 ? Localization.SPANISH : Localization.ENGLISH));
         HoverHelp.install(language, text, "action.switchLanguage", "");
-        getItems().addAll(command, spacer, recent, new Separator(), run, debug, pause, stepOver, stepInto, stepOut,
+        getItems().addAll(leftSpacer, command, rightSpacer, recent, new Separator(), run, debug, pause, stepOver, stepInto, stepOut,
                 build, stop, new Separator(), theme, language);
     }
     private Button action(WorkbenchIcons icon, String key, Localization text, Runnable action) {

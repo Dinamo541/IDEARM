@@ -1,5 +1,8 @@
 package io.github.dinamo541.idearm.cli;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.dinamo541.idearm.application.*;
 import io.github.dinamo541.idearm.domain.DomainException;
 import io.github.dinamo541.idearm.domain.IdearmInfo;
@@ -8,6 +11,7 @@ import io.github.dinamo541.idearm.domain.diagnostic.Diagnostic;
 import io.github.dinamo541.idearm.domain.diagnostic.Severity;
 import io.github.dinamo541.idearm.domain.dist.DistResult;
 import io.github.dinamo541.idearm.domain.execution.SessionState;
+import io.github.dinamo541.idearm.domain.model.Project;
 import io.github.dinamo541.idearm.domain.model.ToolInstallation;
 import io.github.dinamo541.idearm.domain.port.DistPackager;
 import io.github.dinamo541.idearm.domain.port.ExecutionEnvironmentProvider;
@@ -30,6 +34,8 @@ import java.util.*;
  * Command-line interface and composition root for headless execution of IDEARM tasks.
  */
 public final class Main {
+
+    private static final ObjectMapper JSON = new ObjectMapper();
 
     /** A build that goes past this is assumed to be a tool waiting for input (ADR-002). */
     private static final Duration DEFAULT_BUILD_TIMEOUT = Duration.ofSeconds(60);
@@ -62,6 +68,7 @@ public final class Main {
             case "dist", "package" -> handleDist(Arrays.copyOfRange(args, 1, args.length), out, err);
             case "clean" -> handleClean(Arrays.copyOfRange(args, 1, args.length), out, err);
             case "import" -> handleImport(Arrays.copyOfRange(args, 1, args.length), out, err);
+            case "new" -> handleNew(Arrays.copyOfRange(args, 1, args.length), out, err);
             case "doctor" -> handleDoctor(out);
             case "tools" -> args.length >= 3 && args[1].equalsIgnoreCase("add")
                     ? handleToolsAdd(Path.of(args[2]), out, err)
@@ -76,7 +83,7 @@ public final class Main {
 
     private static int handleBuild(String[] args, PrintStream out, PrintStream err) {
         Path projectPath = Path.of(".");
-        String config = "release";
+        String config = "debug";
         boolean json = false;
 
         for (int i = 0; i < args.length; i++) {
@@ -85,6 +92,10 @@ public final class Main {
                 json = true;
             } else if (arg.equals("--config") && i + 1 < args.length) {
                 config = args[++i];
+            } else if (arg.equals("--release")) {
+                config = "release";
+            } else if (arg.equals("--debug")) {
+                config = "debug";
             } else if (!arg.startsWith("-")) {
                 projectPath = Path.of(arg);
             }
@@ -92,7 +103,7 @@ public final class Main {
 
         if (!Files.exists(projectPath.resolve("idearm.toml"))) {
             if (json) {
-                out.println("{\"status\":\"FAILED\",\"diagnostics\":[{\"severity\":\"ERROR\",\"message\":\"No idearm.toml found at " + escapeJson(projectPath.toString()) + "\"}]}");
+                out.println(jsonBuildError("No idearm.toml found at " + projectPath.toAbsolutePath().normalize()));
             } else {
                 err.println("Error: No idearm.toml found at " + projectPath.toAbsolutePath().normalize());
             }
@@ -150,6 +161,8 @@ public final class Main {
                 config = args[++i];
             } else if (arg.equals("--release")) {
                 config = "release";
+            } else if (arg.equals("--debug")) {
+                config = "debug";
             } else if (!arg.startsWith("-")) {
                 projectPath = Path.of(arg);
             }
@@ -157,7 +170,7 @@ public final class Main {
 
         if (!Files.exists(projectPath.resolve("idearm.toml"))) {
             if (json) {
-                out.println("{\"status\":\"FAILED\",\"error\":\"No idearm.toml found at " + escapeJson(projectPath.toString()) + "\"}");
+                out.println(jsonError("No idearm.toml found at " + projectPath.toAbsolutePath().normalize()));
             } else {
                 err.println("Error: No idearm.toml found at " + projectPath.toAbsolutePath().normalize());
             }
@@ -202,10 +215,11 @@ public final class Main {
                 });
 
         if (json) {
-            out.printf("{\"status\":\"%s\",\"exitCode\":%d,\"durationMs\":%d}%n",
-                    result.state(),
-                    result.exitInfo() != null ? result.exitInfo().exitCode() : -1,
-                    result.exitInfo() != null ? result.exitInfo().duration().toMillis() : 0);
+            ObjectNode node = JSON.createObjectNode();
+            node.put("status", result.state().name());
+            node.put("exitCode", result.exitInfo() != null ? result.exitInfo().exitCode() : -1);
+            node.put("durationMs", result.exitInfo() != null ? result.exitInfo().duration().toMillis() : 0);
+            out.println(node.toString());
         } else {
             if (result.state() == SessionState.EXITED) {
                 out.printf("[RUN] Program finished with exit code %d after %d ms.%n",
@@ -236,7 +250,7 @@ public final class Main {
 
         if (!Files.exists(projectPath.resolve("idearm.toml"))) {
             if (json) {
-                out.println("{\"status\":\"FAILED\",\"error\":\"No idearm.toml found at " + escapeJson(projectPath.toString()) + "\"}");
+                out.println(jsonError("No idearm.toml found at " + projectPath.toAbsolutePath().normalize()));
             } else {
                 err.println("Error: No idearm.toml found at " + projectPath.toAbsolutePath().normalize());
             }
@@ -262,10 +276,12 @@ public final class Main {
         try {
             DistResult result = packageProject.execute(projectPath);
             if (json) {
-                out.printf("{\"status\":\"PACKAGED\",\"distDir\":\"%s\",\"executable\":\"%s\",\"files\":%d}%n",
-                        escapeJson(result.distDirectory().toString()),
-                        escapeJson(result.mainExecutable().toString()),
-                        result.packagedFiles().size());
+                ObjectNode node = JSON.createObjectNode();
+                node.put("status", "PACKAGED");
+                node.put("distDir", result.distDirectory().toString());
+                node.put("executable", result.mainExecutable().toString());
+                node.put("files", result.packagedFiles().size());
+                out.println(node.toString());
             } else {
                 out.println("[DIST] Distribution packaged successfully!");
                 out.println("  Output directory: " + result.distDirectory().toAbsolutePath().normalize());
@@ -288,7 +304,7 @@ public final class Main {
             return 0;
         } catch (Exception ex) {
             if (json) {
-                out.println("{\"status\":\"FAILED\",\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+                out.println(jsonError(ex.getMessage() != null ? ex.getMessage() : ex.toString()));
             } else {
                 err.println("[DIST] Packaging failed: " + ex.getMessage());
             }
@@ -314,14 +330,17 @@ public final class Main {
         try {
             cleanProject.execute(projectPath);
             if (json) {
-                out.println("{\"status\":\"CLEANED\",\"project\":\"" + escapeJson(projectPath.toString()) + "\"}");
+                ObjectNode node = JSON.createObjectNode();
+                node.put("status", "CLEANED");
+                node.put("project", projectPath.toString());
+                out.println(node.toString());
             } else {
                 out.println("Successfully cleaned project at: " + projectPath.toAbsolutePath().normalize());
             }
             return 0;
         } catch (Exception ex) {
             if (json) {
-                out.println("{\"status\":\"FAILED\",\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+                out.println(jsonError(ex.getMessage() != null ? ex.getMessage() : ex.toString()));
             } else {
                 err.println("Clean failed: " + ex.getMessage());
             }
@@ -353,8 +372,11 @@ public final class Main {
                     projectPath, null, null, null, toolchain
             ));
             if (json) {
-                out.println("{\"status\":\"IMPORTED\",\"project\":\"" + escapeJson(project.info().name())
-                        + "\",\"toolchain\":\"" + escapeJson(project.toolchain().id()) + "\"}");
+                ObjectNode node = JSON.createObjectNode();
+                node.put("status", "IMPORTED");
+                node.put("project", project.info().name());
+                node.put("toolchain", project.toolchain().id());
+                out.println(node.toString());
             } else {
                 out.println("Successfully imported project: " + project.info().name());
                 out.println("  Directory:  " + projectPath.toAbsolutePath().normalize());
@@ -367,9 +389,93 @@ public final class Main {
             return 0;
         } catch (Exception ex) {
             if (json) {
-                out.println("{\"status\":\"FAILED\",\"error\":\"" + escapeJson(ex.getMessage()) + "\"}");
+                out.println(jsonError(ex.getMessage() != null ? ex.getMessage() : ex.toString()));
             } else {
                 err.println("Import failed: " + ex.getMessage());
+            }
+            return 1;
+        }
+    }
+
+    private static int handleNew(String[] args, PrintStream out, PrintStream err) {
+        Path folder = null;
+        String name = null;
+        String target = null;
+        String cpu = null;
+        String toolchain = null;
+        String toolchainVersion = null;
+        String debugBackend = null;
+        boolean json = false;
+
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            if (arg.equals("--json")) {
+                json = true;
+            } else if (arg.equals("--name") && i + 1 < args.length) {
+                name = args[++i];
+            } else if (arg.equals("--target") && i + 1 < args.length) {
+                target = args[++i];
+            } else if (arg.equals("--cpu") && i + 1 < args.length) {
+                cpu = args[++i];
+            } else if (arg.equals("--toolchain") && i + 1 < args.length) {
+                toolchain = args[++i];
+            } else if (arg.equals("--toolchain-version") && i + 1 < args.length) {
+                toolchainVersion = args[++i];
+            } else if (arg.equals("--debug") && i + 1 < args.length) {
+                debugBackend = args[++i];
+            } else if (!arg.startsWith("-") && folder == null) {
+                folder = Path.of(arg);
+            }
+        }
+
+        if (folder == null) {
+            if (json) {
+                out.println(jsonError("Project folder must be specified"));
+            } else {
+                err.println("Error: Project folder must be specified. Usage: idearm new <folder> [options]");
+            }
+            return 2;
+        }
+
+        var repository = new TomlProjectRepository();
+        var createProject = new CreateProject(repository);
+
+        try {
+            Project project = createProject.createInDirectory(
+                    folder, name, target, cpu, toolchain, toolchainVersion, debugBackend);
+            Path projectRoot = folder.toAbsolutePath().normalize();
+
+            if (json) {
+                ObjectNode node = JSON.createObjectNode();
+                node.put("status", "CREATED");
+                node.put("project", project.info().name());
+                node.put("directory", projectRoot.toString());
+                node.put("target", project.target().profile());
+                node.put("cpu", project.target().cpu());
+                node.put("toolchain", project.toolchain().id());
+                node.put("toolchainVersion", project.toolchain().version());
+                node.put("debugBackend", project.debug().backend());
+                out.println(node.toString());
+            } else {
+                out.println("Successfully created project: " + project.info().name());
+                out.println("  Directory:  " + projectRoot);
+                out.println("  Target:     " + project.target().profile() + " (" + project.target().cpu() + ")");
+                out.println("  Toolchain:  " + project.toolchain().id() + " " + project.toolchain().version());
+                out.println("  Debugger:   " + project.debug().backend());
+            }
+            return 0;
+        } catch (DomainException ex) {
+            if (json) {
+                out.println(jsonError(ex.getMessage()));
+            } else {
+                err.println("Error: " + ex.getMessage());
+            }
+            return 1;
+        } catch (Exception ex) {
+            if (json) {
+                out.println(jsonError(ex.getMessage() != null ? ex.getMessage() : ex.toString()));
+            } else {
+                err.println("Error: " + (ex.getMessage() != null ? ex.getMessage() : ex.toString()));
             }
             return 1;
         }
@@ -504,46 +610,54 @@ public final class Main {
     }
 
     private static String toJson(BuildResult result) {
-        var sb = new StringBuilder();
-        sb.append("{");
-        sb.append("\"status\":\"").append(result.status()).append("\",");
-        sb.append("\"configuration\":\"").append(escapeJson(result.configuration())).append("\",");
-        sb.append("\"artifacts\":[");
-        for (int i = 0; i < result.artifacts().size(); i++) {
-            if (i > 0) sb.append(",");
-            sb.append("\"").append(escapeJson(result.artifacts().get(i).toString())).append("\"");
+        ObjectNode root = JSON.createObjectNode();
+        root.put("status", result.status().name());
+        root.put("configuration", result.configuration());
+
+        ArrayNode artifacts = root.putArray("artifacts");
+        for (Path artifact : result.artifacts()) {
+            artifacts.add(artifact.toString());
         }
-        sb.append("],");
-        sb.append("\"diagnostics\":[");
-        for (int i = 0; i < result.diagnostics().size(); i++) {
-            if (i > 0) sb.append(",");
-            Diagnostic d = result.diagnostics().get(i);
-            sb.append("{");
-            sb.append("\"severity\":\"").append(d.severity()).append("\",");
-            sb.append("\"message\":\"").append(escapeJson(d.message())).append("\",");
-            sb.append("\"tool\":\"").append(escapeJson(d.tool())).append("\"");
+
+        ArrayNode diagnostics = root.putArray("diagnostics");
+        for (Diagnostic d : result.diagnostics()) {
+            ObjectNode node = diagnostics.addObject();
+            node.put("severity", d.severity().name());
+            node.put("message", d.message());
+            node.put("tool", d.tool());
             if (d.location() != null) {
-                sb.append(",\"file\":\"").append(escapeJson(d.location().path())).append("\"");
+                node.put("file", d.location().path());
                 if (d.location().line() != null) {
-                    sb.append(",\"line\":").append(d.location().line());
+                    node.put("line", d.location().line());
                 }
             }
-            sb.append("}");
         }
-        sb.append("]}");
-        return sb.toString();
+        return root.toString();
     }
 
-    private static String escapeJson(String raw) {
-        if (raw == null) return "";
-        return raw.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
+    private static String jsonError(String error) {
+        ObjectNode node = JSON.createObjectNode();
+        node.put("status", "FAILED");
+        node.put("error", error != null ? error : "");
+        return node.toString();
+    }
+
+    private static String jsonBuildError(String message) {
+        ObjectNode node = JSON.createObjectNode();
+        node.put("status", "FAILED");
+        ArrayNode diags = node.putArray("diagnostics");
+        ObjectNode diag = diags.addObject();
+        diag.put("severity", "ERROR");
+        diag.put("message", message != null ? message : "");
+        return node.toString();
     }
 
     private static void printHelp(PrintStream out) {
         out.println(IdearmInfo.NAME + " - Specialized x86 Assembly IDE (Headless CLI)");
         out.println();
         out.println("Usage:");
-        out.println("  idearm build <directory> [--config <name>] [--json]");
+        out.println("  idearm new <folder> [--name <name>] [--target <profile>] [--cpu <cpu>] [--toolchain <toolchain>] [--json]");
+        out.println("  idearm build <directory> [--config <name>] [--release] [--json]");
         out.println("  idearm run <directory> [--release] [--json]");
         out.println("  idearm dist | package <directory> [--json]");
         out.println("  idearm clean <directory> [--json]");

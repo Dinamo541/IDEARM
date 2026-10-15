@@ -29,6 +29,7 @@ public final class FakeEditorComponent implements EditorComponent {
     private Consumer<String> referencesHandler;
     private Function<String, Optional<HoverInfo>> hoverProvider;
     private Function<String, List<CompletionItem>> completionProvider;
+    private Consumer<String> academicCenterHandler;
 
     @Override
     public Node getNode() {
@@ -126,6 +127,11 @@ public final class FakeEditorComponent implements EditorComponent {
     @Override
     public void setOnReferencesRequested(Consumer<String> handler) {
         this.referencesHandler = handler;
+    }
+
+    @Override
+    public void setOnAcademicCenterRequested(Consumer<String> handler) {
+        this.academicCenterHandler = handler;
     }
 
     @Override

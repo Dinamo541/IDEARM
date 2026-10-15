@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDEARM Editor Parity Spike - Monaco Host</title>
+    <link rel="stylesheet" href="editor.css">
+    <style>
+        #toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 34px;
+            background: #252526;
+            border-bottom: 1px solid #3c3c3c;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            gap: 8px;
+            z-index: 1000;
+        }
+        .btn {
+            background: #333333;
+            color: #cccccc;
+            border: 1px solid #454545;
+            padding: 4px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 2px;
+            outline: none;
+        }
+        .btn:hover {
+            background: #404040;
+            color: #ffffff;
+        }
+        .btn-primary {
+            background: #007acc;
+            border-color: #007acc;
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background: #0062a3;
+        }
+        #editor-container {
+            top: 35px;
+            bottom: 22px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="toolbar">
+        <span style="font-weight: bold; color: #569cd6; font-size: 12px; margin-right: 8px;">IDEARM Monaco Host</span>
+        <button class="btn" id="btn-load-5k" onclick="loadFixture('load5k.asm')">Load 5k Lines</button>
+        <button class="btn" id="btn-load-20k" onclick="loadFixture('load20k.asm')">Load 20k Lines</button>
+        <button class="btn" id="btn-diag" onclick="simulateDiagnostics()">Apply Diagnostics</button>
+        <button class="btn" id="btn-stale" onclick="simulateStaleDiagnostics()">Test Stale Rejection</button>
+        <button class="btn" id="btn-bp" onclick="simulateBreakpoints()">Toggle Breakpoints</button>
+        <button class="btn" id="btn-step" onclick="simulateStep()">Step Execution Line</button>
+        <button class="btn" id="btn-gc" onclick="simulateTabDisposal()">Disposal & GC Test</button>
+        <button class="btn btn-primary" id="btn-run-all" onclick="runAutomatedBenchmarkSuite()">Run Benchmark Suite</button>
+    </div>
+
+    <div id="editor-container"></div>
+
+    <div id="status-overlay">
+        <span id="stat-file">File: [None]</span>
+        <span id="stat-lines">Lines: 0</span>
+        <span id="stat-pos">Ln 1, Col 1</span>
+        <span id="stat-latency">Edit Latency: --</span>
+        <span id="stat-msg" style="flex: 1; text-align: right; color: #9cdcfe;">Monaco initializing...</span>
+    </div>
+
+    <!-- Load Monaco AMD loader from local distribution -->
+    <script src="../node_modules/monaco-editor/min/vs/loader.js"></script>
+    <script src="assembly-syntax.js"></script>
+    <script src="bridge.js"></script>
+
+    <script>
+        // Configure AMD loader for local assets
+        require.config({
+            paths: {
+                'vs': '../node_modules/monaco-editor/min/vs'
+            }
+        });
+
+        let currentStepLine = 18;
+        let isExecutionActive = false;
+
+        require(['vs/editor/editor.main'], function () {
+            // Register ASM 8086 syntax
+            window.registerAssemblyLanguage(monaco);
+
+            // Initialize Bridge & Editor
+            const container = document.getElementById('editor-container');
+            const editor = window.monacoBridge.init(container);
+
+            document.getElementById('stat-msg').textContent = 'Monaco 0.52.2 Ready (Isolated Spike Host)';
+
+            // Listen to caret changes to update status bar
+            window.addEventListener('idearm-editor-event', function (ev) {
+                const msg = ev.detail;
+                if (msg.type === 'onCaretChanged') {
+                    document.getElementById('stat-pos').textContent = `Ln ${msg.payload.line}, Col ${msg.payload.column}`;
+                } else if (msg.type === 'onDocumentChanged') {
+                    document.getElementById('stat-msg').textContent = `Doc edited (v${msg.payload.version})`;
+                } else if (msg.type === 'onBreakpointToggled') {
+                    document.getElementById('stat-msg').textContent = `Breakpoint toggled at line ${msg.payload.line}`;
+                }
+            });
+
+            // Initial sample file
+            const initialAsm = [
+                '; =========================================================',
+                '; IDEARM Monaco Isolated Parity Prototype',
+                '; Press F9 for Breakpoint, F12 for Definition, Shift+F12 for References',
+                '; Hover over MOV, ADD, INT or hex numbers for inspector cards',
+                '; =========================================================',
+                '.model small',
+                '.stack 100h',
+                '.data',
+                '    msg_hello   db "Hello from IDEARM Monaco Bridge!", 0Dh, 0Ah, "$"',
+                '    val_counter dw 002Ah        ; 42 in decimal',
+                '    mask_pattern dw 0A5A5h',
+                '',
+                '.code',
+                'main proc far',
+                '    mov ax, @data',
+                '    mov ds, ax',
+                '    mov es, ax',
+                '    lea dx, msg_hello',
+                '    mov ah, 09h',
+                '    int 21h                     ; DOS display string service',
+                '    mov ax, 4C00h',
+                '    int 21h                     ; Terminate program with code 0',
+                'main endp',
+                'end main'
+            ].join('\n');
+
+            window.monacoBridge.openDocument({
+                uri: 'file:///sample.asm',
+                text: initialAsm,
+                version: 1
+            });
+
+            updateStatusBar('sample.asm', 24);
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('auto') === 'true') {
+                setTimeout(runAutomatedBenchmarkSuite, 1000);
+            }
+        });
+
+        function updateStatusBar(filename, lines) {
+            document.getElementById('stat-file').textContent = `File: ${filename}`;
+            document.getElementById('stat-lines').textContent = `Lines: ${lines}`;
+        }
+
+        async function loadFixture(filename) {
+            document.getElementById('stat-msg').textContent = `Loading ${filename}...`;
+            const start = performance.now();
+            try {
+                const resp = await fetch(`../fixtures/${filename}`);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const text = await resp.text();
+                const loadFetchMs = performance.now() - start;
+
+                const bridgeStart = performance.now();
+                const res = window.monacoBridge.openDocument({
+                    uri: `file:///${filename}`,
+                    text: text,
+                    version: 1
+                });
+                const bridgeMs = performance.now() - bridgeStart;
+                const totalMs = performance.now() - start;
+
+                updateStatusBar(filename, res.lineCount);
+                document.getElementById('stat-msg').textContent = 
+                    `Loaded ${filename}: ${res.lineCount} lines in ${totalMs.toFixed(1)}ms (bridge: ${bridgeMs.toFixed(1)}ms)`;
+                return { lineCount: res.lineCount, totalMs, bridgeMs };
+            } catch (err) {
+                document.getElementById('stat-msg').textContent = `Error loading ${filename}: ${err.message}`;
+                throw err;
+            }
+        }
+
+        function simulateDiagnostics() {
+            const diags = [
+                { line: 9, column: 5, length: 9, severity: 'WARNING', message: 'String contains non-terminated characters or unescaped symbols' },
+                { line: 20, column: 5, length: 7, severity: 'INFO', message: 'DOS Interrupt 21h AH=09h requires $ terminated string at DX' },
+                { line: 21, column: 5, length: 11, severity: 'ERROR', message: 'Unreachable code after termination or missing label' }
+            ];
+            const start = performance.now();
+            window.monacoBridge.setDiagnostics({
+                uri: window.monacoBridge.activeUri,
+                version: 1,
+                diagnostics: diags
+            });
+            const elapsed = performance.now() - start;
+            document.getElementById('stat-msg').textContent = `Applied ${diags.length} diagnostics in ${elapsed.toFixed(2)}ms`;
+        }
+
+        function simulateStaleDiagnostics() {
+            // Document is at version 1 (or current version). Send version 0 to trigger stale drop
+            const diags = [
+                { line: 1, column: 1, length: 5, severity: 'ERROR', message: 'STALE LINT: This should be rejected by monotonic version guard' }
+            ];
+            const accepted = window.monacoBridge.setDiagnostics({
+                uri: window.monacoBridge.activeUri,
+                version: 0, // Stale version!
+                diagnostics: diags
+            });
+            document.getElementById('stat-msg').textContent = accepted ? 
+                'FAIL: Stale diagnostics accepted!' : 'SUCCESS: Stale diagnostics correctly rejected by version guard';
+        }
+
+        function simulateBreakpoints() {
+            const active = [18, 21];
+            const disabled = [20];
+            window.monacoBridge.setBreakpoints({
+                uri: window.monacoBridge.activeUri,
+                activeLines: active,
+                disabledLines: disabled
+            });
+            document.getElementById('stat-msg').textContent = `Breakpoints set: Active=[${active}], Disabled=[${disabled}]`;
+        }
+
+        function simulateStep() {
+            if (!isExecutionActive) {
+                currentStepLine = 18;
+                isExecutionActive = true;
+            } else {
+                currentStepLine++;
+                if (currentStepLine > 22) {
+                    currentStepLine = 18;
+                }
+            }
+            window.monacoBridge.setExecutionLine({
+                uri: window.monacoBridge.activeUri,
+                line: currentStepLine,
+                reveal: true
+            });
+            document.getElementById('stat-msg').textContent = `Stepped execution to line ${currentStepLine}`;
+        }
+
+        function simulateTabDisposal() {
+            const tempUri = 'file:///disposable-tab.asm';
+            const tempText = '; Disposable temporary buffer\nmov ax, bx\nret\n';
+            
+            // Open 10 tabs sequentially and dispose each to verify cleanup
+            const start = performance.now();
+            for (let i = 0; i < 10; i++) {
+                const u = `file:///tab-${i}.asm`;
+                window.monacoBridge.openDocument({ uri: u, text: tempText, version: 1 });
+                window.monacoBridge.disposeDocument(u);
+            }
+            const elapsed = performance.now() - start;
+            document.getElementById('stat-msg').textContent = `Opened and disposed 10 models cleanly in ${elapsed.toFixed(1)}ms. Active models: ${window.monacoBridge.models.size}`;
+        }
+
+        async function runAutomatedBenchmarkSuite() {
+            const overlay = document.getElementById('stat-msg');
+            overlay.textContent = 'Running full automated benchmark suite...';
+            const results = {};
+
+            try {
+                // 1. Benchmark 5k lines load
+                const res5k = await loadFixture('load5k.asm');
+                results.load5k = res5k;
+
+                // 2. Measure typing latency on 5k lines (50 iterations)
+                const typing5k = measureTypingLatency(50);
+                results.typing5k = typing5k;
+
+                // 3. Measure diagnostic update on 5k lines (50 markers)
+                const diag5k = measureDiagnosticUpdate(5000, 50);
+                results.diag5k = diag5k;
+
+                // 4. Benchmark 20k lines load
+                const res20k = await loadFixture('load20k.asm');
+                results.load20k = res20k;
+
+                // 5. Measure typing latency on 20k lines (50 iterations)
+                const typing20k = measureTypingLatency(50);
+                results.typing20k = typing20k;
+
+                // 6. Measure diagnostic update on 20k lines (100 markers)
+                const diag20k = measureDiagnosticUpdate(20000, 100);
+                results.diag20k = diag20k;
+
+                // 7. Disposal & memory check
+                const gcStart = performance.now();
+                window.monacoBridge.disposeDocument('file:///load5k.asm');
+                window.monacoBridge.disposeDocument('file:///load20k.asm');
+                const gcDuration = performance.now() - gcStart;
+                results.disposal = { durationMs: gcDuration, retainedModels: window.monacoBridge.models.size };
+
+                console.log('=== BENCHMARK SUITE RESULTS ===', results);
+                window.__LAST_BENCHMARK_RESULTS = results;
+                window.monacoBridge.emit('onBenchmarkComplete', results);
+
+                try {
+                    await fetch('/api/benchmark-results', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(results)
+                    });
+                } catch (postErr) {
+                    // Ignored if offline / file protocol
+                }
+                
+                overlay.textContent = `Benchmarks complete! 5k: ${res5k.totalMs.toFixed(0)}ms, 20k: ${res20k.totalMs.toFixed(0)}ms, Typing p95: ${typing5k.p95.toFixed(1)}ms / ${typing20k.p95.toFixed(1)}ms`;
+                document.getElementById('stat-latency').textContent = `Typing p50/p95: ${typing5k.p50.toFixed(1)}ms / ${typing5k.p95.toFixed(1)}ms`;
+
+                return results;
+            } catch (err) {
+                overlay.textContent = `Benchmark failed: ${err.message}`;
+                console.error(err);
+            }
+        }
+
+        function measureTypingLatency(iterations = 50) {
+            const editor = window.monacoBridge.editor;
+            const model = editor.getModel();
+            const latencies = [];
+
+            // Perform synthetic single-character keystroke inserts and deletions in paragraph
+            for (let i = 0; i < iterations; i++) {
+                const targetLine = Math.min(25 + i * 10, model.getLineCount());
+                const pos = { lineNumber: targetLine, column: 5 };
+                
+                const t0 = performance.now();
+                editor.executeEdits('benchmark-typing', [{
+                    range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
+                    text: 'x',
+                    forceMoveMarkers: true
+                }]);
+                const t1 = performance.now();
+                latencies.push(t1 - t0);
+
+                // Undo/delete inserted char
+                editor.executeEdits('benchmark-typing-revert', [{
+                    range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column + 1),
+                    text: '',
+                    forceMoveMarkers: true
+                }]);
+            }
+
+            latencies.sort((a, b) => a - b);
+            const p50 = latencies[Math.floor(latencies.length * 0.5)];
+            const p95 = latencies[Math.floor(latencies.length * 0.95)];
+            const max = latencies[latencies.length - 1];
+
+            return { iterations, p50, p95, max, samples: latencies };
+        }
+
+        function measureDiagnosticUpdate(lineCount, markerCount) {
+            const diags = [];
+            for (let i = 0; i < markerCount; i++) {
+                const line = Math.max(1, Math.floor((i / markerCount) * lineCount));
+                diags.push({
+                    line: line,
+                    column: 5,
+                    length: 10,
+                    severity: (i % 3 === 0) ? 'ERROR' : (i % 3 === 1) ? 'WARNING' : 'INFO',
+                    message: `Synthetic diagnostic marker #${i} at line ${line}`
+                });
+            }
+
+            const t0 = performance.now();
+            window.monacoBridge.setDiagnostics({
+                uri: window.monacoBridge.activeUri,
+                version: 9999,
+                diagnostics: diags
+            });
+            const durationMs = performance.now() - t0;
+            return { markerCount, durationMs };
+        }
+    </script>
+</body>
+</html>

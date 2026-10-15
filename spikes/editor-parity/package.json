@@ -1,0 +1,15 @@
+{
+  "name": "idearm-editor-parity-spike",
+  "version": "1.0.0",
+  "description": "Task C: Isolated Monaco/VS Code editor prototype, bridge contract, and JavaFX WebView viability harness",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "node server.js",
+    "bench": "node benchmark-runner.js",
+    "test": "node test-bridge.js && node test-server.js"
+  },
+  "dependencies": {
+    "monaco-editor": "0.52.2"
+  }
+}

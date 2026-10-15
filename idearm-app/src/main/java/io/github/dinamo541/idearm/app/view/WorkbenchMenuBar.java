@@ -30,6 +30,9 @@ public final class WorkbenchMenuBar extends MenuBar {
     private Runnable onNewFolderRequested = () -> { };
     private final javafx.scene.control.CheckMenuItem fullScreen = new javafx.scene.control.CheckMenuItem();
     private final javafx.scene.control.CheckMenuItem minimap = new javafx.scene.control.CheckMenuItem();
+    private final Menu compactMenu = new Menu("\u2630");
+    private final java.util.List<Menu> mainMenus;
+    private boolean compact;
 
     public javafx.beans.property.BooleanProperty minimapVisibleProperty() { return minimap.selectedProperty(); }
 
@@ -51,6 +54,23 @@ public final class WorkbenchMenuBar extends MenuBar {
                 createRunMenu(),
                 createHelpMenu()
         );
+        mainMenus = java.util.List.copyOf(getMenus());
+        accessibleTextProperty().bind(localization.text("menu.main"));
+    }
+
+    /** Preserve every menu and accelerator when a snapped window cannot fit the full menu row. */
+    public void setCompact(boolean value) {
+        if (compact == value) return;
+        compact = value;
+        getMenus().forEach(Menu::hide);
+        getMenus().clear();
+        if (value) {
+            compactMenu.getItems().setAll(mainMenus);
+            getMenus().add(compactMenu);
+        } else {
+            compactMenu.getItems().clear();
+            getMenus().setAll(mainMenus);
+        }
     }
 
     public void setOnCommandPaletteRequested(Runnable onCommandPaletteRequested) {
@@ -205,13 +225,43 @@ public final class WorkbenchMenuBar extends MenuBar {
         saveAs.setOnAction(e -> saveAsDialog());
         saveAs.disableProperty().bind(viewModel.getEditorArea().activeDocumentProperty().isNull());
 
+        var reopenEncoding = new Menu();
+        reopenEncoding.textProperty().bind(localization.text("menu.file.reopenEncoding"));
+        reopenEncoding.disableProperty().bind(viewModel.getEditorArea().activeDocumentProperty().isNull());
+        for (var cs : io.github.dinamo541.idearm.domain.files.TextDecoding.COMMON_ENCODINGS) {
+            var item = new MenuItem(io.github.dinamo541.idearm.domain.files.TextDecoding.displayName(cs));
+            item.setOnAction(e -> {
+                try {
+                    viewModel.reopenActiveDocumentWithEncoding(cs);
+                } catch (IOException ex) {
+                    showError(localization.get("menu.file.reopenEncoding"), ex.getMessage());
+                }
+            });
+            reopenEncoding.getItems().add(item);
+        }
+
+        var saveEncoding = new Menu();
+        saveEncoding.textProperty().bind(localization.text("menu.file.saveEncoding"));
+        saveEncoding.disableProperty().bind(viewModel.getEditorArea().activeDocumentProperty().isNull());
+        for (var cs : io.github.dinamo541.idearm.domain.files.TextDecoding.COMMON_ENCODINGS) {
+            var item = new MenuItem(io.github.dinamo541.idearm.domain.files.TextDecoding.displayName(cs));
+            item.setOnAction(e -> {
+                try {
+                    viewModel.saveActiveDocumentWithEncoding(cs);
+                } catch (IOException ex) {
+                    showError(localization.get("dialog.error.save"), ex.getMessage());
+                }
+            });
+            saveEncoding.getItems().add(item);
+        }
+
         var exit = new MenuItem();
         exit.textProperty().bind(localization.text("menu.file.exit"));
         exit.setAccelerator(new KeyCodeCombination(KeyCode.F4, KeyCombination.ALT_DOWN));
         exit.setOnAction(e -> io.github.dinamo541.idearm.app.ui.WindowChrome.requestClose((javafx.stage.Stage) getScene().getWindow()));
 
         menu.getItems().addAll(newFile, newFolder, new SeparatorMenuItem(), newProject, openFile, openProject, recent, importProject,
-                new SeparatorMenuItem(), save, saveAs, saveAll, new SeparatorMenuItem(), exit);
+                new SeparatorMenuItem(), save, saveAs, saveAll, reopenEncoding, saveEncoding, new SeparatorMenuItem(), exit);
         return menu;
     }
 
@@ -365,7 +415,7 @@ public final class WorkbenchMenuBar extends MenuBar {
         var run = new MenuItem();
         run.textProperty().bind(localization.text("menu.run.run"));
         run.setAccelerator(new KeyCodeCombination(KeyCode.F5, KeyCombination.CONTROL_DOWN));
-        run.setOnAction(e -> viewModel.run(false));
+        run.setOnAction(e -> viewModel.run());
         run.disableProperty().bind(viewModel.busyProperty().or(viewModel.currentProjectProperty().isNull()));
 
         var runKeepOpen = new MenuItem();

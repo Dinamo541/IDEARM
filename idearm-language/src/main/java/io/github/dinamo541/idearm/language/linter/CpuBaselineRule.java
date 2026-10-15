@@ -45,6 +45,15 @@ public final class CpuBaselineRule implements LintRule {
             "FS", "GS"
     );
 
+    private static final Set<String> REGS_64BIT = Set.of(
+            "RAX", "RBX", "RCX", "RDX", "RSI", "RDI", "RBP", "RSP",
+            "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15",
+            "R8D", "R9D", "R10D", "R11D", "R12D", "R13D", "R14D", "R15D",
+            "R8W", "R9W", "R10W", "R11W", "R12W", "R13W", "R14W", "R15W",
+            "R8B", "R9B", "R10B", "R11B", "R12B", "R13B", "R14B", "R15B",
+            "RIP"
+    );
+
     @Override
     public List<Diagnostic> check(SourceFileNode ast, String filePath, String targetCpu, ProjectSymbolIndex index) {
         List<Diagnostic> diagnostics = new ArrayList<>();
@@ -236,6 +245,25 @@ public final class CpuBaselineRule implements LintRule {
                                 "idearm-linter",
                                 mnem + " " + String.join(", ", inst.operands()),
                                 List.of(foundSegReg, cpu)
+                        ));
+                        break;
+                    }
+                }
+            }
+
+            // Check 64-bit registers on < x86-64
+            if (allowedLevel < 7) {
+                for (String op : inst.operands()) {
+                    String found64Reg = findRegister(op, REGS_64BIT);
+                    if (found64Reg != null) {
+                        diagnostics.add(new Diagnostic(
+                                Severity.WARNING,
+                                "lint.cpu-baseline-register64",
+                                "Register '" + found64Reg + "' is a 64-bit register requiring x86-64 CPU; project target is " + cpu + ".",
+                                loc,
+                                "idearm-linter",
+                                mnem + " " + String.join(", ", inst.operands()),
+                                List.of(found64Reg, cpu)
                         ));
                         break;
                     }

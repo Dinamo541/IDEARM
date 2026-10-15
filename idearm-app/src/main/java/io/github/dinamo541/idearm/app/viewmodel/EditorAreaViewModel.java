@@ -111,6 +111,23 @@ public final class EditorAreaViewModel {
     }
 
     /**
+     * Closes all open document tabs.
+     */
+    public void closeAll() {
+        documents.clear();
+        activeDocument.set(null);
+    }
+
+    /**
+     * Sets the active document if it belongs to the open documents.
+     */
+    public void setActiveDocument(EditorDocumentViewModel doc) {
+        if (doc != null && documents.contains(doc)) {
+            activeDocument.set(doc);
+        }
+    }
+
+    /**
      * Keeps tabs attached to their files after a rename in the explorer, including files inside a renamed folder.
      */
     public void pathRenamed(Path from, Path to) {

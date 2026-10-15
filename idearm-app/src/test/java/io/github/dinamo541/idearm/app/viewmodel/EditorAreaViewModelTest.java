@@ -92,7 +92,7 @@ class EditorAreaViewModelTest {
         EditorDocumentViewModel doc = viewModel.openFile(file);
 
         assertEquals("; Cálculo del año\nmov ax, 1\n", doc.getEditor().getText());
-        assertEquals("windows-1252 · CRLF", WorkbenchViewModel.describe(doc.getFormat()));
+        assertEquals("Windows-1252 · CRLF", WorkbenchViewModel.describe(doc.getFormat()));
 
         doc.getEditor().modifiedProperty().set(true);
         viewModel.saveActive();

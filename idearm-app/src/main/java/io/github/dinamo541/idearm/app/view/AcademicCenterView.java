@@ -37,6 +37,7 @@ import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -58,9 +59,14 @@ public class AcademicCenterView extends Stage {
     private final Button forwardButton = new Button(null, WorkbenchIcons.RIGHT.create());
     private final Button homeButton = new Button(null, WorkbenchIcons.HOME.create());
 
-    private final ComboBox<CategoryItem> categoryCombo = new ComboBox<>();
+    private final ComboBox<CategoryFilterItem> categoryCombo = new ComboBox<>();
+    private final Label catLabel = new Label();
+    private final ComboBox<BitnessItem> bitnessCombo = new ComboBox<>();
+    private final Label bitnessLabel = new Label();
     private final ComboBox<CpuItem> cpuCombo = new ComboBox<>();
+    private final Label cpuLabel = new Label();
     private final ComboBox<DialectItem> dialectCombo = new ComboBox<>();
+    private final Label dialectLabel = new Label();
     private final Button resetFiltersButton = new Button();
     private final Label countLabel = new Label();
 
@@ -86,9 +92,22 @@ public class AcademicCenterView extends Stage {
     private final Button openExampleButton = new Button();
 
     private boolean isUpdatingLanguage = false;
+    private boolean isUpdatingCategoryCombo = false;
     private final ChangeListener<Locale> localeListener = (obs, oldLocale, newLocale) -> {
         Platform.runLater(this::updateLanguageDependentControls);
     };
+
+    public record CategoryFilterItem(Object value, String labelKey, String displayName, WorkbenchIcons icon) {
+        public boolean isAll() {
+            return value == null;
+        }
+    }
+
+    public record BitnessItem(ArchitectureBitness bitness) {
+        public boolean isAll() {
+            return bitness == null || bitness == ArchitectureBitness.ALL;
+        }
+    }
 
     public record CategoryItem(InstructionCategory category) {
         public boolean isAll() {
@@ -188,36 +207,62 @@ public class AcademicCenterView extends Stage {
         navRow.setAlignment(Pos.CENTER_LEFT);
 
         // Facets row
-        var catLabel = new Label();
         catLabel.textProperty().bind(localization.text("dialog.dictionary.category"));
         catLabel.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_MUTED, Styles.TEXT_SMALL);
 
-        populateCategoryCombo();
-        categoryCombo.setPrefWidth(240);
+        categoryCombo.setPrefWidth(185);
         categoryCombo.getStyleClass().add(Styles.ROUNDED);
+        categoryCombo.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(CategoryFilterItem item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty || item == null ? null : (item.icon() != null ? item.icon().create() : null));
+                setGraphicTextGap(8);
+                setText(empty || item == null ? null : item.displayName());
+            }
+        });
+        categoryCombo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(CategoryFilterItem item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty || item == null ? null : (item.icon() != null ? item.icon().create() : null));
+                setGraphicTextGap(8);
+                setText(empty || item == null ? null : item.displayName());
+            }
+        });
 
-        var cpuLabel = new Label();
+        bitnessLabel.textProperty().bind(localization.text("dialog.academic.architecture"));
+        bitnessLabel.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_MUTED, Styles.TEXT_SMALL);
+
+        populateBitnessCombo();
+        bitnessCombo.setPrefWidth(165);
+        bitnessCombo.getStyleClass().add(Styles.ROUNDED);
+
         cpuLabel.textProperty().bind(localization.text("dialog.dictionary.cpu"));
         cpuLabel.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_MUTED, Styles.TEXT_SMALL);
 
         populateCpuCombo();
-        cpuCombo.setPrefWidth(180);
+        cpuCombo.setPrefWidth(135);
         cpuCombo.getStyleClass().add(Styles.ROUNDED);
 
-        var dialectLabel = new Label();
         dialectLabel.textProperty().bind(localization.text("dialog.academic.dialect"));
         dialectLabel.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_MUTED, Styles.TEXT_SMALL);
 
         populateDialectCombo();
-        dialectCombo.setPrefWidth(180);
+        dialectCombo.setPrefWidth(140);
         dialectCombo.getStyleClass().add(Styles.ROUNDED);
 
         resetFiltersButton.textProperty().bind(localization.text("dialog.dictionary.resetFilters"));
         resetFiltersButton.getStyleClass().addAll(Styles.BUTTON_OUTLINED, Styles.SMALL, Styles.ROUNDED);
+        resetFiltersButton.setGraphic(WorkbenchIcons.RESTART.create(12));
         resetFiltersButton.setOnAction(e -> viewModel.resetFilters());
 
-        var filters = new FlowPane(12, 8, filterField(catLabel, categoryCombo),
-                filterField(cpuLabel, cpuCombo), filterField(dialectLabel, dialectCombo), resetFiltersButton);
+        var filters = new FlowPane(8, 8,
+                filterField(catLabel, categoryCombo),
+                filterField(bitnessLabel, bitnessCombo),
+                filterField(cpuLabel, cpuCombo),
+                filterField(dialectLabel, dialectCombo),
+                resetFiltersButton);
         filters.setAlignment(Pos.CENTER_LEFT);
 
         topBar.getChildren().addAll(navRow, filters);
@@ -225,14 +270,17 @@ public class AcademicCenterView extends Stage {
                 "dialog.academic.title", "dialog.dictionary.subtitle", WorkbenchIcons.BOOK), topBar));
 
         // --- LEFT PANE (Master List / Search Results) ---
+        instructionListView.setFixedCellSize(48);
         instructionListView.setItems(viewModel.getFilteredInstructions());
         instructionListView.getStyleClass().add("dictionary-list");
         instructionListView.setCellFactory(lv -> new InstructionListCell());
 
+        registerListView.setFixedCellSize(48);
         registerListView.setItems(viewModel.getFilteredRegisters());
         registerListView.getStyleClass().add("dictionary-list");
         registerListView.setCellFactory(lv -> new RegisterListCell());
 
+        syntaxListView.setFixedCellSize(48);
         syntaxListView.setItems(viewModel.getFilteredSyntaxItems());
         syntaxListView.getStyleClass().add("dictionary-list");
         syntaxListView.setCellFactory(lv -> new SyntaxListCell());
@@ -256,6 +304,7 @@ public class AcademicCenterView extends Stage {
         knowledgeTabs.setPrefWidth(320);
         knowledgeTabs.setMinWidth(260);
 
+        searchResultListView.setFixedCellSize(48);
         searchResultListView.setPrefWidth(280);
         searchResultListView.getStyleClass().add("dictionary-list");
         searchResultListView.setMinWidth(220);
@@ -367,8 +416,21 @@ public class AcademicCenterView extends Stage {
         searchField.textProperty().bindBidirectional(viewModel.searchQueryProperty());
 
         categoryCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (!isUpdatingLanguage && !isUpdatingCategoryCombo) {
+                Tab activeTab = knowledgeTabs.getSelectionModel().getSelectedItem();
+                if (activeTab == registersTab) {
+                    viewModel.selectedRegisterGroupProperty().set(newVal != null && newVal.value() instanceof RegisterGroup g ? g : null);
+                } else if (activeTab == operandsTab) {
+                    viewModel.selectedSyntaxClassProperty().set(newVal != null && newVal.value() instanceof SyntaxClass s ? s : null);
+                } else {
+                    viewModel.selectedCategoryProperty().set(newVal != null && newVal.value() instanceof InstructionCategory c ? c : null);
+                }
+            }
+        });
+
+        bitnessCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (!isUpdatingLanguage) {
-                viewModel.selectedCategoryProperty().set(newVal != null ? newVal.category() : null);
+                viewModel.selectedBitnessProperty().set(newVal != null ? newVal.bitness() : ArchitectureBitness.ALL);
             }
         });
 
@@ -381,6 +443,54 @@ public class AcademicCenterView extends Stage {
         dialectCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (!isUpdatingLanguage) {
                 viewModel.selectedDialectProperty().set(newVal != null ? newVal.dialect() : Dialect.COMMON);
+            }
+        });
+
+        viewModel.selectedBitnessProperty().addListener((obs, oldVal, newVal) -> {
+            ArchitectureBitness target = newVal != null ? newVal : ArchitectureBitness.ALL;
+            for (BitnessItem item : bitnessCombo.getItems()) {
+                if (item.bitness() == target) {
+                    bitnessCombo.getSelectionModel().select(item);
+                    break;
+                }
+            }
+        });
+
+        viewModel.selectedDialectProperty().addListener((obs, oldVal, newVal) -> {
+            Dialect target = newVal != null ? newVal : Dialect.COMMON;
+            for (DialectItem item : dialectCombo.getItems()) {
+                if (item.dialect() == target) {
+                    dialectCombo.getSelectionModel().select(item);
+                    break;
+                }
+            }
+        });
+
+        viewModel.selectedCpuProperty().addListener((obs, oldVal, newVal) -> {
+            CpuLevel target = newVal;
+            for (CpuItem item : cpuCombo.getItems()) {
+                if (item.cpu() == target) {
+                    cpuCombo.getSelectionModel().select(item);
+                    break;
+                }
+            }
+        });
+
+        viewModel.selectedCategoryProperty().addListener((obs, oldVal, newVal) -> {
+            if (knowledgeTabs.getSelectionModel().getSelectedItem() == mnemonicsTab) {
+                updateContextualCategoryCombo();
+            }
+        });
+
+        viewModel.selectedRegisterGroupProperty().addListener((obs, oldVal, newVal) -> {
+            if (knowledgeTabs.getSelectionModel().getSelectedItem() == registersTab) {
+                updateContextualCategoryCombo();
+            }
+        });
+
+        viewModel.selectedSyntaxClassProperty().addListener((obs, oldVal, newVal) -> {
+            if (knowledgeTabs.getSelectionModel().getSelectedItem() == operandsTab) {
+                updateContextualCategoryCombo();
             }
         });
 
@@ -415,6 +525,8 @@ public class AcademicCenterView extends Stage {
 
         // Selecting a layer shows its first entry, so a tab is never opened empty.
         knowledgeTabs.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+            updateCountLabel();
+            updateContextualCategoryCombo();
             if (viewModel.isSearchingProperty().get()) {
                 return;
             }
@@ -448,8 +560,22 @@ public class AcademicCenterView extends Stage {
             revealLayerOf(newVal);
         });
 
-        viewModel.matchCountProperty().addListener((obs, oldVal, newVal) -> {
-            countLabel.setText(localization.get("dialog.dictionary.instructionsFound", newVal));
+        viewModel.matchCountProperty().addListener((obs, oldVal, newVal) -> updateCountLabel());
+        viewModel.isSearchingProperty().addListener((obs, oldVal, newVal) -> updateCountLabel());
+        viewModel.getFilteredInstructions().addListener((javafx.collections.ListChangeListener<InstructionInfo>) c -> {
+            if (!viewModel.isSearchingProperty().get() && knowledgeTabs.getSelectionModel().getSelectedItem() == mnemonicsTab) {
+                updateCountLabel();
+            }
+        });
+        viewModel.getFilteredRegisters().addListener((javafx.collections.ListChangeListener<RegisterEntry>) c -> {
+            if (!viewModel.isSearchingProperty().get() && knowledgeTabs.getSelectionModel().getSelectedItem() == registersTab) {
+                updateCountLabel();
+            }
+        });
+        viewModel.getFilteredSyntaxItems().addListener((javafx.collections.ListChangeListener<SyntaxItem>) c -> {
+            if (!viewModel.isSearchingProperty().get() && knowledgeTabs.getSelectionModel().getSelectedItem() == operandsTab) {
+                updateCountLabel();
+            }
         });
 
         viewModel.getSearchResultGroups().addListener((javafx.collections.ListChangeListener<SearchResultGroup>) c -> {
@@ -459,7 +585,8 @@ public class AcademicCenterView extends Stage {
             }
         });
 
-        countLabel.setText(localization.get("dialog.dictionary.instructionsFound", viewModel.matchCountProperty().get()));
+        updateContextualCategoryCombo();
+        updateCountLabel();
         viewModel.languageProperty().set(localization.localeProperty().get().getLanguage());
 
         Object initialEntity = viewModel.selectedEntityProperty().get();
@@ -539,7 +666,12 @@ public class AcademicCenterView extends Stage {
         summaryLabel.getStyleClass().addAll(Styles.TITLE_4, Styles.TEXT_MUTED);
         summaryLabel.setWrapText(true);
 
-        detailPane.getChildren().add(detailHeader(mnemonicLabel, summaryLabel, categoryChip, cpuChip));
+        List<Labeled> infoBadges = new ArrayList<>();
+        infoBadges.add(categoryChip);
+        infoBadges.add(cpuChip);
+        infoBadges.addAll(createBitnessBadges(info));
+
+        detailPane.getChildren().add(detailHeader(mnemonicLabel, summaryLabel, infoBadges.toArray(new Labeled[0])));
 
         // Syntax Variants
         if (info.syntaxVariants() != null && !info.syntaxVariants().isEmpty()) {
@@ -600,7 +732,12 @@ public class AcademicCenterView extends Stage {
         summaryLabel.getStyleClass().addAll(Styles.TITLE_4, Styles.TEXT_MUTED);
         summaryLabel.setWrapText(true);
 
-        detailPane.getChildren().add(detailHeader(mnemonicLabel, summaryLabel, categoryChip, cpuChip));
+        List<Labeled> entryBadges = new ArrayList<>();
+        entryBadges.add(categoryChip);
+        entryBadges.add(cpuChip);
+        entryBadges.addAll(createBitnessBadges(entry));
+
+        detailPane.getChildren().add(detailHeader(mnemonicLabel, summaryLabel, entryBadges.toArray(new Labeled[0])));
 
         // Forms and Operands
         if (!entry.forms().isEmpty()) {
@@ -797,20 +934,33 @@ public class AcademicCenterView extends Stage {
         var tokenLabel = new Label(syntax.token());
         tokenLabel.getStyleClass().addAll(Styles.TITLE_1, Styles.TEXT_BOLD, "code-font");
 
-        var classBadge = new Label(localization.get("syntax.class." + syntax.syntaxClass().name()));
-        classBadge.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.ROUNDED, Styles.BUTTON_OUTLINED);
+        var classBadge = new Button(localization.get("syntax.class." + syntax.syntaxClass().name()));
+        classBadge.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.ROUNDED, Styles.BUTTON_OUTLINED, Styles.SMALL);
+        classBadge.setGraphic(syntaxIcon(syntax.syntaxClass()).create());
+        classBadge.setOnAction(e -> viewModel.selectedSyntaxClassProperty().set(syntax.syntaxClass()));
 
         var statusBadge = new Label(localization.get(syntax.assemblable()
                 ? "dialog.academic.assemblable" : "dialog.academic.notationOnly"));
         statusBadge.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.ROUNDED, syntax.assemblable() ? Styles.SUCCESS : Styles.WARNING);
 
-        classBadge.setGraphic(syntaxIcon(syntax).create());
-
         var summaryLabel = new Label(isEs ? syntax.summaryEs() : syntax.summaryEn());
         summaryLabel.getStyleClass().addAll(Styles.TITLE_4, Styles.TEXT_MUTED);
         summaryLabel.setWrapText(true);
 
-        detailPane.getChildren().add(detailHeader(tokenLabel, summaryLabel, classBadge, statusBadge));
+        List<Labeled> syntaxBadges = new ArrayList<>();
+        syntaxBadges.add(classBadge);
+        syntaxBadges.add(statusBadge);
+
+        for (DialectSupport ds : syntax.dialects()) {
+            if (ds.dialect() != null && ds.dialect() != Dialect.COMMON) {
+                var dialectBadge = new Button(ds.dialect().displayName());
+                dialectBadge.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.ROUNDED, Styles.BG_SUBTLE, Styles.SMALL);
+                dialectBadge.setOnAction(e -> viewModel.selectedDialectProperty().set(ds.dialect()));
+                syntaxBadges.add(dialectBadge);
+            }
+        }
+
+        detailPane.getChildren().add(detailHeader(tokenLabel, summaryLabel, syntaxBadges.toArray(new Labeled[0])));
 
         // Description
         var descSection = createSectionTitle(localization.get("dialog.dictionary.description"));
@@ -977,21 +1127,13 @@ public class AcademicCenterView extends Stage {
 
             var flagPill = new VBox(2);
             flagPill.setAlignment(Pos.CENTER);
-            flagPill.setStyle("-fx-background-color: -color-bg-subtle; -fx-background-radius: 4px; -fx-padding: 4px 8px; -fx-min-width: 32px;");
+            flagPill.getStyleClass().add("academic-flag-pill");
 
             var nameLabel = new Label(name);
-            nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 11px;");
+            nameLabel.getStyleClass().add("academic-flag-name");
 
             var effLabel = new Label(eff.symbol());
-            effLabel.setStyle("-fx-font-size: 11px; -fx-font-weight: bold;");
-
-            switch (eff) {
-                case MODIFIED -> effLabel.setStyle("-fx-text-fill: -color-warning-fg; -fx-font-weight: bold;");
-                case SET -> effLabel.setStyle("-fx-text-fill: -color-success-fg; -fx-font-weight: bold;");
-                case CLEARED -> effLabel.setStyle("-fx-text-fill: -color-accent-fg; -fx-font-weight: bold;");
-                case UNDEFINED -> effLabel.setStyle("-fx-text-fill: -color-danger-fg; -fx-font-weight: bold;");
-                case UNAFFECTED -> effLabel.setStyle("-fx-text-fill: -color-fg-muted;");
-            }
+            effLabel.getStyleClass().addAll("academic-flag-eff", "eff-" + eff.name().toLowerCase(java.util.Locale.ROOT));
 
             // Rich educational tooltip on each flag pill
             String fullName = localization.get("flag.full." + name);
@@ -1117,6 +1259,58 @@ public class AcademicCenterView extends Stage {
         return null;
     }
 
+    public void setTargetBitness(ArchitectureBitness bitness) {
+        if (bitness != null) {
+            viewModel.selectedBitnessProperty().set(bitness);
+        }
+    }
+
+    public void selectEntity(String name) {
+        if (name == null || name.isBlank()) {
+            return;
+        }
+        String clean = name.trim();
+        var regOpt = viewModel.corpus().findRegister(clean.toUpperCase(Locale.ROOT));
+        if (regOpt.isPresent()) {
+            selectRegister(regOpt.get());
+            return;
+        }
+        var synOpt = viewModel.corpus().findSyntaxItem(clean.toLowerCase(Locale.ROOT));
+        if (synOpt.isEmpty()) {
+            synOpt = viewModel.corpus().findSyntaxItem(clean.toUpperCase(Locale.ROOT));
+        }
+        if (synOpt.isPresent()) {
+            selectSyntaxItem(synOpt.get());
+            return;
+        }
+        knowledgeTabs.getSelectionModel().select(mnemonicsTab);
+        selectMnemonic(clean);
+    }
+
+    public void selectRegister(RegisterEntry reg) {
+        if (reg != null) {
+            if (!viewModel.getFilteredRegisters().contains(reg)) {
+                viewModel.resetFilters();
+            }
+            knowledgeTabs.getSelectionModel().select(registersTab);
+            viewModel.selectEntity(reg);
+            registerListView.getSelectionModel().select(reg);
+            registerListView.scrollTo(reg);
+        }
+    }
+
+    public void selectSyntaxItem(SyntaxItem item) {
+        if (item != null) {
+            if (!viewModel.getFilteredSyntaxItems().contains(item)) {
+                viewModel.resetFilters();
+            }
+            knowledgeTabs.getSelectionModel().select(operandsTab);
+            viewModel.selectEntity(item);
+            syntaxListView.getSelectionModel().select(item);
+            syntaxListView.scrollTo(item);
+        }
+    }
+
     public void selectMnemonic(String mnemonic) {
         if (mnemonic == null || mnemonic.isBlank()) {
             return;
@@ -1125,14 +1319,18 @@ public class AcademicCenterView extends Stage {
         var found = InstructionCatalog.find(clean);
         if (found.isPresent()) {
             InstructionInfo target = found.get();
-            viewModel.resetFilters();
+            if (!viewModel.getFilteredInstructions().contains(target)) {
+                viewModel.resetFilters();
+            }
             viewModel.selectInstruction(target);
             instructionListView.getSelectionModel().select(target);
             instructionListView.scrollTo(target);
             return;
         }
-        viewModel.resetFilters();
-        viewModel.searchQueryProperty().set(clean);
+        if (!viewModel.searchQueryProperty().get().equalsIgnoreCase(clean)) {
+            viewModel.resetFilters();
+            viewModel.searchQueryProperty().set(clean);
+        }
         for (InstructionInfo info : viewModel.getFilteredInstructions()) {
             if (info.mnemonic().equalsIgnoreCase(clean)) {
                 viewModel.selectInstruction(info);
@@ -1145,43 +1343,203 @@ public class AcademicCenterView extends Stage {
 
     public void selectInstruction(InstructionInfo info) {
         if (info != null) {
+            if (!viewModel.getFilteredInstructions().contains(info)) {
+                viewModel.resetFilters();
+            }
             viewModel.selectInstruction(info);
             instructionListView.getSelectionModel().select(info);
             instructionListView.scrollTo(info);
         }
     }
 
-    private void populateCategoryCombo() {
-        categoryCombo.getItems().clear();
-        categoryCombo.getItems().add(new CategoryItem(null));
-        for (InstructionCategory cat : InstructionCategory.values()) {
-            categoryCombo.getItems().add(new CategoryItem(cat));
+    private void updateCountLabel() {
+        if (viewModel.isSearchingProperty().get()) {
+            countLabel.setText(localization.get("dialog.academic.resultsFound", viewModel.matchCountProperty().get()));
+        } else {
+            Tab currentTab = knowledgeTabs.getSelectionModel().getSelectedItem();
+            if (currentTab == registersTab) {
+                countLabel.setText(localization.get("dialog.academic.registersFound", viewModel.getFilteredRegisters().size()));
+            } else if (currentTab == operandsTab) {
+                countLabel.setText(localization.get("dialog.academic.syntaxFound", viewModel.getFilteredSyntaxItems().size()));
+            } else {
+                countLabel.setText(localization.get("dialog.dictionary.instructionsFound", viewModel.getFilteredInstructions().size()));
+            }
         }
-        categoryCombo.setCellFactory(lv -> new ListCell<>() {
+    }
+
+    private void updateContextualCategoryCombo() {
+        if (isUpdatingLanguage) return;
+        Tab activeTab = knowledgeTabs.getSelectionModel().getSelectedItem();
+        boolean prevUpdating = isUpdatingCategoryCombo;
+        isUpdatingCategoryCombo = true;
+        try {
+            categoryCombo.getItems().clear();
+            if (activeTab == registersTab) {
+                catLabel.textProperty().bind(localization.text("dialog.academic.filter.registerGroup"));
+                categoryCombo.getItems().add(new CategoryFilterItem(null, "dialog.academic.allRegisterGroups",
+                        localization.get("dialog.academic.allRegisterGroups", Corpus.get().getAllRegisters().size()),
+                        WorkbenchIcons.BOOK));
+                for (RegisterGroup g : RegisterGroup.values()) {
+                    categoryCombo.getItems().add(new CategoryFilterItem(g, "register.group." + g.name(),
+                            localization.get("register.group." + g.name()), registerIcon(g)));
+                }
+                RegisterGroup current = viewModel.selectedRegisterGroupProperty().get();
+                int idx = 0;
+                if (current != null) {
+                    for (int i = 1; i < categoryCombo.getItems().size(); i++) {
+                        if (categoryCombo.getItems().get(i).value() == current) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                }
+                categoryCombo.getSelectionModel().select(idx);
+            } else if (activeTab == operandsTab) {
+                catLabel.textProperty().bind(localization.text("dialog.academic.filter.syntaxClass"));
+                categoryCombo.getItems().add(new CategoryFilterItem(null, "dialog.academic.allSyntaxClasses",
+                        localization.get("dialog.academic.allSyntaxClasses", Corpus.get().getAllSyntaxItems().size()),
+                        WorkbenchIcons.BOOK));
+                for (SyntaxClass sc : SyntaxClass.values()) {
+                    categoryCombo.getItems().add(new CategoryFilterItem(sc, "syntax.class." + sc.name(),
+                            localization.get("syntax.class." + sc.name()), syntaxIcon(sc)));
+                }
+                SyntaxClass current = viewModel.selectedSyntaxClassProperty().get();
+                int idx = 0;
+                if (current != null) {
+                    for (int i = 1; i < categoryCombo.getItems().size(); i++) {
+                        if (categoryCombo.getItems().get(i).value() == current) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                }
+                categoryCombo.getSelectionModel().select(idx);
+            } else {
+                catLabel.textProperty().bind(localization.text("dialog.dictionary.category"));
+                categoryCombo.getItems().add(new CategoryFilterItem(null, "dialog.dictionary.allCategories",
+                        localization.get("dialog.dictionary.allCategories", viewModel.totalCount()),
+                        WorkbenchIcons.BOOK));
+                for (InstructionCategory cat : InstructionCategory.values()) {
+                    categoryCombo.getItems().add(new CategoryFilterItem(cat, "category." + cat.name(),
+                            localization.get("category." + cat.name()), categoryIcon(cat)));
+                }
+                InstructionCategory current = viewModel.selectedCategoryProperty().get();
+                int idx = 0;
+                if (current != null) {
+                    for (int i = 1; i < categoryCombo.getItems().size(); i++) {
+                        if (categoryCombo.getItems().get(i).value() == current) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                }
+                categoryCombo.getSelectionModel().select(idx);
+            }
+        } finally {
+            isUpdatingCategoryCombo = prevUpdating;
+        }
+    }
+
+    private void populateBitnessCombo() {
+        bitnessCombo.getItems().clear();
+        for (ArchitectureBitness b : ArchitectureBitness.values()) {
+            bitnessCombo.getItems().add(new BitnessItem(b));
+        }
+        bitnessCombo.setCellFactory(lv -> new ListCell<>() {
             @Override
-            protected void updateItem(CategoryItem item, boolean empty) {
+            protected void updateItem(BitnessItem item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty || item == null ? null :
-                        (item.isAll() ? WorkbenchIcons.BOOK : categoryIcon(item.category())).create());
-                setGraphicTextGap(8);
-                if (empty || item == null) setText(null);
-                else if (item.isAll()) setText(localization.get("dialog.dictionary.allCategories", viewModel.totalCount()));
-                else setText(localization.get("category." + item.category().name()));
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(bitnessLabelText(item.bitness()));
+                    setGraphic(WorkbenchIcons.CHIP.create());
+                }
             }
         });
-        categoryCombo.setButtonCell(new ListCell<>() {
+        bitnessCombo.setButtonCell(new ListCell<>() {
             @Override
-            protected void updateItem(CategoryItem item, boolean empty) {
+            protected void updateItem(BitnessItem item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty || item == null ? null :
-                        (item.isAll() ? WorkbenchIcons.BOOK : categoryIcon(item.category())).create());
-                setGraphicTextGap(8);
-                if (empty || item == null) setText(null);
-                else if (item.isAll()) setText(localization.get("dialog.dictionary.allCategories", viewModel.totalCount()));
-                else setText(localization.get("category." + item.category().name()));
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(bitnessLabelText(item.bitness()));
+                    setGraphic(WorkbenchIcons.CHIP.create());
+                }
             }
         });
-        categoryCombo.getSelectionModel().select(0);
+        bitnessCombo.getSelectionModel().select(0);
+    }
+
+    private String bitnessLabelText(ArchitectureBitness bitness) {
+        if (bitness == null) return "";
+        return switch (bitness) {
+            case ALL -> localization.get("dialog.academic.bitness.all");
+            case BITS_16 -> localization.get("dialog.academic.bitness.16");
+            case BITS_32 -> localization.get("dialog.academic.bitness.32");
+            case BITS_64 -> localization.get("dialog.academic.bitness.64");
+        };
+    }
+
+    private List<Button> createBitnessBadges(InstructionInfo info) {
+        boolean sup16 = ArchitectureBitness.BITS_16.supportsInstruction(info, Corpus.get());
+        boolean sup32 = ArchitectureBitness.BITS_32.supportsInstruction(info, Corpus.get());
+        boolean sup64 = ArchitectureBitness.BITS_64.supportsInstruction(info, Corpus.get());
+        return buildBitnessButtons(sup16, sup32, sup64);
+    }
+
+    private List<Button> createBitnessBadges(InstructionEntry entry) {
+        boolean sup16 = ArchitectureBitness.BITS_16.supportsInstruction(entry);
+        boolean sup32 = ArchitectureBitness.BITS_32.supportsInstruction(entry);
+        boolean sup64 = ArchitectureBitness.BITS_64.supportsInstruction(entry);
+        return buildBitnessButtons(sup16, sup32, sup64);
+    }
+
+    private List<Button> buildBitnessButtons(boolean sup16, boolean sup32, boolean sup64) {
+        List<Button> buttons = new ArrayList<>(3);
+
+        Button b16 = new Button("16-bit " + (sup16 ? "✓" : "✗"));
+        b16.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.ROUNDED, Styles.SMALL);
+        if (sup16) {
+            b16.getStyleClass().add(Styles.BG_SUBTLE);
+            b16.setOnAction(e -> viewModel.selectedBitnessProperty().set(ArchitectureBitness.BITS_16));
+            Tooltip.install(b16, new Tooltip(localization.get("dialog.academic.compat.valid", 16)));
+        } else {
+            b16.getStyleClass().add(Styles.BUTTON_OUTLINED);
+            b16.setStyle("-fx-opacity: 0.65;");
+            Tooltip.install(b16, new Tooltip(localization.get("dialog.academic.compat.req32")));
+        }
+        buttons.add(b16);
+
+        Button b32 = new Button("32-bit " + (sup32 ? "✓" : "✗"));
+        b32.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.ROUNDED, Styles.SMALL);
+        if (sup32) {
+            b32.getStyleClass().add(Styles.BG_SUBTLE);
+            b32.setOnAction(e -> viewModel.selectedBitnessProperty().set(ArchitectureBitness.BITS_32));
+            Tooltip.install(b32, new Tooltip(localization.get("dialog.academic.compat.valid", 32)));
+        } else {
+            b32.getStyleClass().add(Styles.BUTTON_OUTLINED);
+            b32.setStyle("-fx-opacity: 0.65;");
+            Tooltip.install(b32, new Tooltip(localization.get("dialog.academic.compat.invalid", 32)));
+        }
+        buttons.add(b32);
+
+        Button b64 = new Button("64-bit " + (sup64 ? "✓" : "✗"));
+        b64.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.ROUNDED, Styles.SMALL);
+        if (sup64) {
+            b64.getStyleClass().add(Styles.BG_SUBTLE);
+            b64.setOnAction(e -> viewModel.selectedBitnessProperty().set(ArchitectureBitness.BITS_64));
+            Tooltip.install(b64, new Tooltip(localization.get("dialog.academic.compat.valid", 64)));
+        } else {
+            b64.getStyleClass().addAll(Styles.BUTTON_OUTLINED, Styles.DANGER);
+            Tooltip.install(b64, new Tooltip(localization.get("dialog.academic.compat.longInvalid")));
+        }
+        buttons.add(b64);
+
+        return buttons;
     }
 
     private void populateCpuCombo() {
@@ -1244,9 +1602,11 @@ public class AcademicCenterView extends Stage {
         viewModel.languageProperty().set(localization.localeProperty().get().getLanguage());
         isUpdatingLanguage = true;
         try {
-            int catIdx = categoryCombo.getSelectionModel().getSelectedIndex();
-            populateCategoryCombo();
-            if (catIdx >= 0 && catIdx < categoryCombo.getItems().size()) categoryCombo.getSelectionModel().select(catIdx);
+            updateContextualCategoryCombo();
+
+            int bitIdx = bitnessCombo.getSelectionModel().getSelectedIndex();
+            populateBitnessCombo();
+            if (bitIdx >= 0 && bitIdx < bitnessCombo.getItems().size()) bitnessCombo.getSelectionModel().select(bitIdx);
 
             int cpuIdx = cpuCombo.getSelectionModel().getSelectedIndex();
             populateCpuCombo();
@@ -1259,7 +1619,7 @@ public class AcademicCenterView extends Stage {
             isUpdatingLanguage = false;
         }
 
-        countLabel.setText(localization.get("dialog.dictionary.instructionsFound", viewModel.matchCountProperty().get()));
+        updateCountLabel();
         instructionListView.refresh();
         registerListView.refresh();
         syntaxListView.refresh();
@@ -1312,14 +1672,18 @@ public class AcademicCenterView extends Stage {
         };
     }
 
-    private static WorkbenchIcons syntaxIcon(SyntaxItem syntax) {
-        return switch (syntax.syntaxClass()) {
+    private static WorkbenchIcons syntaxIcon(SyntaxClass syntaxClass) {
+        return switch (syntaxClass) {
             case PUNCTUATION -> WorkbenchIcons.REFERENCES;
             case OPERATOR -> WorkbenchIcons.ARITHMETIC;
             case DIRECTIVE, PREPROCESSOR -> WorkbenchIcons.CONFIG;
             case PREDEFINED_SYMBOL -> WorkbenchIcons.INCLUDE;
             case SEGMENT_OVERRIDE -> WorkbenchIcons.REGISTER_SEGMENT;
         };
+    }
+
+    private static WorkbenchIcons syntaxIcon(SyntaxItem syntax) {
+        return syntaxIcon(syntax.syntaxClass());
     }
 
     private static WorkbenchIcons entityIcon(Object entity) {

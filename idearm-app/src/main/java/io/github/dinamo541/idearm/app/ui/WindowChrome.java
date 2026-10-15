@@ -1,19 +1,51 @@
 package io.github.dinamo541.idearm.app.ui;
 
 import io.github.dinamo541.idearm.app.i18n.Localization;
+import javafx.application.ConditionalFeature;
+import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.HeaderBar;
+import javafx.scene.layout.HeaderButtonType;
+import javafx.scene.layout.HeaderDragType;
+import javafx.scene.layout.Region;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
-/** Client-rendered title controls, title dragging and eight-way edge resizing. */
+/** Native Windows window management with themed controls and a portable fallback. */
+@SuppressWarnings("deprecation") // JavaFX 25 HeaderBar is an explicitly enabled preview API; see ADR-015.
 public final class WindowChrome {
     private WindowChrome() {}
+
+    public static StageStyle stageStyle() {
+        return nativeWindowing() ? StageStyle.EXTENDED : StageStyle.UNDECORATED;
+    }
+
+    private static boolean nativeWindowing() {
+        return System.getProperty("os.name", "").startsWith("Windows")
+                && Boolean.getBoolean("javafx.enablePreview")
+                && Platform.isSupported(ConditionalFeature.EXTENDED_WINDOW);
+    }
+
+    /** Keep preview/platform decisions here so other desktop platforms retain their existing chrome. */
+    public static Region header(HBox content) {
+        if (!nativeWindowing()) return content;
+        var header = new HeaderBar(null, content, null);
+        header.setMinWidth(0);
+        header.getStyleClass().add("native-window-header");
+        HeaderBar.setDragType(content, HeaderDragType.DRAGGABLE);
+        return header;
+    }
+
+    public static void draggable(Node node) {
+        if (nativeWindowing()) HeaderBar.setDragType(node, HeaderDragType.DRAGGABLE_SUBTREE);
+    }
 
     public static HBox controls(Stage stage, Localization text) {
         var fullScreen = button(WorkbenchIcons.FULL_SCREEN, "window.fullScreen", text, () -> toggleFullScreen(stage));
@@ -36,9 +68,29 @@ public final class WindowChrome {
         refresh.run();
         var close = button(WorkbenchIcons.CLOSE, "window.close", text, () -> requestClose(stage));
         close.setId("window-close"); close.getStyleClass().add("window-close");
+        if (stage.getStyle() == StageStyle.EXTENDED) {
+            nativeButton(minimize, HeaderButtonType.ICONIFY);
+            nativeButton(maximize, HeaderButtonType.MAXIMIZE);
+            nativeButton(close, HeaderButtonType.CLOSE);
+        }
         var controls = new HBox(fullScreen, minimize, maximize, close); controls.getStyleClass().add("window-controls");
         controls.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
         return controls;
+    }
+
+    private static void nativeButton(Button button, HeaderButtonType type) {
+        // HeaderBar supplies Windows hit testing (including the real Snap Layout menu). Keep our
+        // action as the single owner of activation, including keyboard, accessibility and full screen.
+        button.visibleProperty().bind(new javafx.beans.property.SimpleBooleanProperty(true));
+        HeaderBar.setButtonType(button, type);
+        button.setFocusTraversable(true);
+        button.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
+            if (event.getButton() != MouseButton.PRIMARY) return;
+            boolean activate = button.isArmed() && button.contains(event.getX(), event.getY());
+            button.disarm();
+            event.consume();
+            if (activate) button.fire();
+        });
     }
 
     public static void toggleFullScreen(Stage stage) { stage.setFullScreen(!stage.isFullScreen()); }
@@ -63,6 +115,22 @@ public final class WindowChrome {
         Scene scene = stage.getScene();
         stage.fullScreenExitHintProperty().bind(text.text("window.fullScreenHint"));
         stage.setFullScreenExitKeyCombination(new KeyCodeCombination(KeyCode.ESCAPE));
+        if (stage.getStyle() == StageStyle.EXTENDED) {
+            HeaderBar.setPrefButtonHeight(stage, 0);
+            // JavaFX uses the scene fill to select the native light/dark frame color scheme.
+            scene.fillProperty().bind(javafx.beans.binding.Bindings.createObjectBinding(() ->
+                    header.getBackground() == null || header.getBackground().getFills().isEmpty()
+                            ? javafx.scene.paint.Color.WHITE : header.getBackground().getFills().getFirst().getFill(),
+                    header.backgroundProperty()));
+            // The OS owns move/resize, snap previews, title double-click, system menu and Alt+F4.
+            // Installing the fallback mouse handlers here would bypass the native move/size loop.
+            scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+                if (new KeyCodeCombination(KeyCode.F11, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN).match(e)) {
+                    toggleFullScreen(stage); e.consume();
+                }
+            });
+            return;
+        }
         double[] drag = new double[5];
         boolean[] gesture = new boolean[3]; // [0] armed on empty header space, [1] moved since press, [2] at a screen's top edge.
         // Toolbar skins consume bubbling mouse events. Capture the gesture before it reaches the skin.

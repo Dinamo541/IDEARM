@@ -17,6 +17,14 @@ class WindowPlacementTest {
         assertEquals(saved, saved.fit(List.of(PRIMARY, new Rectangle2D(-1920, 0, 1920, 1080))));
     }
 
+    @Test void preservesNarrowSnapZonesAndClampsToSharedMinimum() {
+        var narrow = new WindowPlacement(960, 0, 500, 360, false);
+        assertEquals(narrow, narrow.fit(List.of(PRIMARY)));
+        var undersized = new WindowPlacement(20, 30, 100, 100, false).fit(List.of(PRIMARY));
+        assertEquals(WindowPlacement.MIN_WIDTH, undersized.width());
+        assertEquals(WindowPlacement.MIN_HEIGHT, undersized.height());
+    }
+
     @Test void recoversWindowWhenMonitorIsDisconnected() {
         var fitted = new WindowPlacement(-1800, -1000, 1200, 800, true).fit(List.of(PRIMARY));
         assertEquals(new WindowPlacement(360, 120, 1200, 800, true), fitted);

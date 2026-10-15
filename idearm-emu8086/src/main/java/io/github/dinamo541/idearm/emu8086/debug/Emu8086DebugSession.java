@@ -1,6 +1,7 @@
 package io.github.dinamo541.idearm.emu8086.debug;
 
 import io.github.dinamo541.idearm.domain.debug.Breakpoint;
+import io.github.dinamo541.idearm.domain.debug.CallFrame;
 import io.github.dinamo541.idearm.domain.debug.DebugCapability;
 import io.github.dinamo541.idearm.domain.debug.DebugEvent;
 import io.github.dinamo541.idearm.domain.debug.DisasmLine;
@@ -265,6 +266,7 @@ public final class Emu8086DebugSession implements DebugSession {
                 return;
             }
 
+            int initialDepth = cpu.getCallDepth();
             // Target to resume until
             int targetIp = (ip + instrLen) & 0xFFFF;
             paused.set(false);
@@ -289,7 +291,7 @@ public final class Emu8086DebugSession implements DebugSession {
                     return;
                 }
 
-                if (cpu.registers().cs == cs && cpu.registers().ip == targetIp) {
+                if (cpu.registers().cs == cs && cpu.registers().ip == targetIp && cpu.getCallDepth() <= initialDepth) {
                     paused.set(true);
                     notifyPaused();
                     return;
@@ -525,6 +527,65 @@ public final class Emu8086DebugSession implements DebugSession {
         return Collections.unmodifiableList(frames);
     }
 
+    /**
+     * Unwinds call frames using the 8086 Base Pointer (BP) frame chain in the stack segment (SS).
+     *
+     * <p><b>Heuristic Unwinding & Limitations:</b>
+     * <ul>
+     *   <li>Assumes the standard near-call convention: {@code push bp; mov bp, sp}, where {@code [bp]} holds the
+     *       caller's BP and {@code [bp+2]} holds the 16-bit near return IP.</li>
+     *   <li><b>Frameless procedures:</b> Code that does not set up a BP frame or uses BP as a general index
+     *       register cannot be unwound beyond frame 0.</li>
+     *   <li><b>Far calls:</b> Far procedures push both CS and IP (4-byte return address). This unwinder only
+     *       assumes near intra-segment calls and does not track segment transitions across far frames without
+     *       compiler debug unwind tables.</li>
+     *   <li><b>Interrupt frames:</b> Hardware or software interrupt handlers push FLAGS, CS, and IP (6 bytes).
+     *       These are not standard stack frames and are not traversed.</li>
+     *   <li>Guarded against infinite cycles, non-monotonic stack frames, and out-of-bounds pointers via visited sets
+     *       and boundary checks.</li>
+     *   <li>Does not fabricate symbol names: uses {@code "??"} when symbols are unknown rather than guessing.</li>
+     * </ul>
+     */
+    @Override
+    public List<CallFrame> callStack(int depth) {
+        int maxFrames = Math.max(0, depth);
+        if (maxFrames == 0) {
+            return List.of();
+        }
+        List<CallFrame> frames = new ArrayList<>();
+        int cs = cpu.registers().cs;
+        int ip = cpu.registers().ip;
+        var loc = inProgramCode() ? sourceMap.findLocation(ip) : Optional.<SourceLocation>empty();
+        String file = loc.map(SourceLocation::file).orElse("");
+        int line = loc.map(SourceLocation::line).orElse(0);
+        String addrStr = String.format("%04X:%04X", cs, ip);
+        frames.add(new CallFrame(0, addrStr, "??", file, line));
+
+        int bp = cpu.registers().bp;
+        int ss = cpu.registers().ss;
+        int sp = cpu.registers().sp;
+        int level = 1;
+        Set<Integer> visitedBp = new HashSet<>();
+        while (level < maxFrames && bp > 0 && bp < 0xFFFE && visitedBp.add(bp)) {
+            if (bp < sp) {
+                break;
+            }
+            int retIp = memory.read16(ss, (bp + 2) & 0xFFFF);
+            var callerLoc = inProgramCode() ? sourceMap.findLocation(retIp) : Optional.<SourceLocation>empty();
+            String callerFile = callerLoc.map(SourceLocation::file).orElse("");
+            int callerLine = callerLoc.map(SourceLocation::line).orElse(0);
+            String callerAddr = String.format("%04X:%04X", cs, retIp);
+            frames.add(new CallFrame(level, callerAddr, "??", callerFile, callerLine));
+            int nextBp = memory.read16(ss, bp);
+            if (nextBp <= bp || nextBp >= 0xFFFE) {
+                break;
+            }
+            bp = nextBp;
+            level++;
+        }
+        return Collections.unmodifiableList(frames);
+    }
+
     @Override
     public void close() {
         stop();
@@ -620,19 +681,30 @@ public final class Emu8086DebugSession implements DebugSession {
     }
 
     private int calculateCallOrIntLength(int cs, int ip) {
-        int op = memory.read8(cs, ip);
-        if (op == 0xCD) return 2; // INT imm8
-        if (op == 0xCC || op == 0xCE) return 1; // INT 3, INTO
-        if (op == 0xE8) return 3; // CALL near disp16
-        if (op == 0x9A) return 5; // CALL far ptr16:16
+        int prefixBytes = 0;
+        int currentIp = ip;
+        while (prefixBytes < 4) {
+            int b = memory.read8(cs, currentIp);
+            if (b == 0x26 || b == 0x2E || b == 0x36 || b == 0x3E || b == 0xF0) {
+                prefixBytes++;
+                currentIp = (currentIp + 1) & 0xFFFF;
+            } else {
+                break;
+            }
+        }
+        int op = memory.read8(cs, currentIp);
+        if (op == 0xCD) return prefixBytes + 2; // INT imm8
+        if (op == 0xCC || op == 0xCE) return prefixBytes + 1; // INT 3, INTO
+        if (op == 0xE8) return prefixBytes + 3; // CALL near disp16
+        if (op == 0x9A) return prefixBytes + 5; // CALL far ptr16:16
         if (op == 0xFF) {
-            int modrm = memory.read8(cs, (ip + 1) & 0xFFFF);
+            int modrm = memory.read8(cs, (currentIp + 1) & 0xFFFF);
             int reg = (modrm >> 3) & 7;
             if (reg == 2 || reg == 3) { // CALL rm16 or CALL m16:16
                 int mod = (modrm >> 6) & 3;
                 int rm = modrm & 7;
                 int dispBytes = (mod == 1) ? 1 : ((mod == 2 || (mod == 0 && rm == 6)) ? 2 : 0);
-                return 2 + dispBytes; // 0xFF + modrm + disp
+                return prefixBytes + 2 + dispBytes; // prefix + 0xFF + modrm + disp
             }
         }
         return 0; // Not a CALL or INT

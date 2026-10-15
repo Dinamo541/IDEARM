@@ -103,7 +103,7 @@ public final class OpenRecentDialog extends Stage {
         var root = new VBox(10, heading, search, filters, list, message, footer); VBox.setVgrow(list, Priority.ALWAYS);
         root.getStyleClass().add("recent-picker");
         io.github.dinamo541.idearm.app.ui.WorkbenchTheme.apply(root, owner);
-        setScene(new Scene(root, Math.min(700, owner.getWidth() - 40), 470));
+        setScene(new Scene(root, Math.min(700, owner.getWidth() - 40), 500));
         getScene().setOnKeyPressed(e -> { if (e.getCode() == KeyCode.ESCAPE) { close(); e.consume(); } });
         setOnShown(e -> { setX(owner.getX() + (owner.getWidth() - getWidth()) / 2); setY(owner.getY() + 55); search.requestFocus(); });
     }

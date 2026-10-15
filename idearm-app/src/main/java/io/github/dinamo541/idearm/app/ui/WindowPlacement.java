@@ -6,14 +6,16 @@ import java.util.List;
 
 /** Screen-independent placement math, in JavaFX logical pixels (including negative monitor origins). */
 record WindowPlacement(double x, double y, double width, double height, boolean maximized) {
+    static final double MIN_WIDTH = 500;
+    static final double MIN_HEIGHT = 360;
     WindowPlacement fit(List<Rectangle2D> screens) {
         if (screens.isEmpty()) throw new IllegalArgumentException("At least one screen is required");
         boolean valid = Double.isFinite(x) && Double.isFinite(y) && Double.isFinite(width)
                 && Double.isFinite(height) && width > 0 && height > 0;
         Rectangle2D screen = valid ? screens.stream().max(Comparator.comparingDouble(this::overlap))
                 .filter(bounds -> overlap(bounds) > 0).orElse(screens.getFirst()) : screens.getFirst();
-        double w = Math.min(screen.getWidth(), Math.max(800, valid ? width : 1280));
-        double h = Math.min(screen.getHeight(), Math.max(500, valid ? height : 800));
+        double w = Math.min(screen.getWidth(), Math.max(MIN_WIDTH, valid ? width : 1280));
+        double h = Math.min(screen.getHeight(), Math.max(MIN_HEIGHT, valid ? height : 800));
         boolean relocate = !valid || overlap(screen) == 0;
         double left = relocate ? screen.getMinX() + (screen.getWidth() - w) / 2 : x;
         double top = relocate ? screen.getMinY() + (screen.getHeight() - h) / 2 : y;

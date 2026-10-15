@@ -86,6 +86,12 @@ The Problems row shows the file and line; double-click it.
 - *Illegal instruction*: a typo in the mnemonic, or an instruction the selected processor directive (`.8086`)
   does not allow.
 - *Unexpected end of file*: the file has no `END` directive, or a `PROC`/`SEGMENT`/`MACRO` is never closed.
+- *CS unreachable from current segment*, on every `PROC` and label: code sits in a segment `CS` does not point at,
+  usually an `INCLUDE` of procedures written after `.DATA` instead of after `.CODE`. When the line is in an include
+  file, look for the source that includes it in the wrong place. A separate program (one that ends with its own
+  `END label`) matched by `src/*.asm` is left out of the build with an *Info* note, so if the errors still appear,
+  that source is listed by name in `modules` or the main file declares no start of its own (user guide, "The main
+  file, and which one Run starts").
 
 TASM reports `S:\...` paths because it runs inside DOSBox-X on a copy of your sources; IDEARM maps them back to
 your files.
@@ -272,4 +278,6 @@ memory; **Continue** then ends the program with exit code 255.
 | *The built-in emulator does not implement opcode ... (e.g. FSQRT)* | The built-in `emu8086` emulator executes 16-bit 8086 integer code but does not emulate the full x87 floating-point unit (FPU coprocessor). | Configure **Project → Properties... → Run Environment** to use **DOSBox** (or GDB on 32/64-bit targets), where full x87 FPU hardware emulation is active. Alternatively, for integer-only projects, implement an integer square root algorithm (such as Newton-Raphson). |
 | *Instruction ... is invalid in 64-bit Long Mode (e.g. AAA, DAA, PUSHA, POPA, INTO, BOUND, LDS, LES)* | 64-bit x86-64 long mode eliminated 15 legacy 16-bit instructions (BCD adjust, PUSHA/POPA, 16-bit far pointer loads, etc.). | In 64-bit projects (`win-pe64-console`, `linux-elf64-console`), replace legacy BCD or PUSHA with standard 64-bit general-purpose instructions, or switch the project profile to 16-bit DOS or 32-bit Windows. |
 | *Operand mode ... is invalid in 16-bit real mode (e.g. [bx+bp], [ax])* | The 8086 addressing unit only permits combinations of `[BX|BP + SI|DI + disp]`. Registers like `AX`, `CX`, `DX` or double base registers `[BX+BP]` cannot form effective addresses in 16 bits. | Replace `[bx+bp]` with `[bp+si]` or `[bp+di]`. Use 32-bit registers (e.g. `[eax]`, `[eax+ebx*4]`) only when targeting 386+ protected or flat memory models. |
+| *String literal ... contains non-ASCII characters in a UTF-8 file; DOS will display corrupted characters. Save the file with CP437 encoding instead.* (or mojibake such as `a├▒o` instead of `año` in DOSBox / emulator) | In DOS Real Mode, screen display output (`INT 10h`, `INT 21h` AH=09h) maps byte codes directly to IBM Code Page 437 (CP437) or CP850 font glyphs. When the source file is encoded in UTF-8, characters beyond ASCII (`> 127`, such as `ñ`, `á`, `¿`) are stored as multi-byte sequences (e.g. `ñ` = 0xC3 0xB1), which DOS renders as box-drawing characters (`├▒`). | In the editor, click the encoding indicator in the status bar (or **File → Save with Encoding**) and select **CP437** (or **CP850**). If a legacy DOS file appears garbled in the editor, use **File → Reopen with Encoding → CP437**. Alternatively, express non-ASCII characters as raw numeric byte values (e.g. `db 'a', 164, 'o$'` where 164 = 0xA4 = `ñ` in CP437). |
+
 

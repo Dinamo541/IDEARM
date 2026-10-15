@@ -1,5 +1,45 @@
 # Window management and branding verification
 
+## Native Windows integration — 2026-10-02
+
+Windows x64, JDK 25.0.3 / JavaFX 25.0.2. Implementation: [ADR-015](adr/ADR-015-native-windows-window-management.md).
+
+- The supported Windows path uses `StageStyle.EXTENDED` and `HeaderBar`. Native hit testing identifies title
+  regions as `HTCAPTION`, Maximize/Restore as `HTMAXBUTTON`, and normal header actions as `HTCLIENT`.
+  Native frame flags enable the system menu, maximizing and resizing. Windows owns drag/snap and its flyouts.
+- The native integration replaces manual title dragging and resize handling on Windows. The previous code
+  remains a fallback on other platforms and when the JavaFX preview option is disabled.
+- All eight resize directions are verified against the real Win32 frame. Button release fires once;
+  releasing outside cancels. Minimize, maximize, full screen and saved normal bounds round-trip correctly.
+  Both the custom close action and native `WM_CLOSE` honor cancellation.
+- The 500 × 360 logical-pixel minimum supports smaller snap zones. Menus collapse into one menu; command
+  search becomes an icon. Sidebar and bottom-panel space adapts and restores as the window grows. Toolbar
+  overflow, compact activity buttons and abbreviated status content keep essential controls reachable.
+- Both languages and themes are rendered at four window sizes. No desktop keyboard or pointer input is
+  injected by the new native protocol tests or the window-layout smoke.
+
+| Check | Result |
+| --- | --- |
+| `mvn -o -B verify` | 932 tests: 930 passed, 2 skipped, no failures/errors |
+| Native protocol / fallback chrome / placement | 27 passed |
+| Final targeted run including EN/ES bundles | 34 passed |
+| `IDEARM_WINDOW_SMOKE` | PASS: four sizes in dark EN and light ES; native controls, compact menu structure, Save accelerator, visible status and automatic panel restoration |
+| Portable build | `scripts/package-native.ps1 -Type app-image -SkipBuild`; JavaFX preview enabled in the packaged desktop launcher |
+| Packaged executable | `IDEARM_SMOKE=1`: PASS; packaged application JAR hash matches the final build; preview option verified in `IDEARM.cfg` |
+
+Artifacts and logs are under ignored `scratch/native-window-review/`, with isolated settings directories.
+The portable executable is `target/release/image/IDEARM/IDEARM.exe`; the ZIP and checksum are in `dist/release/`.
+
+### Remaining manual checks
+
+The user's VS Code window was observed as a reference. Computer Use was stopped with the physical Escape
+key before the drag/hover comparison completed; no further Computer Use input was issued. The new tests
+prove native hit-test and state integration, but do not claim visual verification of the Windows shell's
+top-edge picker, hover flyout, Snap Assist groups, Win-key shortcuts or physical cross-monitor/DPI dragging.
+Those checks require an interactive Windows desktop with snapping enabled. Linux/macOS were not exercised.
+
+## Previous verification — 2026-09-23
+
 Verified locally on Windows x64, JDK 25 / JavaFX 25.0.2, on 2026-09-23.
 
 ## Behavior
@@ -37,6 +77,7 @@ The visual smoke explicitly requests focus after undoing minimization before tes
 The native window-state tests are Windows-only: an Xvfb display without a window manager cannot validate
 maximize/minimize behavior. Geometry and settings tests remain platform-independent. Linux/macOS desktop
 behavior, physical multi-monitor/DPI transitions and an installed MSI were not exercised in this review.
-The existing custom title bar does not implement the Windows Snap Layout hover flyout; see ADR-009.
+That review used the original custom title bar without native Windows Snap Layouts (ADR-009), now superseded
+on Windows by ADR-015 above.
 
 See [window shortcuts](workbench-shortcuts.md) and [branding](branding.md) for usage and asset regeneration.

@@ -127,12 +127,13 @@ class MessageBundlesTest {
         assertTrue(missing.isEmpty(), "Explorer codes without a translation: " + missing);
     }
 
-    /** Codes of the problems the lower layers report; each needs a text in both languages. */
+    /** Codes of reported problems, including editor save failures; each needs a text in both languages. */
     private static final Pattern PROBLEM_CODE = Pattern.compile(
             "(?:new DomainException|\\bfail|\\berror|\\bfailure|\\bproblem)\\(\\s*\"([a-z][a-zA-Z0-9_.-]*)\""
                     + "|\"((?:lint|explorer)\\.[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*|build\\.failed|build\\.timedOut)\"");
     private static final List<String> PROBLEM_MODULES = List.of("idearm-domain", "idearm-application",
-            "idearm-infrastructure", "idearm-toolchain-dos", "idearm-toolchain-nasm", "idearm-language", "idearm-emu8086");
+            "idearm-infrastructure", "idearm-toolchain-dos", "idearm-toolchain-nasm", "idearm-language", "idearm-emu8086",
+            "idearm-app");
 
     @Test
     void everyProblemCodeHasATranslationAndEveryTranslationAProblem() throws IOException {

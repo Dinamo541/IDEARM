@@ -38,15 +38,14 @@ class EmulatorServicesContractTest {
 
     @Test
     void testUnsupportedInt10ReportsProblem() {
-        // AH = 02h (Set cursor position - unsupported in built-in emu)
-        regs.setAh(0x02);
-        regs.setBh(0);
-        regs.setDh(10);
-        regs.setDl(20);
+        // AH = 06h (Scroll window up - unsupported in built-in emu)
+        regs.setAh(0x06);
+        regs.setAl(0);
+        regs.setBh(7);
         cpu.triggerInterrupt(0x10);
 
         assertEquals(1, problems.size());
-        assertEquals("emu.bios.unsupported:10h:02", problems.getFirst());
+        assertEquals("emu.bios.unsupported:10h:06", problems.getFirst());
     }
 
     @Test

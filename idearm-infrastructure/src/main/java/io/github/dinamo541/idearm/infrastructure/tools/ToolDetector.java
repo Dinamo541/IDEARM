@@ -128,12 +128,32 @@ public final class ToolDetector {
 
     private static Optional<ToolInstallation> detectMasm(Path dir) {
         Path file = findExecutable(dir, "ML.EXE");
-        return file == null ? Optional.empty() : dosTool("ml", file, "6.11", Map.of());
+        if (file == null) return Optional.empty();
+        return dosTool("ml", file, "6.11", Map.of()).filter(tool -> {
+            if (tool.hostKind() == HostKind.WIN64) {
+                return false;
+            }
+            String v = tool.version();
+            if (v != null && !v.equals(UNKNOWN_VERSION)) {
+                Matcher m = VERSION_NUMBER.matcher(v);
+                if (m.find()) {
+                    try {
+                        int major = Integer.parseInt(m.group().split("\\.")[0]);
+                        if (major > 6) {
+                            return false;
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+            return true;
+        });
     }
 
     private static Optional<ToolInstallation> detectLink(Path dir) {
         Path file = findExecutable(dir, "LINK.EXE");
-        return file == null ? Optional.empty() : dosTool("link", file, "5.31", Map.of());
+        if (file == null) return Optional.empty();
+        return dosTool("link", file, "5.31", Map.of()).filter(tool ->
+                tool.hostKind() == HostKind.DOS_REAL || tool.hostKind() == HostKind.DOS_DPMI);
     }
 
     private static Optional<ToolInstallation> detectDosBox(Path dir) {

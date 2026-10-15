@@ -131,4 +131,23 @@ class CpuBaselineRuleTest {
         assertEquals(io.github.dinamo541.idearm.language.knowledge.CpuGeneration.P6,
                 io.github.dinamo541.idearm.language.knowledge.CpuGeneration.parse("Pentium II"));
     }
+
+    @Test
+    void cpuBaselineRegister64WarnsOn386Or8086AndPassesOnX86_64() {
+        String code = """
+                .code
+                mov rax, rbx
+                """;
+        List<Diagnostic> diag8086 = linter.lint(code, "test.asm", "8086", index);
+        assertTrue(diag8086.stream().anyMatch(d -> "lint.cpu-baseline-register64".equals(d.code())
+                && d.message().contains("RAX")), "64-bit register RAX must warn on 8086");
+
+        List<Diagnostic> diag386 = linter.lint(code, "test.asm", "386", index);
+        assertTrue(diag386.stream().anyMatch(d -> "lint.cpu-baseline-register64".equals(d.code())
+                && d.message().contains("RAX")), "64-bit register RAX must warn on 386");
+
+        List<Diagnostic> diag64 = linter.lint(code, "test.asm", "x86-64", index);
+        assertFalse(diag64.stream().anyMatch(d -> "lint.cpu-baseline-register64".equals(d.code())),
+                "64-bit register RAX must not warn on x86-64");
+    }
 }

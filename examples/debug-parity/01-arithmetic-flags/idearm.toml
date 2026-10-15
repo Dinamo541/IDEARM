@@ -1,0 +1,29 @@
+schema = 1
+
+[project]
+name = "PARITY-ARITH"
+version = "0.1.0"
+
+[target]
+profile = "dos-exe-16"
+cpu = "8086"
+
+[toolchain]
+id = "borland-tasm"
+version = ">=3.2"
+
+[sources]
+entry = "src/main.asm"
+
+[build.release]
+debug-info = false
+listing = true
+map = true
+
+[build.debug]
+debug-info = true
+listing = true
+map = true
+
+[debug]
+backend = "emu8086"

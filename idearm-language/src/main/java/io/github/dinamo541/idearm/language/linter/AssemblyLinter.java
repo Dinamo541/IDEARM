@@ -28,7 +28,8 @@ public final class AssemblyLinter {
                 new CpuBaselineRule(),
                 new UndefinedSymbolRule(),
                 new UnknownInstructionRule(dialect),
-                new AddressingModeRule()
+                new AddressingModeRule(),
+                new DosNonAsciiStringRule()
         ), dialect);
     }
 
@@ -42,17 +43,27 @@ public final class AssemblyLinter {
     }
 
     public List<Diagnostic> lint(String sourceText, String filePath, String targetCpu, ProjectSymbolIndex index) {
+        return lint(sourceText, filePath, targetCpu, index, java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    public List<Diagnostic> lint(String sourceText, String filePath, String targetCpu, ProjectSymbolIndex index,
+                                 java.nio.charset.Charset charset) {
         if (sourceText == null || sourceText.isBlank()) return List.of();
         SourceFileNode ast = parser.parse(sourceText);
-        return lint(ast, filePath, targetCpu, index);
+        return lint(ast, filePath, targetCpu, index, charset);
     }
 
     public List<Diagnostic> lint(SourceFileNode ast, String filePath, String targetCpu, ProjectSymbolIndex index) {
+        return lint(ast, filePath, targetCpu, index, java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    public List<Diagnostic> lint(SourceFileNode ast, String filePath, String targetCpu, ProjectSymbolIndex index,
+                                 java.nio.charset.Charset charset) {
         if (ast == null) return List.of();
         List<Diagnostic> diagnostics = new ArrayList<>();
 
         for (LintRule rule : rules) {
-            diagnostics.addAll(rule.check(ast, filePath, targetCpu, index));
+            diagnostics.addAll(rule.check(ast, filePath, targetCpu, index, charset));
         }
 
         return List.copyOf(diagnostics);

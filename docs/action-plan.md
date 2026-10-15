@@ -379,6 +379,8 @@ UTF-8 file (DOS shows them as garbage) and suggests CP437.
 
 **Done when.** Tests for re-encoding and the rule.
 
+**Status: done.** `TextDecoding` exposes `WINDOWS_1252`, `CP437`, `CP850`, `COMMON_ENCODINGS`, `decode(bytes, Charset)`, and `displayName(Charset)`; `StatusBarView` encoding badge is interactive with click popup menus for "Reopen with Encoding..." and "Save with Encoding..."; File menu in `WorkbenchMenuBar` and Command Palette in `WorkbenchView` provide the same encoding actions; `DosNonAsciiStringRule` warns on non-ASCII characters (`> 127`, e.g. `ñ`, `á`, `¿`) within string literals in DOS projects when the file is UTF-8 (corrupting DOS display as `a├▒o`), advising CP437 and suppressing when the file is CP437 or CP850; `docs/troubleshooting.md` updated; 100% bilingual parity in message bundles; unit tests in `TextDecodingTest`, `DosNonAsciiStringRuleTest`, `EditorDocumentViewModelTest`, `WorkbenchViewModelTest`.
+
 ### P2-05 · More DOS and BIOS services in the emulator — M
 
 **Do.** `INT 21h`: 40h (write to handles 1 and 2), 3Fh (read from handle 0), 2Ah/2Ch (date and time).
@@ -387,6 +389,16 @@ UTF-8 file (DOS shows them as garbage) and suggests CP437.
 are reported by P1-04. Update the user guide.
 
 **Done when.** One `DosInterruptHandlerTest` case per service.
+
+**Status: done.**
+- `INT 21h`: `40h` (write stdout/stderr handles 1 & 2; invalid handles return CF=1, AX=6), `3Fh` (read stdin handle 0 with echo and CRLF), `2Ah` (system date: CX=year, DH=month, DL=day, AL=weekday), `2Ch` (system time: CH=hour, CL=min, DH=sec, DL=centisec).
+- `INT 10h`: `02h` (set cursor position per page), `03h` (get cursor position and shape), `09h` & `0Ah` (write character CX times without moving cursor), `0Eh` (teletype output with cursor tracking), `13h` (write string modes 0–3 with attribute bytes and cursor update).
+- `INT 16h`: returns BIOS scan code in AH and ASCII in AL; supports Enter (0x1C), Escape (0x01), Backspace (0x0E), Tab (0x0F), and Arrow keys (Up 0x48, Down 0x50, Left 0x4B, Right 0x4D) via ANSI escapes, unicode arrows, and ASCII lookup.
+- `INT 1Ah`: `00h` (system timer ticks from `LocalTime` at ~18.2065 Hz; CX:DX ticks, AL midnight rollover flag).
+- Unsupported interrupt services (files, graphics modes) continue to cleanly report `emu.dos.unsupported` / `emu.bios.unsupported`.
+- Knowledge base: updated `bios-int10.json` with `bios.int10.13h` availability as `AVAILABLE` for `emu8086`.
+- Documentation: user guide §6.1 updated with the full list of supported BIOS and DOS services and input scan codes.
+- Unit tests: 9 dedicated tests added to `DosInterruptHandlerTest` covering each service; all 14 tests in `DosInterruptHandlerTest` and 81 tests in `idearm-emu8086` pass.
 
 ### P2-06 · Lint while typing — L
 
@@ -426,6 +438,16 @@ longer exists; ignore PE `LINK.EXE`/`ML.EXE` (for example Visual Studio's) for t
 
 **Done when.** Tests for refresh and for a missing registered tool; both dialogs open instantly.
 
+**Status: done.**
+- Tool detection warmed up asynchronously in the background at startup (`ToolRegistry.warmUp()`, `DefaultToolRegistry.system()`).
+- `DoctorDialog` loads its tool table asynchronously with a placeholder (`dialog.doctor.scanning`), opening instantly off the UI thread.
+- Added a "Rescan" button (`#rescanTools`, `WorkbenchIcons.RESTART`) in `DoctorDialog` backed by `ToolRegistry.refresh()`, triggering background refresh and updating the table.
+- `ProjectPropertiesDialog` loads installed DOSBox dialects asynchronously in `buildRunEnvironmentCombo`, opening instantly without UI thread stalls.
+- `DefaultToolRegistry` separates registered and detected tools; falls back to detection with a warning when a registered tool's executable is missing on disk.
+- `ToolDetector` ignores PE `LINK.EXE` (`WIN32_CONSOLE`/`WIN64`, e.g. Visual Studio) for the 16-bit DOS link role (accepting only `DOS_REAL`/`DOS_DPMI`) and ignores 64-bit / modern Visual Studio `ML.EXE` (major version > 6) for the 16-bit MASM role.
+- 100% bilingual parity preserved in message bundles (`dialog.doctor.rescan`, `dialog.doctor.scanning`, `dialog.doctor.scanned`).
+- Tests: `DoctorDialogTest` (instant open, rescan button, async rows), `ProjectPropertiesDialogTest`, `DefaultToolRegistryTest` (fallback on missing executable, refresh reloading config), and `ToolDetectorTest` (ignoring PE linkers and modern ML.EXE).
+
 ### P2-08 · CLI completeness — S
 
 **Do.** Add `idearm new <folder> --name --target --cpu --toolchain` using CreateProject. CreateProject derives the
@@ -433,6 +455,14 @@ default toolchain from the target (NASM for native targets instead of always `bo
 Jackson (escapes tabs and other control characters). Decide whether `build` defaults to `debug` as in the IDE.
 
 **Done when.** New `MainCliTest` cases.
+
+**Status: done.**
+- Added `idearm new <folder> [--name <name>] [--target <profile>] [--cpu <cpu>] [--toolchain <toolchain>] [--json]` to `Main.java` backed by `CreateProject.createInDirectory(...)`.
+- `CreateProject` derives default toolchain (`target.isDos() ? "borland-tasm" : "nasm"`) and default CPU (`target.cpuBaseline()`) directly from the selected `TargetProfile`.
+- Replaced manual JSON concatenation across `Main.java` (`build`, `run`, `dist`, `clean`, `import`, `new`) with Jackson `ObjectMapper` / `ObjectNode` / `ArrayNode`, guaranteeing RFC 8259 escaping of tabs, backslashes, quotes, and control characters.
+- Aligned CLI `build` to default to `debug` configuration matching the IDE workbench and `run` defaults, while adding `--release` and `--debug` flags.
+- Updated `printHelp` with usage and flags.
+- Tests added in `CreateProjectTest` and `MainCliTest` covering `new` command, defaults, target-derived toolchains and CPUs, error handling, configuration defaults, and valid JSON serialization via Jackson. 100% full reactor Maven test suite passing.
 
 ### P2-09 · Feedback when a task is already running — S
 

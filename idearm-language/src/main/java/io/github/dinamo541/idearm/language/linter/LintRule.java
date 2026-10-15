@@ -11,4 +11,9 @@ import java.util.List;
  */
 public interface LintRule {
     List<Diagnostic> check(SourceFileNode ast, String filePath, String targetCpu, ProjectSymbolIndex index);
+
+    default List<Diagnostic> check(SourceFileNode ast, String filePath, String targetCpu, ProjectSymbolIndex index,
+                                   java.nio.charset.Charset charset) {
+        return check(ast, filePath, targetCpu, index);
+    }
 }

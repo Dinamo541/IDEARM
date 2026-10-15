@@ -31,7 +31,10 @@ public final class KnowledgeViewModel {
     private final StringProperty language = new SimpleStringProperty("es");
     private final ObjectProperty<Dialect> selectedDialect = new SimpleObjectProperty<>(Dialect.COMMON);
     private final ObjectProperty<CpuLevel> selectedCpu = new SimpleObjectProperty<>();
+    private final ObjectProperty<ArchitectureBitness> selectedBitness = new SimpleObjectProperty<>(ArchitectureBitness.ALL);
     private final ObjectProperty<InstructionCategory> selectedCategory = new SimpleObjectProperty<>();
+    private final ObjectProperty<RegisterGroup> selectedRegisterGroup = new SimpleObjectProperty<>();
+    private final ObjectProperty<SyntaxClass> selectedSyntaxClass = new SimpleObjectProperty<>();
 
     // --- Active Selection ---
     private final ObjectProperty<Object> selectedEntity = new SimpleObjectProperty<>();
@@ -85,6 +88,9 @@ public final class KnowledgeViewModel {
         selectedCategory.addListener((obs, oldVal, newVal) -> onSearchOrFilterChanged());
         selectedCpu.addListener((obs, oldVal, newVal) -> onSearchOrFilterChanged());
         selectedDialect.addListener((obs, oldVal, newVal) -> onSearchOrFilterChanged());
+        selectedBitness.addListener((obs, oldVal, newVal) -> onSearchOrFilterChanged());
+        selectedRegisterGroup.addListener((obs, oldVal, newVal) -> onSearchOrFilterChanged());
+        selectedSyntaxClass.addListener((obs, oldVal, newVal) -> onSearchOrFilterChanged());
 
         selectedInstruction.addListener((obs, oldVal, newVal) -> {
             if (newVal != null && !isNavigatingHistory) {
@@ -133,6 +139,18 @@ public final class KnowledgeViewModel {
         return selectedCategory;
     }
 
+    public ObjectProperty<ArchitectureBitness> selectedBitnessProperty() {
+        return selectedBitness;
+    }
+
+    public ObjectProperty<RegisterGroup> selectedRegisterGroupProperty() {
+        return selectedRegisterGroup;
+    }
+
+    public ObjectProperty<SyntaxClass> selectedSyntaxClassProperty() {
+        return selectedSyntaxClass;
+    }
+
     public ObjectProperty<Object> selectedEntityProperty() {
         return selectedEntity;
     }
@@ -170,6 +188,10 @@ public final class KnowledgeViewModel {
 
     public List<RegisterView> registerFamily(RegisterEntry register) {
         return corpus.registerFamily(register);
+    }
+
+    public Corpus corpus() {
+        return corpus;
     }
 
     public ObservableList<SearchResultGroup> getSearchResultGroups() {
@@ -210,7 +232,13 @@ public final class KnowledgeViewModel {
 
     public boolean isFilterActive() {
         String query = searchQuery.get();
-        return (query != null && !query.isBlank()) || selectedCategory.get() != null || selectedCpu.get() != null;
+        return (query != null && !query.isBlank())
+                || selectedCategory.get() != null
+                || selectedCpu.get() != null
+                || (selectedBitness.get() != null && selectedBitness.get() != ArchitectureBitness.ALL)
+                || (selectedDialect.get() != null && selectedDialect.get() != Dialect.COMMON)
+                || selectedRegisterGroup.get() != null
+                || selectedSyntaxClass.get() != null;
     }
 
     // --- Navigation Actions ---
@@ -224,6 +252,9 @@ public final class KnowledgeViewModel {
         selectedCategory.set(null);
         selectedCpu.set(null);
         selectedDialect.set(Dialect.COMMON);
+        selectedBitness.set(ArchitectureBitness.ALL);
+        selectedRegisterGroup.set(null);
+        selectedSyntaxClass.set(null);
     }
 
     public void selectEntity(Object entity) {
@@ -356,9 +387,12 @@ public final class KnowledgeViewModel {
         boolean hasQuery = query != null && !query.trim().isEmpty();
         isSearching.set(hasQuery);
 
+        ArchitectureBitness bitness = selectedBitness.get() != null ? selectedBitness.get() : ArchitectureBitness.ALL;
+        Dialect dialect = selectedDialect.get() != null ? selectedDialect.get() : Dialect.COMMON;
+
         if (hasQuery) {
             // Transversal multi-entity search
-            List<SearchResultGroup> groups = queryEngine.search(query.trim(), language.get());
+            List<SearchResultGroup> groups = queryEngine.search(query.trim(), language.get(), bitness, dialect);
             searchResultGroups.setAll(groups);
 
             int totalMatches = groups.stream().mapToInt(g -> g.items().size()).sum();
@@ -383,6 +417,8 @@ public final class KnowledgeViewModel {
         List<InstructionInfo> matches = allInstructions.stream()
                 .filter(info -> category == null || info.category() == category)
                 .filter(info -> cpu == null || info.minCpu().level() <= cpu.level())
+                .filter(info -> bitness.supportsInstruction(info, corpus))
+                .filter(info -> isInstructionCompatibleWithDialect(info, dialect))
                 .filter(info -> info.matches(query))
                 .toList();
 
@@ -399,19 +435,33 @@ public final class KnowledgeViewModel {
             if (!hasQuery) selectedInstruction.set(matches.getFirst());
         }
 
-        filteredRegisters.setAll(matchingRegisters(query));
-        filteredSyntaxItems.setAll(matchingSyntaxItems(query));
+        filteredRegisters.setAll(matchingRegisters(query, selectedRegisterGroup.get(), bitness));
+        filteredSyntaxItems.setAll(matchingSyntaxItems(query, selectedSyntaxClass.get(), dialect, bitness));
 
         updateInstructionNavigationState();
+    }
+
+    private boolean isInstructionCompatibleWithDialect(InstructionInfo info, Dialect dialect) {
+        if (dialect == null || dialect == Dialect.COMMON) {
+            return true;
+        }
+        var entryOpt = corpus.findInstruction(info.mnemonic());
+        if (entryOpt.isPresent()) {
+            InstructionEntry entry = entryOpt.get();
+            return entry.recognizedBy().isEmpty() || entry.recognizedBy().contains(dialect);
+        }
+        return true;
     }
 
     /**
      * The registers whose name, identifier or use mentions the query, widest first so the 64-bit container leads its
      * own 32 and 16-bit names. An empty query lists them all.
      */
-    private List<RegisterEntry> matchingRegisters(String query) {
+    private List<RegisterEntry> matchingRegisters(String query, RegisterGroup group, ArchitectureBitness bitness) {
         String needle = normalize(query);
         return corpus.getAllRegisters().stream()
+                .filter(reg -> group == null || reg.group() == group)
+                .filter(reg -> bitness == null || bitness.supportsRegister(reg))
                 .filter(reg -> needle.isEmpty()
                         || normalize(reg.name()).contains(needle)
                         || normalize(reg.id()).contains(needle)
@@ -425,9 +475,12 @@ public final class KnowledgeViewModel {
     }
 
     /** The signs, operators and directives whose token or summary mentions the query. An empty query lists them all. */
-    private List<SyntaxItem> matchingSyntaxItems(String query) {
+    private List<SyntaxItem> matchingSyntaxItems(String query, SyntaxClass syntaxClass, Dialect dialect, ArchitectureBitness bitness) {
         String needle = normalize(query);
         return corpus.getAllSyntaxItems().stream()
+                .filter(item -> syntaxClass == null || item.syntaxClass() == syntaxClass)
+                .filter(item -> bitness == null || bitness.supportsSyntaxItem(item))
+                .filter(item -> dialect == null || dialect == Dialect.COMMON || item.supportsDialect(dialect))
                 .filter(item -> needle.isEmpty()
                         || normalize(item.token()).contains(needle)
                         || normalize(item.id()).contains(needle)

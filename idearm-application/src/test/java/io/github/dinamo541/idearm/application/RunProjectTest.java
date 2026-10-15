@@ -97,6 +97,7 @@ class RunProjectTest {
         BuildProject builder = new BuildProject(repo, tools, List.of(toolchain), workspace, runner, Duration.ofSeconds(5));
 
         AtomicBoolean launched = new AtomicBoolean(false);
+        var launchSpec = new java.util.concurrent.atomic.AtomicReference<LaunchSpec>();
         ExecutionEnvironmentProvider fakeEnv = new ExecutionEnvironmentProvider() {
             @Override public String id() { return "dosbox"; }
             @Override public IsolationLevel isolation() { return IsolationLevel.EMULATED; }
@@ -104,6 +105,7 @@ class RunProjectTest {
             @Override public boolean supports(TargetProfile profile) { return true; }
             @Override public ExecutionSession launch(LaunchSpec spec) {
                 launched.set(true);
+                launchSpec.set(spec);
                 return new ExecutionSession() {
                     private final CompletableFuture<ExitInfo> exit = CompletableFuture.completedFuture(
                             ExitInfo.success(Duration.ofMillis(100)));
@@ -126,6 +128,12 @@ class RunProjectTest {
         assertNotNull(result.exitInfo());
         assertEquals(0, result.exitInfo().exitCode());
         assertFalse(result.exitInfo().wasStopped());
+        assertTrue(launchSpec.get().keepOpen(), "Ordinary Run honours the project's pause setting");
+
+        runProject.execute(projectRoot, "debug", false, CancellationToken.NONE, event -> {});
+        assertFalse(launchSpec.get().keepOpen(), "An explicit override can turn pause off");
+        runProject.execute(projectRoot, "debug", true, CancellationToken.NONE, event -> {});
+        assertTrue(launchSpec.get().keepOpen(), "Run with pause overrides the project for this run");
     }
 
     /** A program whose console is the IDE (native, outside Windows) shows its text there and reads the keyboard. */

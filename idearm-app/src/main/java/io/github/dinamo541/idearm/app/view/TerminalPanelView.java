@@ -90,12 +90,17 @@ public final class TerminalPanelView extends BorderPane {
                             : localization.get("terminal.status.stopped"),
                     viewModel.runningProperty(), localization.localeProperty()
             ));
-            statusBadge.styleProperty().bind(Bindings.createStringBinding(
-                    () -> viewModel.isRunning()
-                            ? "-fx-background-color: -color-success-subtle; -fx-text-fill: -color-success-fg;"
-                            : "-fx-background-color: -color-bg-subtle; -fx-text-fill: -color-fg-muted;",
-                    viewModel.runningProperty()
-            ));
+            Runnable updateTerminalStatus = () -> {
+                if (viewModel.isRunning()) {
+                    if (!statusBadge.getStyleClass().contains("running")) {
+                        statusBadge.getStyleClass().add("running");
+                    }
+                } else {
+                    statusBadge.getStyleClass().remove("running");
+                }
+            };
+            viewModel.runningProperty().addListener((obs, oldV, newV) -> updateTerminalStatus.run());
+            updateTerminalStatus.run();
         }
 
         headerBar.getChildren().addAll(dirLabel, spacer, statusBadge, restartBtn, clearBtn);

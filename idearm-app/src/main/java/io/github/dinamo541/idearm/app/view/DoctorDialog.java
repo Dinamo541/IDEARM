@@ -73,7 +73,9 @@ public final class DoctorDialog extends Stage {
         var idCol = new TableColumn<ToolRow, String>();
         idCol.textProperty().bind(localization.text("dialog.doctor.tool"));
         idCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().id()));
-        idCol.setMaxWidth(140);
+        idCol.setMinWidth(115);
+        idCol.setPrefWidth(130);
+        idCol.setMaxWidth(160);
 
         var verCol = new TableColumn<ToolRow, String>();
         verCol.textProperty().bind(localization.text("dialog.doctor.version"));
@@ -104,14 +106,13 @@ public final class DoctorDialog extends Stage {
             @Override
             protected void updateItem(Boolean usable, boolean empty) {
                 super.updateItem(usable, empty);
+                getStyleClass().removeAll("tool-ready", "tool-unusable");
                 if (empty || usable == null) {
                     setText(null);
-                    setStyle("");
                     return;
                 }
                 setText(localization.get(usable ? "dialog.doctor.ready" : "dialog.doctor.unusable"));
-                setStyle(usable ? "-fx-text-fill: -color-success-fg;"
-                        : "-fx-text-fill: -color-danger-fg; -fx-font-weight: bold;");
+                getStyleClass().add(usable ? "tool-ready" : "tool-unusable");
             }
         });
         statusCol.setMaxWidth(120);
@@ -122,11 +123,23 @@ public final class DoctorDialog extends Stage {
         table.getColumns().add(statusCol);
         table.getColumns().add(pathCol);
 
-        table.setItems(rows());
         var emptyLabel = new Label();
         emptyLabel.textProperty().bind(localization.text("dialog.doctor.empty"));
         emptyLabel.setWrapText(true);
-        table.setPlaceholder(emptyLabel);
+
+        var placeholderLabel = new Label();
+        placeholderLabel.textProperty().bind(localization.text("dialog.doctor.scanning"));
+        placeholderLabel.setWrapText(true);
+        table.setPlaceholder(placeholderLabel);
+
+        // Load asynchronously off the UI thread so DoctorDialog opens instantly
+        CompletableFuture.supplyAsync(this::rows)
+                .whenComplete((initialRows, failure) -> Platform.runLater(() -> {
+                    if (failure == null && initialRows != null) {
+                        table.setItems(initialRows);
+                    }
+                    table.setPlaceholder(emptyLabel);
+                }));
 
         var hint = new Label();
         hint.textProperty().bind(localization.text("dialog.doctor.hint"));
@@ -139,17 +152,25 @@ public final class DoctorDialog extends Stage {
         feedback.setMaxWidth(Double.MAX_VALUE);
 
         var addButton = new Button();
+        addButton.setId("addToolsFolder");
         addButton.textProperty().bind(localization.text("dialog.doctor.addFolder"));
         addButton.getStyleClass().add("accent");
         addButton.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.PLUS.create());
-        addButton.setOnAction(e -> addFolder(table, addButton, feedback));
+
+        var rescanButton = new Button();
+        rescanButton.setId("rescanTools");
+        rescanButton.textProperty().bind(localization.text("dialog.doctor.rescan"));
+        rescanButton.setGraphic(io.github.dinamo541.idearm.app.ui.WorkbenchIcons.RESTART.create());
+        rescanButton.setOnAction(e -> rescan(table, rescanButton, addButton, feedback));
+
+        addButton.setOnAction(e -> addFolder(table, addButton, rescanButton, feedback));
 
         var closeButton = new Button();
         closeButton.textProperty().bind(localization.text("dialog.doctor.close"));
         closeButton.setCancelButton(true);
         closeButton.setOnAction(e -> close());
 
-        var buttonBar = new HBox(10, addButton, feedback, closeButton);
+        var buttonBar = new HBox(10, addButton, rescanButton, feedback, closeButton);
         buttonBar.setAlignment(Pos.CENTER_LEFT);
         buttonBar.getStyleClass().add("dialog-footer");
         var body = new VBox(12, header, hint, table);
@@ -184,10 +205,40 @@ public final class DoctorDialog extends Stage {
     }
 
     /**
+     * Rescans all candidate folders and refreshes the tool table off the UI thread.
+     */
+    private void rescan(TableView<ToolRow> table, Button rescanButton, Button addButton, Label feedback) {
+        rescanButton.setDisable(true);
+        addButton.setDisable(true);
+        feedback.setText(localization.get("dialog.doctor.scanning"));
+        var scanningLabel = new Label();
+        scanningLabel.textProperty().bind(localization.text("dialog.doctor.scanning"));
+        scanningLabel.setWrapText(true);
+        table.setPlaceholder(scanningLabel);
+        CompletableFuture.runAsync(toolRegistry::refresh)
+                .thenCompose(v -> CompletableFuture.supplyAsync(this::rows))
+                .whenComplete((newRows, failure) -> Platform.runLater(() -> {
+                    rescanButton.setDisable(false);
+                    addButton.setDisable(false);
+                    if (failure != null) {
+                        Throwable cause = failure instanceof CompletionException ? failure.getCause() : failure;
+                        feedback.setText(localization.describe(Problem.of(cause)));
+                    } else {
+                        table.setItems(newRows);
+                        feedback.setText(localization.get("dialog.doctor.scanned"));
+                        var emptyLabel = new Label();
+                        emptyLabel.textProperty().bind(localization.text("dialog.doctor.empty"));
+                        emptyLabel.setWrapText(true);
+                        table.setPlaceholder(emptyLabel);
+                    }
+                }));
+    }
+
+    /**
      * Registers the tools in a folder the user picks, such as their own copy of TASM. Detection asks native tools
      * for their version, so it runs away from the UI thread.
      */
-    private void addFolder(TableView<ToolRow> table, Button addButton, Label feedback) {
+    private void addFolder(TableView<ToolRow> table, Button addButton, Button rescanButton, Label feedback) {
         var chooser = new DirectoryChooser();
         chooser.setTitle(localization.get("dialog.doctor.chooseFolder"));
         File chosen = chooser.showDialog(this);
@@ -196,17 +247,20 @@ public final class DoctorDialog extends Stage {
         }
         Path folder = chosen.toPath();
         addButton.setDisable(true);
+        rescanButton.setDisable(true);
         CompletableFuture.supplyAsync(() -> toolRegistry.registerFolder(folder))
-                .whenComplete((added, failure) -> Platform.runLater(() -> {
+                .thenCompose(added -> CompletableFuture.supplyAsync(this::rows).thenApply(r -> Map.entry(added, r)))
+                .whenComplete((result, failure) -> Platform.runLater(() -> {
                     addButton.setDisable(false);
+                    rescanButton.setDisable(false);
                     if (failure != null) {
                         Throwable cause = failure instanceof CompletionException ? failure.getCause() : failure;
                         feedback.setText(localization.describe(Problem.of(cause)));
-                    } else if (added.isEmpty()) {
+                    } else if (result.getKey().isEmpty()) {
                         feedback.setText(localization.get("dialog.doctor.nothingFound", folder.toString()));
                     } else {
-                        feedback.setText(localization.get("dialog.doctor.added", added.size(), folder.toString()));
-                        table.setItems(rows());
+                        feedback.setText(localization.get("dialog.doctor.added", result.getKey().size(), folder.toString()));
+                        table.setItems(result.getValue());
                     }
                 }));
     }

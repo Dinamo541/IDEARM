@@ -26,7 +26,11 @@ import java.util.function.Supplier;
 final class LiveLintCoordinator implements AutoCloseable {
 
     /** What a validation pass needs to know about the document it is given. */
-    record LintContext(String filePath, String targetCpu, boolean dosTarget, ProjectSymbolIndex index) {
+    record LintContext(String filePath, String targetCpu, boolean dosTarget, ProjectSymbolIndex index,
+                       java.nio.charset.Charset charset) {
+        LintContext(String filePath, String targetCpu, boolean dosTarget, ProjectSymbolIndex index) {
+            this(filePath, targetCpu, dosTarget, index, java.nio.charset.StandardCharsets.UTF_8);
+        }
     }
 
     private final LintSource lintSource;
@@ -133,7 +137,7 @@ final class LiveLintCoordinator implements AutoCloseable {
 
     private void validate(EditorComponent editor, String text, LintContext context, long generation) {
         List<Diagnostic> diagnostics = lintSource.execute(
-                text, context.filePath(), context.targetCpu(), context.index(), context.dosTarget());
+                text, context.filePath(), context.targetCpu(), context.index(), context.dosTarget(), context.charset());
         FxDispatch.run(() -> {
             // Typing went on, or the document closed, while this pass ran: its marks would sit on the wrong lines.
             if (!isCurrent(editor, generation)) {

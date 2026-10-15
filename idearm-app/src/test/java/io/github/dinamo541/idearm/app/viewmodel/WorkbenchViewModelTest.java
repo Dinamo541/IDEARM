@@ -1,5 +1,6 @@
 package io.github.dinamo541.idearm.app.viewmodel;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,6 +16,7 @@ import io.github.dinamo541.idearm.domain.build.ToolRunResult;
 import io.github.dinamo541.idearm.domain.debug.Breakpoint;
 import io.github.dinamo541.idearm.domain.debug.DebugEvent;
 import io.github.dinamo541.idearm.domain.debug.RegisterState;
+import io.github.dinamo541.idearm.domain.files.TextDecoding;
 import io.github.dinamo541.idearm.domain.model.Project;
 import io.github.dinamo541.idearm.domain.model.ResolvedToolchain;
 import io.github.dinamo541.idearm.domain.port.BreakpointStore;
@@ -23,6 +25,7 @@ import io.github.dinamo541.idearm.domain.port.ToolRegistry;
 import io.github.dinamo541.idearm.domain.port.ToolRunner;
 import io.github.dinamo541.idearm.infrastructure.workspace.FileBuildWorkspace;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -39,6 +42,54 @@ class WorkbenchViewModelTest {
     Path tempDir;
 
     private final ToolRegistry emptyRegistry = id -> Optional.empty();
+
+    @Test
+    void failedSavePreventsBuildRunAndDebugAndAllowsRetry() throws Exception {
+        var loads = new java.util.concurrent.atomic.AtomicInteger();
+        var repository = new ProjectRepository() {
+            @Override public boolean exists(Path root) { return true; }
+            @Override public Project load(Path root) {
+                loads.incrementAndGet();
+                return Project.hello("SaveFailure");
+            }
+            @Override public void save(Path root, Project project) { }
+        };
+        var area = new EditorAreaViewModel(FakeEditorComponent::new);
+        var status = new StatusBarViewModel();
+        var vm = workbench(area, status, repository);
+        try {
+            vm.openProject(tempDir);
+            Path source = Files.writeString(tempDir.resolve("main.asm"), "mov ax, 1");
+            Path blockingFile = Files.writeString(tempDir.resolve("not-a-directory"), "block");
+            var doc = area.openFile(source);
+            doc.getEditor().setText("mov ax, 2");
+            doc.getEditor().modifiedProperty().set(true);
+            doc.filePathProperty().set(blockingFile.resolve("main.asm"));
+            int loadsBeforeTasks = loads.get();
+
+            for (var task : List.<java.util.function.Supplier<?>>of(
+                    () -> vm.build().join(), () -> vm.run().join(), () -> vm.debug().join())) {
+                assertNull(task.get());
+                assertEquals(loadsBeforeTasks, loads.get(), "No build or session may start from old source");
+                assertFalse(vm.isBusy());
+                assertTrue(doc.isModified());
+                assertEquals("mov ax, 2", doc.getEditor().getText());
+                assertEquals("mov ax, 1", Files.readString(source));
+                assertEquals("status.task.failed", status.getStatus().key());
+                var problem = (io.github.dinamo541.idearm.app.i18n.Problem) status.getStatus().arguments().getFirst();
+                assertEquals("editor.save.failed", problem.code());
+                assertEquals(doc.getFilePath().toString(), problem.arguments().getFirst());
+                assertEquals(BottomPanelViewModel.BottomTab.BUILD, vm.getBottomPanel().getActiveTab());
+            }
+            assertTrue(vm.getBottomPanel().buildTextProperty().get().contains("not-a-directory"));
+
+            doc.filePathProperty().set(source);
+            vm.build().get(5, java.util.concurrent.TimeUnit.SECONDS);
+            assertTrue(loads.get() > loadsBeforeTasks, "The failed precondition must release the task slot");
+            assertFalse(doc.isModified());
+            assertEquals("mov ax, 2", Files.readString(source));
+        } finally { vm.dispose(); }
+    }
 
     @Test
     void missingRecentEntriesLeaveTheCurrentProjectAndEditorUntouched() throws IOException {
@@ -575,6 +626,46 @@ class WorkbenchViewModelTest {
             public void save(Path projectRoot, Project project2) {
             }
         };
+    }
+
+    @Test
+    void activeProjectBitnessReflectsTargetProfile() {
+        var area = new EditorAreaViewModel(FakeEditorComponent::new);
+        var vm = workbench(area, new StatusBarViewModel(), repositoryReturning(Project.hello("DosHello")));
+        try {
+            assertEquals(io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness.ALL, vm.getActiveProjectBitness());
+            vm.openProject(tempDir);
+            assertEquals(io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness.BITS_16, vm.getActiveProjectBitness());
+        } finally {
+            vm.dispose();
+        }
+    }
+
+    @Test
+    void reopenAndSaveActiveDocumentWithEncodingUpdatesStatusAndFormat() throws IOException {
+        Path file = tempDir.resolve("MAIN.ASM");
+        Files.writeString(file, "msg DB 'Hola año$'\n", StandardCharsets.UTF_8);
+
+        var area = new EditorAreaViewModel(FakeEditorComponent::new);
+        var statusBar = new StatusBarViewModel();
+        var vm = workbench(area, statusBar, repositoryReturning(Project.hello("TestProj")));
+        try {
+            area.openFile(file);
+            assertEquals("UTF-8 · LF", statusBar.getEncoding());
+
+            vm.saveActiveDocumentWithEncoding(TextDecoding.CP437);
+            assertEquals("CP437 · LF", statusBar.getEncoding());
+            assertEquals("status.editor.savedWithEncoding", statusBar.getStatus().key());
+
+            byte[] onDisk = Files.readAllBytes(file);
+            assertArrayEquals("msg DB 'Hola a\u00F1o$'\n".getBytes(TextDecoding.CP437), onDisk);
+
+            vm.reopenActiveDocumentWithEncoding(TextDecoding.WINDOWS_1252);
+            assertEquals("Windows-1252 · LF", statusBar.getEncoding());
+            assertEquals("status.editor.reopenedWithEncoding", statusBar.getStatus().key());
+        } finally {
+            vm.dispose();
+        }
     }
 
     /** No tool is installed in a unit test, so a build never reaches the runner. */

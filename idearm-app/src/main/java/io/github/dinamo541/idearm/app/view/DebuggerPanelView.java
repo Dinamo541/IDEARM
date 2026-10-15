@@ -11,11 +11,11 @@ import io.github.dinamo541.idearm.app.viewmodel.RegisterItemViewModel;
 import io.github.dinamo541.idearm.app.viewmodel.WatchItemViewModel;
 import io.github.dinamo541.idearm.domain.debug.DisasmLine;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.binding.BooleanExpression;
-import javafx.scene.Node;
+import javafx.beans.property.BooleanProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.layout.*;
@@ -30,6 +30,9 @@ import java.util.function.Consumer;
  * <p>Every control is bound to a capability the attached session declares, not merely to "the program is
  * paused": Turbo Debugger and CodeView drive the program in their own DOSBox window and report nothing back, so
  * with them the panel explains that instead of offering buttons that would do nothing.
+ *
+ * <p>Structured as two resizable panels: CPU registers with controls and flags on the left sidebar, and a full
+ * tabbed inspection area (Disassembly, Memory Dump, Call Stack, Breakpoints, Watches) on the right.
  */
 public final class DebuggerPanelView extends StackPane {
 
@@ -47,29 +50,37 @@ public final class DebuggerPanelView extends StackPane {
         getStyleClass().add("debugger-panel");
 
         SplitPane panels = new SplitPane();
-        panels.getStyleClass().add(Styles.DENSE);
+        panels.getStyleClass().addAll(Styles.DENSE, "debugger-split-pane");
         panels.setOrientation(javafx.geometry.Orientation.HORIZONTAL);
-        panels.getItems().addAll(createRegistersBox(), createCenterTabPane(), createRightTabPane());
-        panels.setDividerPositions(0.44, 0.74);
-        panels.setMinWidth(880);
-        panels.setMinHeight(210);
-        // Keep register values and memory addresses readable on narrow windows; the whole tool can scroll.
-        var viewport = new ScrollPane(panels);
-        viewport.setFitToWidth(true);
-        viewport.setFitToHeight(true);
-        viewport.setMinSize(0, 0);
+
+        var registersBox = createRegistersBox();
+        var inspectionTabs = createInspectionTabPane();
+
+        SplitPane.setResizableWithParent(registersBox, Boolean.TRUE);
+        SplitPane.setResizableWithParent(inspectionTabs, Boolean.TRUE);
+
+        registersBox.setMinWidth(300);
+        inspectionTabs.setMinWidth(320);
+
+        panels.getItems().addAll(registersBox, inspectionTabs);
+        panels.setDividerPositions(0.40);
+        panels.widthProperty().addListener((obs, oldW, newW) -> {
+            if (oldW.doubleValue() <= 0 && newW.doubleValue() > 0) {
+                javafx.application.Platform.runLater(() -> panels.setDividerPositions(0.40));
+            }
+        });
 
         // A session that declares no capability has nothing to show here. Before a session starts, the panels are
         // shown as before, so breakpoints and watches can be prepared.
         BooleanExpression launchOnly = viewModel.activeProperty().and(viewModel.integratedProperty().not());
-        viewport.visibleProperty().bind(launchOnly.not());
-        viewport.managedProperty().bind(viewport.visibleProperty());
+        panels.visibleProperty().bind(launchOnly.not());
+        panels.managedProperty().bind(panels.visibleProperty());
 
         Node notice = createExternalDebuggerNotice();
         notice.visibleProperty().bind(launchOnly);
         notice.managedProperty().bind(notice.visibleProperty());
 
-        getChildren().addAll(viewport, notice);
+        getChildren().addAll(panels, notice);
     }
 
     /** Shown while a launch-only debugger owns the session, in place of panels that would stay empty. */
@@ -112,37 +123,45 @@ public final class DebuggerPanelView extends StackPane {
         var stopBtn = controlButton("action.stop", "tooltip.stopDebug", WorkbenchIcons.STOP, Styles.DANGER,
                 viewModel::stop, viewModel.activeProperty());
 
-        FlowPane controlsBar = new FlowPane(3, 3, resumeBtn, pauseBtn, stepOverBtn, stepIntoBtn, stepOutBtn, restartBtn,
+        resumeBtn.setId("debugger-resume-btn");
+        pauseBtn.setId("debugger-pause-btn");
+        stepOverBtn.setId("debugger-step-over-btn");
+        stepIntoBtn.setId("debugger-step-into-btn");
+        stepOutBtn.setId("debugger-step-out-btn");
+        restartBtn.setId("debugger-restart-btn");
+        stopBtn.setId("debugger-stop-btn");
+
+        FlowPane controlsBar = new FlowPane(2, 2, resumeBtn, pauseBtn, stepOverBtn, stepIntoBtn, stepOutBtn, restartBtn,
                 stopBtn);
         controlsBar.setAlignment(Pos.CENTER_LEFT);
         controlsBar.getStyleClass().add("debug-controls");
 
         TableView<RegisterItemViewModel> regTable = new TableView<>(viewModel.getRegisterList());
-        regTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
-        regTable.setFixedCellSize(26);
+        regTable.setId("debugger-registers-table");
+        regTable.getStyleClass().addAll("debug-register-table", Styles.DENSE);
+        regTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        regTable.setFixedCellSize(25);
         regTable.setPlaceholder(new Label());
-        // Digits line up in a monospaced font; a 64-bit value needs its 16 hex digits.
-        regTable.setStyle(MONOSPACED);
 
+        // Digits line up in a monospaced font; a 64-bit value needs its 16 hex digits and 20 decimal digits.
         TableColumn<RegisterItemViewModel, String> nameCol = new TableColumn<>();
         nameCol.textProperty().bind(localization.text("debugger.registers.name"));
         nameCol.setCellValueFactory(data -> Bindings.createStringBinding(data.getValue()::getName));
-        nameCol.setPrefWidth(75);
+        nameCol.setMinWidth(72);
+        nameCol.setPrefWidth(82);
         nameCol.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
+                getStyleClass().remove("reg-changed");
                 if (empty || item == null) {
                     setText(null);
                     setTooltip(null);
-                    setStyle("");
                 } else {
                     setText(item);
                     var reg = getTableRow() != null ? getTableRow().getItem() : null;
                     if (reg != null && reg.isChanged()) {
-                        setStyle("-fx-text-fill: -color-warning-fg; -fx-font-weight: bold;");
-                    } else {
-                        setStyle("");
+                        getStyleClass().add("reg-changed");
                     }
                     var help = viewModel.registerHelp(item, localization.localeProperty().get().getLanguage());
                     if (help.isPresent()) {
@@ -152,7 +171,9 @@ public final class DebuggerPanelView extends StackPane {
                         tip.setWrapText(true);
                         setTooltip(tip);
                     } else {
-                        setTooltip(null);
+                        var tip = new Tooltip(item);
+                        tip.setShowDelay(Duration.millis(450));
+                        setTooltip(tip);
                     }
                 }
             }
@@ -163,17 +184,19 @@ public final class DebuggerPanelView extends StackPane {
                     @Override
                     protected void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
+                        getStyleClass().remove("reg-changed");
                         if (empty || item == null) {
                             setText(null);
-                            setStyle("");
+                            setTooltip(null);
                         } else {
                             setText(item);
                             var reg = getTableRow() != null ? getTableRow().getItem() : null;
                             if (reg != null && reg.isChanged()) {
-                                setStyle("-fx-text-fill: -color-warning-fg; -fx-font-weight: bold;");
-                            } else {
-                                setStyle("");
+                                getStyleClass().add("reg-changed");
                             }
+                            var tip = new Tooltip(item);
+                            tip.setShowDelay(Duration.millis(350));
+                            setTooltip(tip);
                         }
                     }
                 };
@@ -182,13 +205,15 @@ public final class DebuggerPanelView extends StackPane {
         hexCol.textProperty().bind(localization.text("debugger.registers.hex"));
         hexCol.setCellValueFactory(data -> data.getValue().hexValueProperty());
         hexCol.setCellFactory(regCellFactory);
-        hexCol.prefWidthProperty().bind(Bindings.when(viewModel.nativeSessionProperty()).then(170).otherwise(70));
+        hexCol.minWidthProperty().bind(Bindings.when(viewModel.nativeSessionProperty()).then(130.0).otherwise(54.0));
+        hexCol.prefWidthProperty().bind(Bindings.when(viewModel.nativeSessionProperty()).then(150.0).otherwise(64.0));
 
         TableColumn<RegisterItemViewModel, String> decCol = new TableColumn<>();
         decCol.textProperty().bind(localization.text("debugger.registers.dec"));
         decCol.setCellValueFactory(data -> data.getValue().decValueProperty());
         decCol.setCellFactory(regCellFactory);
-        decCol.prefWidthProperty().bind(Bindings.when(viewModel.nativeSessionProperty()).then(175).otherwise(75));
+        decCol.minWidthProperty().bind(Bindings.when(viewModel.nativeSessionProperty()).then(150.0).otherwise(56.0));
+        decCol.prefWidthProperty().bind(Bindings.when(viewModel.nativeSessionProperty()).then(170.0).otherwise(68.0));
 
         // Binary is what a computer architecture course reads flags and masks in. A 64-bit register would need 64
         // digits, which do not fit and say little, so the column is dropped for native programs.
@@ -196,7 +221,8 @@ public final class DebuggerPanelView extends StackPane {
         binCol.textProperty().bind(localization.text("debugger.registers.bin"));
         binCol.setCellValueFactory(data -> data.getValue().binValueProperty());
         binCol.setCellFactory(regCellFactory);
-        binCol.setPrefWidth(170);
+        binCol.setMinWidth(135);
+        binCol.setPrefWidth(150);
         binCol.visibleProperty().bind(viewModel.nativeSessionProperty().not());
 
         regTable.getColumns().addAll(nameCol, hexCol, decCol, binCol);
@@ -204,8 +230,9 @@ public final class DebuggerPanelView extends StackPane {
         VBox.setVgrow(regTable, Priority.ALWAYS);
 
         FlowPane flagsBox = new FlowPane(3, 3);
+        flagsBox.setId("debugger-flags-box");
         flagsBox.getStyleClass().add("debug-flags");
-        flagsBox.setPadding(new Insets(4));
+        flagsBox.setPadding(new Insets(3));
         flagsBox.setAlignment(Pos.CENTER_LEFT);
         flagsBox.getChildren().addAll(
                 createFlagBadge("CF", viewModel.cfProperty(), viewModel.cfChangedProperty()),
@@ -226,15 +253,15 @@ public final class DebuggerPanelView extends StackPane {
         instructionsLabel.getStyleClass().addAll(Styles.TEXT_MUTED, Styles.TEXT_SMALL);
         instructionsLabel.setPadding(new Insets(0, 4, 0, 4));
 
-        VBox box = new VBox(6, title, controlsBar, regTable, flagsBox, instructionsLabel);
+        VBox box = new VBox(5, title, controlsBar, regTable, flagsBox, instructionsLabel);
         box.getStyleClass().add("debug-section");
-        box.setMinWidth(0);
+        box.setMinWidth(300);
         return box;
     }
 
     /** A debugger control whose enabled state follows what the session can actually do. */
     private Button controlButton(String textKey, String tooltipKey, WorkbenchIcons icon, String accent,
-                                 Runnable action, BooleanExpression enabled) {
+                                  Runnable action, BooleanExpression enabled) {
         var button = new Button();
         button.accessibleTextProperty().bind(localization.text(textKey));
         HoverHelp.install(button, localization, tooltipKey, "");
@@ -274,44 +301,90 @@ public final class DebuggerPanelView extends StackPane {
         return item;
     }
 
+    // What each flag means, in the reader's language: a badge is not self-explanatory to a beginner.
     private Label createFlagBadge(String name, BooleanProperty property, BooleanProperty changedProperty) {
         Label badge = new Label(name);
         badge.getStyleClass().add("debug-flag");
-        badge.setPadding(new Insets(2, 6, 2, 6));
-        badge.styleProperty().bind(Bindings.createStringBinding(() -> {
-            String border = Boolean.TRUE.equals(changedProperty.get())
-                    ? "-fx-border-color: -color-danger-emphasis; -fx-border-width: 1.5px; -fx-border-radius: 4px;"
-                    : "-fx-border-color: transparent; -fx-border-width: 1.5px; -fx-border-radius: 4px;";
-            String bg = property.get()
-                    ? "-fx-background-color: -color-accent-emphasis; -fx-text-fill: -color-fg-emphasis; -fx-font-weight: bold;"
-                    : "-fx-background-color: -color-bg-subtle; -fx-text-fill: -color-fg-muted;";
-            return bg + " " + border;
-        }, property, changedProperty));
-        // What each flag means, in the reader's language: a badge is not self-explanatory to a beginner.
+
+        Runnable updateState = () -> {
+            boolean active = Boolean.TRUE.equals(property.get());
+            boolean changed = Boolean.TRUE.equals(changedProperty.get());
+            if (active) {
+                if (!badge.getStyleClass().contains("active")) {
+                    badge.getStyleClass().add("active");
+                }
+            } else {
+                badge.getStyleClass().remove("active");
+            }
+            if (changed) {
+                if (!badge.getStyleClass().contains("changed")) {
+                    badge.getStyleClass().add("changed");
+                }
+            } else {
+                badge.getStyleClass().remove("changed");
+            }
+        };
+
+        property.addListener((obs, oldV, newV) -> updateState.run());
+        changedProperty.addListener((obs, oldV, newV) -> updateState.run());
+        updateState.run();
+
         var tip = new Tooltip();
         tip.textProperty().bind(localization.text("debugger.flags." + name.toLowerCase(java.util.Locale.ROOT)));
         Tooltip.install(badge, tip);
         return badge;
     }
 
-    private TabPane createCenterTabPane() {
+    /**
+     * Unified inspection tab pane housing Disassembly, Memory Dump, Call Stack, Breakpoints, and Watches.
+     */
+    private TabPane createInspectionTabPane() {
         TabPane tabPane = new TabPane();
+        tabPane.setId("debugger-inspection-tabs");
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        tabPane.getStyleClass().add(Styles.DENSE);
+        tabPane.getStyleClass().addAll(Styles.DENSE, "debugger-tab-pane");
+
+        Tab disasmTab = new Tab();
+        disasmTab.textProperty().bind(localization.text("debugger.disasm.title"));
+        disasmTab.setGraphic(WorkbenchIcons.ASSEMBLY.create(14));
+        var disasmTip = new Tooltip();
+        disasmTip.textProperty().bind(localization.text("debugger.disasm.title"));
+        disasmTab.setTooltip(disasmTip);
+        disasmTab.setContent(createDisassemblyBox());
 
         Tab memoryTab = new Tab();
         memoryTab.textProperty().bind(localization.text("debugger.memory.title"));
+        memoryTab.setGraphic(WorkbenchIcons.CHIP.create(14));
+        var memoryTip = new Tooltip();
+        memoryTip.textProperty().bind(localization.text("debugger.memory.title"));
+        memoryTab.setTooltip(memoryTip);
         memoryTab.setContent(createMemoryBox());
 
         Tab stackTab = new Tab();
         stackTab.textProperty().bind(localization.text("debugger.stack.title"));
+        stackTab.setGraphic(WorkbenchIcons.STACK_PROCEDURES.create(14));
+        var stackTip = new Tooltip();
+        stackTip.textProperty().bind(localization.text("debugger.stack.title"));
+        stackTab.setTooltip(stackTip);
         stackTab.setContent(createCallStackBox());
 
-        Tab disasmTab = new Tab();
-        disasmTab.textProperty().bind(localization.text("debugger.disasm.title"));
-        disasmTab.setContent(createDisassemblyBox());
+        Tab breakpointsTab = new Tab();
+        breakpointsTab.textProperty().bind(localization.text("debugger.breakpoints.title"));
+        breakpointsTab.setGraphic(WorkbenchIcons.BREAKPOINT.create(14));
+        var bpTip = new Tooltip();
+        bpTip.textProperty().bind(localization.text("debugger.breakpoints.title"));
+        breakpointsTab.setTooltip(bpTip);
+        breakpointsTab.setContent(createBreakpointsBox());
 
-        tabPane.getTabs().addAll(memoryTab, stackTab, disasmTab);
+        Tab watchesTab = new Tab();
+        watchesTab.textProperty().bind(localization.text("debugger.watches.title"));
+        watchesTab.setGraphic(WorkbenchIcons.SEARCH.create(14));
+        var watchTip = new Tooltip();
+        watchTip.textProperty().bind(localization.text("debugger.watches.title"));
+        watchesTab.setTooltip(watchTip);
+        watchesTab.setContent(createWatchesBox());
+
+        tabPane.getTabs().addAll(disasmTab, memoryTab, stackTab, breakpointsTab, watchesTab);
         return tabPane;
     }
 
@@ -320,11 +393,8 @@ public final class DebuggerPanelView extends StackPane {
      * 8086, {@code shl ax, 3} is three shifts — and this is where that becomes visible.
      */
     private VBox createDisassemblyBox() {
-        Label title = new Label();
-        title.textProperty().bind(localization.text("debugger.disasm.title"));
-        title.getStyleClass().add("debug-heading");
-
         ListView<DisasmLine> list = new ListView<>(viewModel.getDisassembly());
+        list.setId("debugger-disasm-list");
         list.setPlaceholder(new Label());
         ((Label) list.getPlaceholder()).textProperty().bind(localization.text("debugger.disasm.empty"));
         list.setStyle(MONOSPACED + " -fx-font-size: 12px;");
@@ -332,34 +402,33 @@ public final class DebuggerPanelView extends StackPane {
             @Override
             protected void updateItem(DisasmLine item, boolean empty) {
                 super.updateItem(item, empty);
+                getStyleClass().remove("disasm-current");
                 setText((empty || item == null) ? null : item.toDisplayString());
                 // The instruction about to run, marked as the editor marks its line.
-                setStyle(item != null && item.current()
-                        ? "-fx-background-color: -color-warning-subtle; -fx-font-weight: bold;" : "");
+                if (item != null && item.current()) {
+                    getStyleClass().add("disasm-current");
+                }
             }
         });
         VBox.setVgrow(list, Priority.ALWAYS);
 
-        VBox box = new VBox(4, title, list);
+        VBox box = new VBox(list);
         box.getStyleClass().add("debug-section");
         box.setMinWidth(0);
         return box;
     }
 
     private VBox createMemoryBox() {
-        Label title = new Label();
-        title.textProperty().bind(localization.text("debugger.memory.title"));
-        title.getStyleClass().add("debug-heading");
-
         HBox addressRow = new HBox(6);
         addressRow.setAlignment(Pos.CENTER_LEFT);
         Label addrLabel = new Label();
         // A DOS program is addressed as segment:offset; a 32/64-bit program by one flat address or a register.
-        addrLabel.textProperty().bind(javafx.beans.binding.Bindings.when(viewModel.nativeSessionProperty())
+        addrLabel.textProperty().bind(Bindings.when(viewModel.nativeSessionProperty())
                 .then(localization.text("debugger.memory.flatAddress"))
                 .otherwise(localization.text("debugger.memory.address")));
 
         TextField segField = new TextField();
+        segField.setId("debugger-memory-seg-field");
         segField.setPrefWidth(60);
         segField.setMinWidth(45);
         segField.textProperty().bindBidirectional(viewModel.memorySegmentProperty());
@@ -372,40 +441,39 @@ public final class DebuggerPanelView extends StackPane {
         colon.managedProperty().bind(segField.visibleProperty());
 
         TextField offField = new TextField();
-        offField.setPrefWidth(100);
-        offField.setMinWidth(55);
+        offField.setId("debugger-memory-off-field");
+        offField.setPrefWidth(120);
+        offField.setMinWidth(65);
         HBox.setHgrow(offField, Priority.ALWAYS);
         offField.textProperty().bindBidirectional(viewModel.memoryOffsetProperty());
         offField.setOnAction(e -> viewModel.requestMemoryRefresh());
 
         Button readBtn = new Button(null, WorkbenchIcons.RESTART.create());
+        readBtn.setId("debugger-memory-read-btn");
         HoverHelp.install(readBtn, localization, "help.memory", "");
         readBtn.getStyleClass().addAll(Styles.BUTTON_OUTLINED, Styles.SMALL);
         readBtn.setOnAction(e -> viewModel.requestMemoryRefresh());
         readBtn.disableProperty().bind(viewModel.canReadMemoryProperty().not());
 
-        addressRow.getChildren().addAll(segField, colon, offField, readBtn);
-        addrLabel.setWrapText(true);
-        addrLabel.getStyleClass().add(Styles.TEXT_MUTED);
+        addressRow.getChildren().addAll(addrLabel, segField, colon, offField, readBtn);
+        addrLabel.getStyleClass().addAll(Styles.TEXT_MUTED, Styles.TEXT_SMALL);
 
         TextArea dumpArea = new TextArea();
+        dumpArea.setId("debugger-memory-dump-area");
         dumpArea.setEditable(false);
         dumpArea.setStyle(MONOSPACED + " -fx-font-size: 12px;");
         dumpArea.textProperty().bind(viewModel.memoryDumpTextProperty());
         VBox.setVgrow(dumpArea, Priority.ALWAYS);
 
-        VBox box = new VBox(6, addrLabel, addressRow, dumpArea);
+        VBox box = new VBox(6, addressRow, dumpArea);
         box.getStyleClass().add("debug-section");
         box.setMinWidth(0);
         return box;
     }
 
     private VBox createCallStackBox() {
-        Label title = new Label();
-        title.textProperty().bind(localization.text("debugger.stack.title"));
-        title.getStyleClass().add("debug-heading");
-
         ListView<CallFrameItemViewModel> stackList = new ListView<>(viewModel.getStackLines());
+        stackList.setId("debugger-stack-list");
         stackList.setPlaceholder(new Label());
         ((Label) stackList.getPlaceholder()).textProperty().bind(localization.text("debugger.stack.empty"));
         stackList.setStyle(MONOSPACED + " -fx-font-size: 12px;");
@@ -428,40 +496,21 @@ public final class DebuggerPanelView extends StackPane {
         });
         VBox.setVgrow(stackList, Priority.ALWAYS);
 
-        VBox box = new VBox(4, title, stackList);
+        VBox box = new VBox(stackList);
         box.getStyleClass().add("debug-section");
         box.setMinWidth(0);
         return box;
     }
 
-    private TabPane createRightTabPane() {
-        TabPane tabPane = new TabPane();
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-        tabPane.getStyleClass().add(Styles.DENSE);
-
-        Tab breakpointsTab = new Tab();
-        breakpointsTab.textProperty().bind(localization.text("debugger.breakpoints.title"));
-        breakpointsTab.setContent(createBreakpointsBox());
-
-        Tab watchesTab = new Tab();
-        watchesTab.textProperty().bind(localization.text("debugger.watches.title"));
-        watchesTab.setContent(createWatchesBox());
-
-        tabPane.getTabs().addAll(breakpointsTab, watchesTab);
-        return tabPane;
-    }
-
     private VBox createWatchesBox() {
-        Label title = new Label();
-        title.textProperty().bind(localization.text("debugger.watches.title"));
-        title.getStyleClass().add("debug-heading");
-
         TextField exprField = new TextField();
+        exprField.setId("debugger-watch-expr-field");
         exprField.promptTextProperty().bind(localization.text("debugger.watches.prompt"));
         HBox.setHgrow(exprField, Priority.ALWAYS);
-        exprField.setMinWidth(50);
+        exprField.setMinWidth(80);
 
         Button addBtn = new Button();
+        addBtn.setId("debugger-watch-add-btn");
         addBtn.setGraphic(WorkbenchIcons.PLUS.create());
         HoverHelp.install(addBtn, localization, "debugger.watches.add", "");
         addBtn.getStyleClass().addAll(Styles.BUTTON_OUTLINED, Styles.SMALL);
@@ -475,14 +524,16 @@ public final class DebuggerPanelView extends StackPane {
         exprField.setOnAction(e -> addBtn.fire());
 
         Button removeBtn = new Button();
+        removeBtn.setId("debugger-watch-remove-btn");
         removeBtn.setGraphic(WorkbenchIcons.CLEAR.create());
         HoverHelp.install(removeBtn, localization, "action.remove", "");
         removeBtn.getStyleClass().addAll(Styles.BUTTON_OUTLINED, Styles.DANGER, Styles.SMALL);
 
-        HBox inputBar = new HBox(4, exprField, addBtn, removeBtn);
+        HBox inputBar = new HBox(6, exprField, addBtn, removeBtn);
         inputBar.setAlignment(Pos.CENTER_LEFT);
 
         TableView<WatchItemViewModel> table = new TableView<>(viewModel.getWatches());
+        table.setId("debugger-watches-table");
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         table.setPlaceholder(new Label());
         ((Label) table.getPlaceholder()).textProperty().bind(localization.text("debugger.watches.empty"));
@@ -490,7 +541,7 @@ public final class DebuggerPanelView extends StackPane {
         TableColumn<WatchItemViewModel, String> exprCol = new TableColumn<>();
         exprCol.textProperty().bind(localization.text("debugger.watches.expression"));
         exprCol.setCellValueFactory(data -> Bindings.createStringBinding(data.getValue()::getExpression));
-        exprCol.setPrefWidth(120);
+        exprCol.setPrefWidth(160);
 
         TableColumn<WatchItemViewModel, String> valCol = new TableColumn<>();
         valCol.textProperty().bind(localization.text("debugger.watches.value"));
@@ -501,7 +552,7 @@ public final class DebuggerPanelView extends StackPane {
                         ? localization.text("debugger.watch.error").get()
                         : data.getValue().getValue(),
                 data.getValue().valueProperty(), data.getValue().errorProperty(), localization.localeProperty()));
-        valCol.setPrefWidth(120);
+        valCol.setPrefWidth(160);
 
         table.getColumns().addAll(exprCol, valCol);
         VBox.setVgrow(table, Priority.ALWAYS);
@@ -514,18 +565,15 @@ public final class DebuggerPanelView extends StackPane {
             }
         });
 
-        VBox box = new VBox(4, title, inputBar, table);
+        VBox box = new VBox(5, inputBar, table);
         box.getStyleClass().add("debug-section");
         box.setMinWidth(0);
         return box;
     }
 
     private VBox createBreakpointsBox() {
-        Label title = new Label();
-        title.textProperty().bind(localization.text("debugger.breakpoints.title"));
-        title.getStyleClass().add("debug-heading");
-
         TableView<BreakpointItemViewModel> table = new TableView<>(viewModel.getBreakpoints());
+        table.setId("debugger-breakpoints-table");
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         table.setPlaceholder(new Label());
         ((Label) table.getPlaceholder()).textProperty().bind(localization.text("debugger.breakpoints.empty"));
@@ -536,17 +584,20 @@ public final class DebuggerPanelView extends StackPane {
         // that intent on, so the listener lives with the row rather than with each rendering of the cell.
         enabledCol.setCellValueFactory(data -> data.getValue().enabledProperty());
         enabledCol.setCellFactory(tc -> new CheckBoxTableCell<>());
-        enabledCol.setPrefWidth(60);
+        enabledCol.setMinWidth(60);
+        enabledCol.setPrefWidth(70);
 
         TableColumn<BreakpointItemViewModel, String> fileCol = new TableColumn<>();
         fileCol.textProperty().bind(localization.text("debugger.breakpoints.file"));
         fileCol.setCellValueFactory(data -> Bindings.createStringBinding(data.getValue()::getPath));
-        fileCol.setPrefWidth(120);
+        fileCol.setMinWidth(120);
+        fileCol.setPrefWidth(220);
 
         TableColumn<BreakpointItemViewModel, String> lineCol = new TableColumn<>();
         lineCol.textProperty().bind(localization.text("debugger.breakpoints.line"));
         lineCol.setCellValueFactory(data -> Bindings.createStringBinding(() -> String.valueOf(data.getValue().getLine())));
-        lineCol.setPrefWidth(60);
+        lineCol.setMinWidth(55);
+        lineCol.setPrefWidth(70);
 
         table.getColumns().addAll(enabledCol, fileCol, lineCol);
         VBox.setVgrow(table, Priority.ALWAYS);
@@ -563,7 +614,7 @@ public final class DebuggerPanelView extends StackPane {
             return row;
         });
 
-        VBox box = new VBox(4, title, table);
+        VBox box = new VBox(table);
         box.getStyleClass().add("debug-section");
         box.setMinWidth(0);
         return box;

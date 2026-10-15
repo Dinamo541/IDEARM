@@ -29,7 +29,9 @@ import io.github.dinamo541.idearm.application.editor.QueryExplain;
 import io.github.dinamo541.idearm.application.editor.QueryHover;
 import io.github.dinamo541.idearm.application.editor.QueryOutline;
 import io.github.dinamo541.idearm.application.editor.QueryReferences;
+import io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness;
 import io.github.dinamo541.idearm.language.knowledge.CompatibilityContext;
+import io.github.dinamo541.idearm.domain.DomainException;
 import io.github.dinamo541.idearm.domain.build.BuildStatus;
 import io.github.dinamo541.idearm.domain.build.CancellationToken;
 import io.github.dinamo541.idearm.domain.debug.Breakpoint;
@@ -261,6 +263,18 @@ public final class WorkbenchViewModel {
         return services.toolRegistry();
     }
 
+    public ArchitectureBitness getActiveProjectBitness() {
+        Project proj = currentProject.get();
+        if (proj != null && proj.target() != null && proj.target().profile() != null) {
+            try {
+                TargetProfile profile = TargetProfileCatalog.require(proj.target().profile());
+                return ArchitectureBitness.fromBits(profile.codeMode());
+            } catch (Exception ignored) {
+            }
+        }
+        return ArchitectureBitness.ALL;
+    }
+
     /**
      * Changes which DOSBox dialect the project runs, builds and debugs in (or {@code "dosbox"} for auto), saving
      * {@code idearm.toml} and refreshing the open project so the next Run, Build or Debug honours the choice.
@@ -393,6 +407,11 @@ public final class WorkbenchViewModel {
      */
     public void openProject(Path projectDirectory) {
         Path directory = projectDirectory.toAbsolutePath().normalize();
+        Path previousProject = currentProjectPath.get();
+        if (previousProject != null && !previousProject.equals(directory)) {
+            saveWorkspaceState(previousProject);
+            editorArea.closeAll();
+        }
         currentProjectPath.set(directory);
         currentProject.set(null);
         explorer.openProject(directory);
@@ -411,20 +430,20 @@ public final class WorkbenchViewModel {
         ProjectRepository repository = services.projectRepository();
         if (!repository.exists(directory)) {
             currentProject.set(null);
-            openMainSource(directory, null);
+            restoreProjectOrOpenMain(directory, null);
             statusBar.setStatus(Message.of("status.project.notAProject", String.valueOf(directory.getFileName())));
             return;
         }
         try {
             Project project = repository.load(directory);
             currentProject.set(project);
-            openMainSource(directory, project);
+            restoreProjectOrOpenMain(directory, project);
             statusBar.setTargetProfile(project.target().profile() + " · " + project.target().cpu());
             statusBar.setToolchain(project.toolchain().id());
             statusBar.setStatus(Message.of("status.project.opened", project.info().name()));
         } catch (RuntimeException failure) {
             currentProject.set(null);
-            openMainSource(directory, null);
+            restoreProjectOrOpenMain(directory, null);
             String reason = failure.getMessage() == null ? failure.getClass().getSimpleName() : failure.getMessage();
             statusBar.setStatus(Message.of("status.project.invalid", Problem.of(failure)));
             bottomPanel.appendBuildLine("[PROJECT] " + directory + ": " + reason);
@@ -441,8 +460,17 @@ public final class WorkbenchViewModel {
         });
     }
 
-    /** Runs the current project in isolated staging. */
+    /** Runs with the project's pause-on-exit setting. */
+    public CompletableFuture<RunResult> run() {
+        return startRun(null);
+    }
+
+    /** Runs with an explicit pause-on-exit override for this invocation only. */
     public CompletableFuture<RunResult> run(boolean keepOpen) {
+        return startRun(keepOpen);
+    }
+
+    private CompletableFuture<RunResult> startRun(Boolean keepOpen) {
         return startTask(Message.of("status.run.running", projectName()), true, token -> {
             bottomPanel.clearOutput();
             bottomPanel.setActiveTab(BottomPanelViewModel.BottomTab.OUTPUT);
@@ -601,7 +629,7 @@ public final class WorkbenchViewModel {
         }
     }
 
-    private RunResult runProgram(CancellableToken token, boolean keepOpen) {
+    private RunResult runProgram(CancellableToken token, Boolean keepOpen) {
         RunResult result = runProject.execute(currentProjectPath.get(), DEFAULT_CONFIGURATION, keepOpen, token,
                 this::reportRunEvent);
         bottomPanel.setProgramInput(BottomPanelViewModel.ProgramInput.NONE, null);
@@ -850,7 +878,14 @@ public final class WorkbenchViewModel {
             statusBar.setStatus(Message.of("status.task.busy"));
             return CompletableFuture.completedFuture(null);
         }
-        saveAllQuietly();
+        try {
+            saveAllBeforeTask();
+        } catch (RuntimeException failure) {
+            taskRunning.set(false);
+            reportFailure(failure);
+            bottomPanel.setActiveTab(BottomPanelViewModel.BottomTab.BUILD);
+            return CompletableFuture.completedFuture(null);
+        }
         FxDispatch.run(() -> busy.set(true));
         statusBar.setStatus(status);
 
@@ -906,6 +941,66 @@ public final class WorkbenchViewModel {
         return path == null ? "" : String.valueOf(path.getFileName());
     }
 
+    private void restoreProjectOrOpenMain(Path directory, Project project) {
+        if (!editorArea.getDocuments().isEmpty()) {
+            return;
+        }
+        boolean restored = restoreWorkspaceState(directory);
+        if (!restored) {
+            openMainSource(directory, project);
+        }
+    }
+
+    public boolean restoreWorkspaceState(Path directory) {
+        if (directory == null || !Files.isDirectory(directory)) {
+            return false;
+        }
+        var workspace = io.github.dinamo541.idearm.app.ui.WorkbenchSession.readProjectWorkspace(directory);
+        if (!workspace.exists()) {
+            return false;
+        }
+        boolean anyRestored = false;
+        EditorDocumentViewModel activeDoc = null;
+        for (var fileState : workspace.openFiles()) {
+            Path file = fileState.path();
+            if (Files.isRegularFile(file)) {
+                try {
+                    EditorDocumentViewModel doc = editorArea.openFile(file);
+                    anyRestored = true;
+                    if (fileState.line() > 0) {
+                        doc.getEditor().goToLine(fileState.line());
+                    }
+                    if (workspace.activeFile() != null && file.equals(workspace.activeFile())) {
+                        activeDoc = doc;
+                    }
+                } catch (IOException unreadable) {
+                    bottomPanel.appendBuildLine("[PROJECT] " + file + ": " + unreadable.getMessage());
+                }
+            }
+        }
+        if (activeDoc != null) {
+            editorArea.setActiveDocument(activeDoc);
+            activeDoc.getEditor().requestFocus();
+        }
+        return anyRestored;
+    }
+
+    public void saveWorkspaceState(Path directory) {
+        if (directory == null || !Files.isDirectory(directory)) {
+            return;
+        }
+        List<io.github.dinamo541.idearm.app.ui.WorkbenchSession.FileState> fileStates = new ArrayList<>();
+        for (EditorDocumentViewModel doc : editorArea.getDocuments()) {
+            fileStates.add(new io.github.dinamo541.idearm.app.ui.WorkbenchSession.FileState(
+                    doc.getFilePath(),
+                    doc.caretLineProperty().get(),
+                    doc.caretColumnProperty().get()));
+        }
+        EditorDocumentViewModel active = editorArea.getActiveDocument();
+        Path activePath = active != null ? active.getFilePath() : null;
+        io.github.dinamo541.idearm.app.ui.WorkbenchSession.writeProjectWorkspace(directory, fileStates, activePath);
+    }
+
     /**
      * Opens the entry source of a freshly opened folder: the one {@code idearm.toml} names, or the conventional
      * {@code src/main.asm} when there is no readable description.
@@ -923,14 +1018,21 @@ public final class WorkbenchViewModel {
         }
     }
 
-    private void saveAllQuietly() {
-        try {
-            editorArea.saveAll();
-            for (var doc : editorArea.getDocuments()) {
-                indexSingleFile(doc.getFilePath(), doc.getEditor().getText());
+    private void saveAllBeforeTask() {
+        for (var doc : editorArea.getDocuments()) {
+            if (doc.isModified()) {
+                try {
+                    doc.save();
+                } catch (IOException failure) {
+                    throw new DomainException("editor.save.failed",
+                            "Could not save " + doc.getFilePath() + ": " + failure.getMessage()
+                                    + ". The task was not started.",
+                            failure, doc.getFilePath(), failure.getMessage());
+                }
             }
-        } catch (IOException failure) {
-            bottomPanel.appendBuildLine("[EDITOR] " + failure.getMessage());
+        }
+        for (var doc : editorArea.getDocuments()) {
+            indexSingleFile(doc.getFilePath(), doc.getEditor().getText());
         }
     }
 
@@ -1035,7 +1137,7 @@ public final class WorkbenchViewModel {
                 return null;
             }
             String cpu = currentProject.get() != null ? currentProject.get().target().cpu() : "8086";
-            return new LiveLintCoordinator.LintContext(file.toString(), cpu, isDosTarget(), symbolIndex);
+            return new LiveLintCoordinator.LintContext(file.toString(), cpu, isDosTarget(), symbolIndex, doc.getFormat().charset());
         }));
     }
 
@@ -1192,6 +1294,10 @@ public final class WorkbenchViewModel {
 
     /** Stops background work; the application calls it when the window closes. */
     public void dispose() {
+        Path root = currentProjectPath.get();
+        if (root != null) {
+            saveWorkspaceState(root);
+        }
         recentItems.close();
         stop();
         explorer.dispose();
@@ -1218,8 +1324,44 @@ public final class WorkbenchViewModel {
     }
 
     static String describe(TextDecoding.TextFormat format) {
-        String name = format.charset().name();
+        String name = TextDecoding.displayName(format.charset());
         return (format.bom() ? name + " BOM" : name) + " · " + format.lineSeparatorName();
+    }
+
+    /** Reopens the currently active editor document using the specified charset. */
+    public void reopenActiveDocumentWithEncoding(java.nio.charset.Charset charset) throws IOException {
+        EditorDocumentViewModel doc = editorArea.getActiveDocument();
+        if (doc != null) {
+            doc.reopenWithEncoding(charset);
+            showEncoding(doc);
+            Path fileName = doc.getFilePath() != null ? doc.getFilePath().getFileName() : null;
+            statusBar.setStatus(Message.of("status.editor.reopenedWithEncoding",
+                    fileName != null ? fileName.toString() : "", TextDecoding.displayName(charset)));
+            liveLint.requestLint(doc.getEditor(), () -> {
+                Path file = doc.getFilePath();
+                if (file == null) return null;
+                String cpu = currentProject.get() != null ? currentProject.get().target().cpu() : "8086";
+                return new LiveLintCoordinator.LintContext(file.toString(), cpu, isDosTarget(), symbolIndex, doc.getFormat().charset());
+            });
+        }
+    }
+
+    /** Saves the currently active editor document with the specified charset. */
+    public void saveActiveDocumentWithEncoding(java.nio.charset.Charset charset) throws IOException {
+        EditorDocumentViewModel doc = editorArea.getActiveDocument();
+        if (doc != null) {
+            doc.saveWithEncoding(charset);
+            showEncoding(doc);
+            Path fileName = doc.getFilePath() != null ? doc.getFilePath().getFileName() : null;
+            statusBar.setStatus(Message.of("status.editor.savedWithEncoding",
+                    fileName != null ? fileName.toString() : "", TextDecoding.displayName(charset)));
+            liveLint.requestLint(doc.getEditor(), () -> {
+                Path file = doc.getFilePath();
+                if (file == null) return null;
+                String cpu = currentProject.get() != null ? currentProject.get().target().cpu() : "8086";
+                return new LiveLintCoordinator.LintContext(file.toString(), cpu, isDosTarget(), symbolIndex, doc.getFormat().charset());
+            });
+        }
     }
 
     /** A save that had to switch a file to UTF-8 says so, because other tools may now read it differently. */

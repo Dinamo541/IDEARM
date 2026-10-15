@@ -81,6 +81,52 @@ class TextDecodingTest {
         assertArrayEquals("a\r\nb\r\n".getBytes(StandardCharsets.UTF_8), TextDecoding.encode("a\nb\n", crlf));
     }
 
+    @Test
+    void explicitCp437DecodesAndEncodesDosAccentsCorrectly() throws CharacterCodingException {
+        // In CP437: 'ñ' is 0xA4, 'á' is 0xA0, '¿' is 0xA8
+        byte[] cp437Bytes = {(byte) 0xA8, 'a', (byte) 0xA4, 'o', '?'};
+        var decoded = TextDecoding.decode(cp437Bytes, TextDecoding.CP437);
+
+        assertEquals("¿año?", decoded.text());
+        assertEquals(TextDecoding.CP437, decoded.format().charset());
+        assertFalse(decoded.format().bom());
+
+        byte[] reEncoded = TextDecoding.encode(decoded.text(), decoded.format());
+        assertArrayEquals(cp437Bytes, reEncoded);
+    }
+
+    @Test
+    void explicitCp850DecodesAndEncodesCorrectly() throws CharacterCodingException {
+        byte[] cp850Bytes = "¡Hola!".getBytes(TextDecoding.CP850);
+        var decoded = TextDecoding.decode(cp850Bytes, TextDecoding.CP850);
+
+        assertEquals("¡Hola!", decoded.text());
+        assertEquals(TextDecoding.CP850, decoded.format().charset());
+
+        byte[] reEncoded = TextDecoding.encode(decoded.text(), decoded.format());
+        assertArrayEquals(cp850Bytes, reEncoded);
+    }
+
+    @Test
+    void explicitUtf8SkipsBomWhileOtherEncodingsKeepRawBytes() {
+        byte[] withBom = withUtf8Bom("test");
+        var decodedUtf8 = TextDecoding.decode(withBom, StandardCharsets.UTF_8);
+        assertTrue(decodedUtf8.format().bom());
+        assertEquals("test", decodedUtf8.text());
+
+        var decodedAnsi = TextDecoding.decode(withBom, TextDecoding.WINDOWS_1252);
+        assertFalse(decodedAnsi.format().bom());
+        assertEquals("ï»¿test", decodedAnsi.text());
+    }
+
+    @Test
+    void displayNameFormatsCommonEncodings() {
+        assertEquals("UTF-8", TextDecoding.displayName(StandardCharsets.UTF_8));
+        assertEquals("Windows-1252", TextDecoding.displayName(TextDecoding.WINDOWS_1252));
+        assertEquals("CP437", TextDecoding.displayName(TextDecoding.CP437));
+        assertEquals("CP850", TextDecoding.displayName(TextDecoding.CP850));
+    }
+
     private static byte[] withUtf8Bom(String text) {
         byte[] body = text.getBytes(StandardCharsets.UTF_8);
         byte[] result = new byte[body.length + 3];

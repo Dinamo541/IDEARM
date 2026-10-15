@@ -208,6 +208,10 @@ public final class ProjectExplorerView extends BorderPane {
             Path root = viewModel.getProjectRoot();
             return root == null || root.getFileName() == null ? "" : root.getFileName().toString();
         }, viewModel.projectRootProperty()));
+        folderName.textProperty().addListener((obs, oldVal, newVal) -> {
+            folderName.setTooltip(newVal == null || newVal.isBlank() ? null : new Tooltip(newVal));
+        });
+        folderName.setMinWidth(0);
 
         var spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -221,10 +225,15 @@ public final class ProjectExplorerView extends BorderPane {
         actions.visibleProperty().bind(viewModel.projectRootProperty().isNotNull());
         actions.managedProperty().bind(actions.visibleProperty());
 
-        var folderRow = new HBox(4, folderName, spacer, actions);
-        folderRow.setAlignment(Pos.CENTER_LEFT);
+        var titleRow = new HBox(4, title, spacer, actions);
+        titleRow.setAlignment(Pos.CENTER_LEFT);
 
-        var header = new VBox(4, title, folderRow);
+        var folderRow = new HBox(4, folderName);
+        folderRow.setAlignment(Pos.CENTER_LEFT);
+        folderRow.visibleProperty().bind(viewModel.projectRootProperty().isNotNull());
+        folderRow.managedProperty().bind(folderRow.visibleProperty());
+
+        var header = new VBox(4, titleRow, folderRow);
         header.getStyleClass().add("explorer-header");
         header.setPadding(new Insets(8, 4, 4, 10));
         return header;

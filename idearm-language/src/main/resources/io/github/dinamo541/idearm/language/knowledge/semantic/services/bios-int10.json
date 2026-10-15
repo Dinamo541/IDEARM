@@ -553,9 +553,9 @@
     "availability": [
       {
         "backend": "emu8086",
-        "status": "UNAVAILABLE",
-        "caveat": "diagnostic.emu.bios.unsupported",
-        "reason": "Built-in emulator does not implement BIOS INT 10h function 13h."
+        "status": "AVAILABLE",
+        "caveat": null,
+        "reason": null
       },
       {
         "backend": "dosbox",
@@ -570,10 +570,10 @@
         "reason": null
       }
     ],
-    "summaryEn": "Write character string with attributes (AT BIOS and later; not supported in emu8086).",
-    "summaryEs": "Escribe una cadena de caracteres con atributos (BIOS AT y posterior; no soportado en emu8086).",
-    "descriptionEn": "Outputs a string of CX characters located at ES:BP starting at row DH, column DL. Requires an AT BIOS or EGA/VGA adapter. The built-in emu8086 emulator flags this function as unsupported.",
-    "descriptionEs": "Imprime una cadena de CX caracteres situada en ES:BP comenzando en fila DH, columna DL. Requiere BIOS AT o adaptador EGA/VGA. El emulador emu8086 integrado marca esta función como no soportada.",
+    "summaryEn": "Write character string with attributes.",
+    "summaryEs": "Escribe una cadena de caracteres con atributos.",
+    "descriptionEn": "Outputs a string of CX characters located at ES:BP starting at row DH, column DL. Requires an AT BIOS or EGA/VGA adapter. Supported in the built-in emulator and DOSBox.",
+    "descriptionEs": "Imprime una cadena de CX caracteres situada en ES:BP comenzando en fila DH, columna DL. Requiere BIOS AT o adaptador EGA/VGA. Soportado en el emulador integrado y DOSBox.",
     "example": "mov ax, seg mensaje\nmov es, ax\nlea bp, mensaje\nmov ah, 13h\nmov al, 01h   ; Chars only, update cursor\nmov bh, 00h\nmov bl, 0Fh   ; Bright white\nmov cx, 12    ; Length\nmov dh, 10    ; Row\nmov dl, 20    ; Col\nint 10h",
     "sources": [
       "IBM PC AT Technical Reference BIOS",

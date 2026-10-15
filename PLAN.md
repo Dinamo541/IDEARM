@@ -5,7 +5,7 @@
 > [`docs/technical-plan.md`](docs/technical-plan.md), every decision in [`docs/adr/`](docs/adr/), and the Phase 0
 > evidence in [`spikes/REPORT.md`](spikes/REPORT.md).
 >
-> **Last updated:** 2026-09-24 · **Current phase:** Phase 1 of [`docs/action-plan.md`](docs/action-plan.md) is
+> **Last updated:** 2026-10-02 · **Current phase:** Phase 1 of [`docs/action-plan.md`](docs/action-plan.md) is
 > implemented (Windows and Linux), plus the debugger work of Phase 2 (D1, P2-02, P2-03, P2-09 — ADR-010)
 > → **release v1.0.0 once the user approves version, git init and tag** (§9)
 >
@@ -157,6 +157,144 @@ The repository implements the 4-layer N-tier architecture defined in ADR-007. Ev
 ---
 
 ## 7. Roadmap and status
+
+### Patterns leave other programs out of the build — 2026-10-14 (Claude)
+
+Reported in use: Mastermind (`modules = ["src/*.asm"]`) failed with twelve *CS unreachable from current segment*
+errors in `src/menu.inc`, while another IDE built it. The errors came from `src/Extras.asm`, a separate sprite test
+with its own `END MAIN` that includes `menu.inc` after `.DATA`; `main.asm` was always fine. `SourceSet` now leaves
+out any file a pattern matches that declares its own start (`ProgramStart`: `END label`, `.STARTUP`,
+`STARTUPCODE`) when the entry declares one too, and `BuildProject` reports each as `build.module.other-program`
+(INFO). DOS targets only; files listed by name are untouched. Recorded as an ADR-003 addendum and in the user guide
+and troubleshooting guide. Verified with TASM 3.2 / TLINK 3.01 in DOSBox 0.74-3 on an unmodified copy of
+Mastermind: only `main.asm` is assembled, the build succeeds, one note points at `Extras.asm:213`. 182 application
+tests green. `MessageBundlesTest` still fails on `debug.close.failed` / `debug.session.failed`, which come from the
+uncommitted `DebugProject` work and are written as `new Diagnostic(...)`, a form the test does not scan.
+
+### Assembly IDE comparison and implementation proposal — 2026-10-13
+
+Reviewed the professor's Ensamblador IDE 0.1.0 and the current IDEARM working tree. The supplied and installed
+reference archives match. Verified its build-before-run, paused DOSBox output, Turbo Debugger source view and
+F7 stepping; launched IDEARM 2.0.0 and verified integrated entry stop, stepping, register changes and keyboard
+input through program exit. The reactor packages successfully offline. Of 79 selected tests, 78 passed in the
+sandbox; the remaining atomic-save test passed when rerun outside it. This was not a full release verification.
+
+The [comparison and implementation plan](docs/assembly-ide-parity-plan.md) records save-failure propagation,
+normal Run overriding pause-on-exit, and console paste as initial fixes, followed by classroom compatibility,
+debugger layout improvements and a measured Monaco editor evaluation. The initial planning pass changed no
+product behavior; the implementation continuation below records subsequent changes. Existing local changes remain in place.
+
+### Assembly IDE implementation continuation — 2026-10-14
+
+Implemented save-failure propagation before Build/Run/Debug, preservation of the project's pause-on-exit
+setting for normal Run, and keyboard-mode console paste. The focused application/presentation suite passed
+57 tests, including all 15 WindowChrome tests; offline packaging passed across all ten modules. Desktop QA
+of the packaged hello-input example verified F5 entry pause, continuation, pasted `Ana`, `Hello, Ana!`, and
+exit code zero. QA also found duplicate debug exit messages, now assigned for a lifecycle fix.
+
+Four Antigravity chats own bounded parallel tasks: rendered debugger layout/tests, 8086 conformance/fixes,
+an isolated Monaco/WebView prototype, and terminal-event lifecycle handling. Codex owns integration and
+verification. These tasks are in progress, not accepted merely because files or reports exist. Production
+still uses RichTextFX. Full reactor verification remains required after integrating their final changes.
+
+### P2-08 CLI Completeness & Target-Derived Defaults — 2026-10-05 (Antigravity)
+
+- **`idearm new` Command Implementation (`idearm-cli`, `idearm-application`):**
+  - Added `idearm new <folder> [--name <name>] [--target <profile>] [--cpu <cpu>] [--toolchain <toolchain>] [--toolchain-version <version>] [--debug <backend>] [--json]` to CLI composition root (`Main.java`).
+  - Added `createInDirectory` capability to `CreateProject` use case, enabling headless project scaffolding directly into target folders or creating folder structures as specified.
+  - Target-derived defaults: `CreateProject` resolves `TargetProfile` upfront and derives default toolchain (`target.isDos() ? "borland-tasm" : "nasm"`) and default CPU (`target.cpuBaseline()`) automatically when not explicitly provided by the caller.
+- **Robust JSON Output via Jackson (`idearm-cli`):**
+  - Replaced legacy string concatenation and simplistic character escaping in `Main.java` with Jackson `ObjectMapper` / `ObjectNode` / `ArrayNode`.
+  - Guarantees strict RFC 8259 conformance across all CLI commands (`build`, `run`, `dist`, `clean`, `import`, `new`), properly escaping tabs, backslashes (Windows file paths), newlines, quotes, and control characters.
+- **Unified Build Configuration Defaults:**
+  - Aligned CLI `build` default configuration to `"debug"`, matching the IDE Workbench and CLI `run` defaults.
+  - Added `--release` flag support to `build` (in addition to `--config <name>` and `--debug`), allowing straightforward release artifact builds.
+- **Tests & Verification:**
+  - Expanded `CreateProjectTest` with target-derived defaults (verifying `win-pe64-console` -> `nasm`/`x86-64`, `dos-exe-16` -> `borland-tasm`/`8086`) and direct directory creation.
+  - Added tests in `MainCliTest` covering `idearm new` with defaults, target flags, custom names, explicit toolchains/CPUs, missing folder errors, collision detection, debug configuration defaults, and valid JSON structure parsed by Jackson.
+  - 100% full reactor Maven test suite passing across all 10 modules (0 failures, 0 errors).
+
+### P2-07 Tool Detection Off the UI Thread — 2026-10-04 (Antigravity)
+
+- **Asynchronous Tool Detection & Background Warmup (`idearm-domain`, `idearm-infrastructure`):**
+  - Added `refresh()` and `warmUp()` to `ToolRegistry` port in `idearm-domain`.
+  - In `DefaultToolRegistry`: automated background warmup (`warmUp()`) on startup daemon thread via `DefaultToolRegistry.system()`, avoiding the 1.2+ second freeze when tool queries occur.
+  - Separated `registeredTools` and `detectedTools` collections in `DefaultToolRegistry`.
+  - Fallback logic: when a registered tool's executable is deleted or moved (`!Files.isRegularFile(...)`), the registry logs a warning diagnostic (`System.Logger`) and seamlessly falls back to the auto-detected tool for that role.
+  - Thread-safe `refresh()` in `DefaultToolRegistry` resets detected caches, reloads registered configuration from `%APPDATA%\IDEARM\tools.toml`, and re-runs detection.
+- **Incompatible Tool Filtering for 16-bit MASM (`ToolDetector`):**
+  - Ignored PE `LINK.EXE` binaries (`WIN32_CONSOLE` or `WIN64`, e.g. from Visual Studio or Windows SDK) for the 16-bit DOS linker role, ensuring only real-mode / 16-bit DOS linkers (`DOS_REAL`, `DOS_DPMI`) are registered.
+  - Ignored 64-bit PE (`WIN64`) and modern Visual Studio `ML.EXE` binaries (major version > 6) for the 16-bit MASM role, ensuring only genuine 16-bit MASM 6.x assemblers are detected.
+- **Instant Dialog Openings & UI Polish (`idearm-app`):**
+  - Upgraded `DoctorDialog`: loads table rows asynchronously off the JavaFX thread with an interactive scanning placeholder (`dialog.doctor.scanning`). The window opens in 0 ms.
+  - Added a dedicated "Rescan" button (`#rescanTools`, `WorkbenchIcons.RESTART`) in `DoctorDialog` executing `toolRegistry.refresh()` asynchronously without freezing the UI.
+  - Upgraded `ProjectPropertiesDialog`: `buildRunEnvironmentCombo` populates instantly with current project environment and fetches detected DOSBox dialects asynchronously off the UI thread.
+  - Full bilingual i18n parity verified for new keys (`dialog.doctor.rescan`, `dialog.doctor.scanning`, `dialog.doctor.scanned`).
+  - Unit tests added: `DoctorDialogTest` (instant open, rescan button, async rows), `ProjectPropertiesDialogTest`, `DefaultToolRegistryTest` (missing executable fallback, refresh reloading config), and `ToolDetectorTest` (ignoring PE linkers and modern ML.EXE).
+  - 100% full reactor Maven test suite passing across all 10 modules (0 failures, 0 errors).
+
+### P2-05 More DOS and BIOS Services in the Emulator — 2026-10-04 (Antigravity)
+
+- **Expanded Emulator System Services (`idearm-emu8086`):**
+  - **`INT 21h` Extended DOS API:** Implemented function `40h` (write to handles 1 stdout and 2 stderr; reports `emu.dos.unsupported` and returns CF=1, AX=6 for invalid/unsupported handles), `3Fh` (read from handle 0 stdin with echo and CRLF line feed handling), `2Ah` (get system date: CX=year, DH=month, DL=day, AL=weekday), and `2Ch` (get system time: CH=hour, CL=minute, DH=second, DL=centisecond).
+  - **`INT 10h` Extended Video BIOS API:** Text cursor position tracked across all 8 video pages (`02h` set cursor position, `03h` get cursor position/shape, `0Eh` teletype tracking cursor row/col), `09h` & `0Ah` (write character repeat CX times without advancing cursor), and `13h` (write string modes 0–3 handling color attribute bytes and cursor update).
+  - **`INT 1Ah` System Timer:** Implemented service `00h` returning clock ticks since midnight computed from `LocalTime` at ~18.2065 Hz (CX:DX ticks, AL midnight flag).
+  - **`INT 16h` Scan Codes & Arrow Navigation:** Standardized input queue to `KeyStroke` records containing both BIOS scan code (`AH`) and ASCII code (`AL`). Handled Enter (`0x1C`), Escape (`0x01`), Backspace (`0x0E`), Tab (`0x0F`), standard ASCII keys, and arrow keys (Up `0x48`, Down `0x50`, Left `0x4B`, Right `0x4D`) via ANSI escapes (`\033[A`), Unicode arrows (`↑`, `↓`, `←`, `→`), and ASCII-to-scancode mapping.
+  - Non-text services (file I/O handles > 2, graphics modes) cleanly emit `emu.dos.unsupported` / `emu.bios.unsupported` diagnostics.
+- **Academic Knowledge Base Synchronization (`idearm-language`):**
+  - Updated `bios-int10.json` marking `bios.int10.13h` as `AVAILABLE` for `emu8086` without caveats.
+  - Verified `InterruptServicesTest` and `CorpusTranslationTest` passing.
+- **Documentation & Verification:**
+  - Updated User Guide §6.1 ([`docs/user-guide.md`](docs/user-guide.md)) documenting all supported DOS/BIOS interrupts, functions, and key scan codes.
+  - 9 dedicated unit tests added in `DosInterruptHandlerTest` covering each new service; all 14 tests in `DosInterruptHandlerTest` and 81 tests in `idearm-emu8086` pass.
+  - 100% full reactor Maven test suite passing across all 10 modules (0 failures, 0 errors).
+
+### P2-04 Encoding Choices, DOS Accents and CP437 Linter — 2026-10-04 (Antigravity)
+
+- **Interactive Encoding Management:**
+  - Status bar encoding badge in `StatusBarView` is interactive (click and context menu) offering "Reopen with Encoding..." and "Save with Encoding..." options across common encodings (`UTF-8`, `Windows-1252`, `CP437`, `CP850`).
+  - Added dedicated submenus in `WorkbenchMenuBar` (File → Reopen with Encoding / Save with Encoding) and integrated them into the Command Palette in `WorkbenchView`.
+  - Added `reopenWithEncoding(Charset)` and `saveWithEncoding(Charset)` to `EditorDocumentViewModel` and `WorkbenchViewModel`.
+  - Extended `TextDecoding` in `idearm-domain` with `CP437`, `CP850`, `COMMON_ENCODINGS`, explicit decode overloads, and standard `displayName(Charset)`.
+- **Educational Non-ASCII DOS Linter Rule (`DosNonAsciiStringRule`):**
+  - New educational rule in `idearm-language` detecting non-ASCII characters (`> 127`, such as `ñ`, `á`, `¿`) in string literals within DOS projects when the file is UTF-8 (which renders as mojibake `a├▒o` under DOSBox / 8086 font glyphs).
+  - Emits educational diagnostic `lint.dos-non-ascii-string` advising saving with CP437 encoding or using OEM byte constants.
+  - Automatically suppresses the warning when the file encoding is already CP437 or CP850.
+  - Layer 3 architectural purity preserved: operates purely in memory with `Charset` and `Predicate<String>` without any file I/O.
+- **Diagnostics & Troubleshooting:**
+  - Added comprehensive troubleshooting entry in `docs/troubleshooting.md` §9 explaining DOS OEM code pages, UTF-8 byte sequences, and editor encoding remedies.
+  - Verified 100% bilingual parity in `messages_en.properties` and `messages_es.properties` via `MessageBundlesTest`.
+  - 100% full reactor Maven test suite passing across all 10 modules (0 failures, 0 errors).
+
+### Academic Center Unified Filters, Architecture Bitness & Contextual Deep-Linking — 2026-10-04 (Antigravity)
+
+- Unified filter architecture across all Academic Assistant entities (instructions, registers, syntax items, interrupt services) and transversal searches.
+- Introduced `ArchitectureBitness` (`ALL`, `BITS_16`, `BITS_32`, `BITS_64`) domain model in `idearm-language`, categorizing instructions, registers (16-bit `AX`, 32-bit `EAX`, 64-bit `RAX`), and syntax items by architecture bitness.
+- Extended `CpuBaselineRule` in `idearm-language` to detect 64-bit registers (`RAX`..`R15`, `R8D`..`R15D`, `R8W`..`R15W`, `R8B`..`R15B`, `RIP`) and emit warning diagnostic `lint.cpu-baseline-register64` when the target CPU baseline is below `x86-64`.
+- Enhanced `QueryKnowledge` in `idearm-application` with multi-category transversal search supporting bitness and dialect filtering.
+- Added reactive properties to `KnowledgeViewModel` (`selectedBitnessProperty()`, `selectedRegisterGroupProperty()`, `selectedSyntaxClassProperty()`) with multi-predicate filtering and entity deep-linking.
+- Upgraded `AcademicCenterView` with smart filter retention, target bitness combo, and entity selection methods (`selectEntity`, `selectMnemonic`, `selectRegister`, `selectSyntaxItem`).
+- Integrated editor context menu and `Shift+F1` shortcut in `RichTextFxEditorComponent` for instant lookup; added problems table context menu in `BottomPanelView` for direct navigation from diagnostics to the Academic Center.
+- Synchronized `WorkbenchView` and `WorkbenchViewModel` to auto-detect active project architecture bitness (`TargetProfileCatalog`) and apply it when opening the Academic Center.
+- Full bilingual i18n parity verified in `MessageBundlesTest`; 100% full reactor Maven test suite passing across all 10 modules (0 failures, 0 errors).
+- See [ADR-016](docs/adr/ADR-016-academic-center-architecture-and-contextual-filters.md).
+
+### Native Windows window management — 2026-10-02 (Codex)
+
+- Replaced manual move/resize on supported Windows runtimes with JavaFX 25's native extended frame and
+  `HeaderBar`. Windows owns title dragging, snapping, maximize hover layouts, system menus and resize borders.
+  Other platforms keep the prior implementation. Maven/tests/packaged launchers enable the JavaFX preview API.
+- Kept themed window controls, full-screen behavior, normal-size persistence and unsaved-close cancellation.
+  Mouse activation has one owner, preventing duplicate maximize or close actions.
+- Minimum size is 500 × 360 logical pixels, with compact menus, command-search icon and reversible automatic
+  sidebar/bottom-panel collapse. Status gives priority to caret and encoding in narrow windows.
+- Added Windows-native protocol tests for caption/maximize/client hit testing, eight resize directions,
+  frame flags, full screen, minimize, native close cancellation and persistence. `IDEARM_WINDOW_SMOKE`
+  captures dark EN/light ES at four sizes and checks panel/menu restoration without desktop input injection.
+- Verified: full offline Maven reactor, 932 tests (930 passed, 2 skipped); 34 final window/localization tests;
+  compact-window scene checks and portable executable startup. Portable ZIP and checksum are in `dist/release`.
+- See [ADR-015](docs/adr/ADR-015-native-windows-window-management.md) and the
+  [verification record](docs/window-management-review.md) for results and remaining manual platform checks.
 
 ### Release 2.0.0 preparation — 2026-09-27 (Claude)
 
@@ -1120,6 +1258,22 @@ Details and numbers: [`spikes/REPORT.md`](spikes/REPORT.md).
 ---
 
 ## 9. Next steps: v1.0.0 release and student feedback
+
+**New requested work (2026-10-13):** follow [Assembly IDE parity and editor modernization](docs/assembly-ide-parity-plan.md).
+M1 (save-before-launch, project pause-on-exit, console paste) is implemented with focused verification;
+continue the classroom workflow, debugger refinement and regression coverage. Evaluate Monaco behind the
+editor contract before replacing RichTextFX. Parallel implementation remains under review; see §7.
+
+**Academic Center and contextual navigation handoff (2026-10-04):** preserve smart filter retention in
+`AcademicCenterView` (do not indiscriminately clear filters when deep-linking if the item is already visible);
+keep `ArchitectureBitness` domain model pure in `idearm-language`; maintain `Shift+F1` editor shortcut and
+problems table context menu parity in both languages. See ADR-016.
+
+**Native-window handoff (2026-10-02):** keep JavaFX preview opt-in in development/test/native launchers and
+keep preview API calls isolated in `WindowChrome`. Revalidate on JavaFX upgrades. Run `NativeWindowChromeTest`
+on Windows and `IDEARM_WINDOW_SMOKE` after layout changes. Manually check the top-edge Snap Layout picker,
+maximize hover and cross-monitor/DPI dragging with Windows snapping enabled; the desktop comparison was
+stopped with Escape before those interactive checks completed. See ADR-015.
 
 **PNG icon handoff (2026-09-26):** use downloaded resources through `WorkbenchIcons`, not Java geometry or
 symbol fonts. Extend `scripts/workbench-icons.json` and the enum together; preserve pinned provenance and

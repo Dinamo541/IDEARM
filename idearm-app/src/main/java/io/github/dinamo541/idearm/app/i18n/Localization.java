@@ -31,6 +31,14 @@ public final class Localization {
         return locale;
     }
 
+    public Locale getLocale() {
+        return locale.get();
+    }
+
+    public void setLocale(Locale value) {
+        locale.set(value);
+    }
+
     /** Text in the current language; arguments are formatted with {@link MessageFormat}. */
     public String get(String key, Object... args) {
         String pattern = ResourceBundle.getBundle(BUNDLE, locale.get()).getString(key);

@@ -175,4 +175,56 @@ class CreateProjectTest {
         assertTrue(content.contains("default rel"));
         assertTrue(content.contains("ExitProcess"));
     }
+
+    @Test
+    void derivesDefaultToolchainAndCpuFromTarget() {
+        Map<Path, Project> savedProjects = new HashMap<>();
+        ProjectRepository repo = new ProjectRepository() {
+            @Override public Project load(Path p) { return savedProjects.get(p); }
+            @Override public void save(Path p, Project proj) { savedProjects.put(p, proj); }
+        };
+
+        CreateProject useCase = new CreateProject(repo);
+
+        // Native 64-bit Windows target derives nasm and x86-64
+        Project win64 = useCase.execute(tempDir, "WinApp", "win-pe64-console", null, null, null);
+        assertEquals("nasm", win64.toolchain().id());
+        assertEquals("x86-64", win64.target().cpu());
+        assertEquals(DebugConfiguration.GDB, win64.debug().backend());
+
+        // Native 64-bit Linux target derives nasm and x86-64
+        Project linux64 = useCase.execute(tempDir, "LinuxApp", "linux-elf64", null, null, null);
+        assertEquals("nasm", linux64.toolchain().id());
+        assertEquals("x86-64", linux64.target().cpu());
+        assertEquals(DebugConfiguration.GDB, linux64.debug().backend());
+
+        // DOS target derives borland-tasm and 8086
+        Project dos = useCase.execute(tempDir, "DosApp", "dos-exe-16", null, null, null);
+        assertEquals("borland-tasm", dos.toolchain().id());
+        assertEquals("8086", dos.target().cpu());
+        assertEquals(DebugConfiguration.EMULATOR, dos.debug().backend());
+    }
+
+    @Test
+    void createsProjectDirectlyInDirectory() {
+        Map<Path, Project> savedProjects = new HashMap<>();
+        ProjectRepository repo = new ProjectRepository() {
+            @Override public Project load(Path p) { return savedProjects.get(p); }
+            @Override public void save(Path p, Project proj) { savedProjects.put(p, proj); }
+        };
+
+        CreateProject useCase = new CreateProject(repo);
+        Path targetDir = tempDir.resolve("DirectFolder");
+
+        Project project = useCase.createInDirectory(targetDir, null, "win-pe64-console", null, null, null);
+        assertNotNull(project);
+        assertEquals("DirectFolder", project.info().name());
+        assertEquals("win-pe64-console", project.target().profile());
+        assertEquals("x86-64", project.target().cpu());
+        assertEquals("nasm", project.toolchain().id());
+
+        assertTrue(Files.exists(targetDir.resolve("src").resolve("main.asm")));
+        assertTrue(Files.exists(targetDir.resolve(".gitignore")));
+        assertTrue(savedProjects.containsKey(targetDir));
+    }
 }

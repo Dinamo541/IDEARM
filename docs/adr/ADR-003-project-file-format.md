@@ -35,6 +35,15 @@ exclude = []              # patterns too
 
 Renaming the entry, an explicit module or an include folder from the explorer updates these paths.
 
+**Addendum 2026-10-14 — a pattern gathers modules, not programs.** A folder of DOS sources often holds a test or an
+older exercise next to the program. When the entry declares its own start (`END label`, `.STARTUP` or
+`STARTUPCODE`), a file a pattern matches that declares one too is a separate program: `SourceSet` leaves it out
+and the build reports `build.module.other-program` (INFO) at its `END` line. Found in use: a sprite test in
+Mastermind included `menu.inc` after `.DATA`, so every build of `src/*.asm` failed with *CS unreachable from current
+segment* in an include `main.asm` uses correctly. TLINK 3.01 would have linked the two programs without a word
+(one entry point, the first object's, and both stacks added up). A file listed by name is still built, and an
+entry without a start keeps every module, since then one of them must start the program.
+
 ## Consequences
 - (+) Readable, supports comments, a familiar format (Cargo, pyproject).
 - (−) Saving from the properties dialog rewrites the file in canonical form: hand-written comments are not

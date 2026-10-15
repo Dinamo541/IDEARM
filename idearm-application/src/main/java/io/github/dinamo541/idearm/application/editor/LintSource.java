@@ -40,7 +40,12 @@ public final class LintSource {
      */
     public List<Diagnostic> execute(String sourceText, String filePath, String targetCpu, ProjectSymbolIndex index,
                                     boolean dosTarget) {
+        return execute(sourceText, filePath, targetCpu, index, dosTarget, java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    public List<Diagnostic> execute(String sourceText, String filePath, String targetCpu, ProjectSymbolIndex index,
+                                    boolean dosTarget, java.nio.charset.Charset charset) {
         AssemblyLinter linter = dosTarget ? dosLinter : portableLinter;
-        return linter.lint(sourceText, filePath, targetCpu, index);
+        return linter.lint(sourceText, filePath, targetCpu, index, charset);
     }
 }

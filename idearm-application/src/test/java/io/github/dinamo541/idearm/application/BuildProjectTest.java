@@ -9,7 +9,10 @@ import io.github.dinamo541.idearm.domain.diagnostic.Severity;
 import io.github.dinamo541.idearm.domain.model.*;
 import io.github.dinamo541.idearm.domain.port.*;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.*;
@@ -157,6 +160,38 @@ class BuildProjectTest {
         assertEquals(1, result.diagnostics().size());
         assertEquals(Severity.ERROR, result.diagnostics().getFirst().severity());
         assertEquals(10, result.diagnostics().getFirst().location().line());
+    }
+
+    @Test
+    void leavesAnotherProgramOutOfTheBuildAndSaysSo(@TempDir Path root) throws IOException {
+        Files.createDirectories(root.resolve("src"));
+        Files.writeString(root.resolve("src/main.asm"), ".CODE\nmain PROC\nmain ENDP\nEND main\n");
+        Files.writeString(root.resolve("src/extras.asm"), ".CODE\nMAIN PROC FAR\nMAIN ENDP\nEND MAIN\n");
+        Files.writeString(root.resolve("src/video.asm"), ".CODE\nPUBLIC Cls\nCls PROC\nCls ENDP\nEND\n");
+        Project sample = createSampleProject();
+        Project project = new Project(sample.schema(), sample.info(), sample.target(), sample.toolchain(),
+                new Sources("src/main.asm", List.of("src/*.asm"), List.of(), List.of()), sample.resources(),
+                sample.build(), sample.run(), sample.debug(), sample.dist());
+        ProjectRepository repo = new ProjectRepository() {
+            @Override public Project load(Path path) { return project; }
+            @Override public void save(Path path, Project p) {}
+        };
+        var assembled = new ArrayList<String>();
+        ToolRunner runner = (plan, at, toolchain, cancellation, timeout) -> {
+            plan.steps().stream().filter(step -> step.phase() == BuildPhase.ASSEMBLE)
+                    .forEach(step -> assembled.addAll(step.arguments()));
+            List<ToolResult> steps = plan.steps().stream().map(step -> new ToolResult(step, 0, "OK")).toList();
+            return new ToolRunResult(BuildStatus.SUCCEEDED, steps, Path.of("temp-out"), "Build OK");
+        };
+
+        BuildResult result = new BuildProject(repo, id -> Optional.empty(), List.of(createFakeProvider()),
+                createFakeWorkspace(), runner, Duration.ofSeconds(10)).execute(root, "release");
+
+        assertEquals(BuildStatus.SUCCEEDED, result.status());
+        assertEquals(List.of("src/main.asm", "src/video.asm"), assembled);
+        assertEquals(List.of("build.module.other-program"),
+                result.diagnostics().stream().map(Diagnostic::code).toList());
+        assertEquals(Severity.INFO, result.diagnostics().getFirst().severity());
     }
 
     @Test

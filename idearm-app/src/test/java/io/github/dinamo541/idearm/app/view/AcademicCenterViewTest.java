@@ -206,4 +206,143 @@ class AcademicCenterViewTest {
 
         assertTrue(intact, "browsing registers must not change the mnemonics layer");
     }
+
+    @Test
+    void filteringBy64BitExcludesInvalidLegacyInstructions() throws Exception {
+        boolean aaaExcluded = onCenter(view -> {
+            view.viewModel.selectedBitnessProperty().set(io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness.BITS_64);
+            settle(view);
+            openLayer(view, 0);
+            ListView<?> mnemonics = (ListView<?>) lookup(view, "#mnemonicsList");
+            return mnemonics.getItems().stream()
+                    .noneMatch(item -> ((io.github.dinamo541.idearm.language.catalog.InstructionInfo) item).mnemonic().equalsIgnoreCase("AAA"));
+        });
+
+        assertTrue(aaaExcluded, "AAA must be excluded in 64-bit mode");
+    }
+
+    @Test
+    void filteringBy16BitExcludes64BitRegisters() throws Exception {
+        boolean raxExcluded = onCenter(view -> {
+            view.viewModel.selectedBitnessProperty().set(io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness.BITS_16);
+            settle(view);
+            ListView<RegisterEntry> regList = registers(view);
+            List<String> names = regList.getItems().stream().map(RegisterEntry::name).toList();
+            return names.contains("AX") && !names.contains("RAX");
+        });
+
+        assertTrue(raxExcluded, "RAX must be excluded and AX present in 16-bit mode");
+    }
+
+    @Test
+    void switchingTabsAdaptsCategoryFilterContextually() throws Exception {
+        record TabStates(boolean onMnemonics, boolean onRegisters, boolean onOperands) { }
+
+        TabStates states = onCenter(view -> {
+            openLayer(view, 0);
+            boolean onMnem = view.viewModel.selectedCategoryProperty().get() == null;
+            openLayer(view, 1);
+            boolean onReg = view.viewModel.selectedRegisterGroupProperty().get() == null;
+            openLayer(view, 2);
+            boolean onOp = view.viewModel.selectedSyntaxClassProperty().get() == null;
+            return new TabStates(onMnem, onReg, onOp);
+        });
+
+        assertTrue(states.onMnemonics());
+        assertTrue(states.onRegisters());
+        assertTrue(states.onOperands());
+    }
+
+    @Test
+    void setTargetBitnessUpdatesSelectedBitnessProperty() throws Exception {
+        var bitness = onCenter(view -> {
+            view.setTargetBitness(io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness.BITS_32);
+            settle(view);
+            return view.viewModel.selectedBitnessProperty().get();
+        });
+        assertEquals(io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness.BITS_32, bitness);
+    }
+
+    @Test
+    void selectEntityNavigatesToRegister() throws Exception {
+        boolean selected = onCenter(view -> {
+            view.selectEntity("EAX");
+            settle(view);
+            TabPane tabs = (TabPane) lookup(view, "#knowledgeLayers");
+            Object entity = view.viewModel.selectedEntityProperty().get();
+            return tabs.getSelectionModel().getSelectedIndex() == 1
+                    && entity instanceof RegisterEntry reg
+                    && reg.name().equalsIgnoreCase("EAX");
+        });
+        assertTrue(selected, "selectEntity('EAX') must switch to registers tab and select EAX");
+    }
+
+    @Test
+    void selectEntityNavigatesToSyntaxItem() throws Exception {
+        boolean selected = onCenter(view -> {
+            view.selectEntity("DB");
+            settle(view);
+            TabPane tabs = (TabPane) lookup(view, "#knowledgeLayers");
+            Object entity = view.viewModel.selectedEntityProperty().get();
+            return tabs.getSelectionModel().getSelectedIndex() == 2
+                    && entity instanceof SyntaxItem syn
+                    && syn.token().equalsIgnoreCase("DB");
+        });
+        assertTrue(selected, "selectEntity('DB') must switch to operands tab and select DB");
+    }
+
+    @Test
+    void selectEntityNavigatesToInstruction() throws Exception {
+        boolean selected = onCenter(view -> {
+            view.selectEntity("MOV");
+            settle(view);
+            TabPane tabs = (TabPane) lookup(view, "#knowledgeLayers");
+            Object entity = view.viewModel.selectedEntityProperty().get();
+            return tabs.getSelectionModel().getSelectedIndex() == 0
+                    && ((entity instanceof io.github.dinamo541.idearm.language.catalog.InstructionInfo info && info.mnemonic().equalsIgnoreCase("MOV"))
+                    || (entity instanceof io.github.dinamo541.idearm.language.knowledge.InstructionEntry entry && entry.mnemonic().equalsIgnoreCase("MOV")));
+        });
+        assertTrue(selected, "selectEntity('MOV') must switch to mnemonics tab and select MOV");
+    }
+
+    @Test
+    void resetFiltersRestoresAllFiltersAndBitnessToNeutral() throws Exception {
+        boolean restored = onCenter(view -> {
+            view.viewModel.selectedBitnessProperty().set(io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness.BITS_64);
+            view.viewModel.selectedCategoryProperty().set(io.github.dinamo541.idearm.language.catalog.InstructionCategory.STRINGS);
+            view.viewModel.searchQueryProperty().set("TEST");
+            settle(view);
+
+            view.viewModel.resetFilters();
+            settle(view);
+
+            return view.viewModel.selectedBitnessProperty().get() == io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness.ALL
+                    && view.viewModel.selectedCategoryProperty().get() == null
+                    && view.viewModel.searchQueryProperty().get().isEmpty();
+        });
+        assertTrue(restored, "resetFilters must restore bitness, category and search query to neutral state");
+    }
+
+    @Test
+    void switchingTabsAdaptsCategoryComboValues() throws Exception {
+        boolean adapted = onCenter(view -> {
+            openLayer(view, 1); // Registers tab
+            view.viewModel.selectedRegisterGroupProperty().set(io.github.dinamo541.idearm.language.knowledge.RegisterGroup.G1_GENERAL);
+            settle(view);
+            boolean regGroupSet = view.viewModel.selectedRegisterGroupProperty().get() == io.github.dinamo541.idearm.language.knowledge.RegisterGroup.G1_GENERAL;
+
+            openLayer(view, 2); // Operands tab
+            view.viewModel.selectedSyntaxClassProperty().set(io.github.dinamo541.idearm.language.knowledge.SyntaxClass.DIRECTIVE);
+            settle(view);
+            boolean synClassSet = view.viewModel.selectedSyntaxClassProperty().get() == io.github.dinamo541.idearm.language.knowledge.SyntaxClass.DIRECTIVE;
+
+            openLayer(view, 0); // Mnemonics tab
+            view.viewModel.selectedCategoryProperty().set(io.github.dinamo541.idearm.language.catalog.InstructionCategory.ARITHMETIC);
+            settle(view);
+            boolean catSet = view.viewModel.selectedCategoryProperty().get() == io.github.dinamo541.idearm.language.catalog.InstructionCategory.ARITHMETIC;
+
+            return regGroupSet && synClassSet && catSet;
+        });
+        assertTrue(adapted, "Each tab must support its own independent facet selection");
+    }
 }

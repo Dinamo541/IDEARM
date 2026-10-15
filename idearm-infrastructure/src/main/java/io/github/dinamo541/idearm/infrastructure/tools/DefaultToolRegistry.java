@@ -29,8 +29,10 @@ public final class DefaultToolRegistry implements ToolRegistry {
 
     static final String SOURCE_DETECTED = "detected";
     static final String SOURCE_REGISTERED = "registered";
+    private static final System.Logger LOG = System.getLogger(DefaultToolRegistry.class.getName());
 
-    private final Map<String, ToolInstallation> tools = new ConcurrentHashMap<>();
+    private final Map<String, ToolInstallation> registeredTools = new ConcurrentHashMap<>();
+    private final Map<String, ToolInstallation> detectedTools = new ConcurrentHashMap<>();
     private final boolean autoDetect;
     private final Path configFile;
     private volatile boolean detected = false;
@@ -47,6 +49,7 @@ public final class DefaultToolRegistry implements ToolRegistry {
     public static DefaultToolRegistry system() {
         var registry = new DefaultToolRegistry(true);
         registry.loadFromGlobalConfig();
+        registry.warmUp();
         return registry;
     }
 
@@ -55,11 +58,16 @@ public final class DefaultToolRegistry implements ToolRegistry {
     }
 
     public void register(ToolInstallation tool) {
-        tools.put(tool.toolId().toLowerCase(Locale.ROOT), tool);
+        register(tool.toolId(), tool);
     }
 
     public void register(String role, ToolInstallation tool) {
-        tools.put(role.toLowerCase(Locale.ROOT), tool);
+        String key = role.toLowerCase(Locale.ROOT);
+        if (SOURCE_DETECTED.equals(tool.source())) {
+            detectedTools.put(key, tool);
+        } else {
+            registeredTools.put(key, tool);
+        }
     }
 
     @Override
@@ -71,12 +79,28 @@ public final class DefaultToolRegistry implements ToolRegistry {
             ensureDetected();
             return automaticDosBox();
         }
-        ToolInstallation direct = tools.get(key);
-        if (direct != null) {
-            return Optional.of(direct);
+        ToolInstallation reg = registeredTools.get(key);
+        if (reg != null) {
+            if (Files.isRegularFile(reg.executable())) {
+                return Optional.of(reg);
+            }
+            ensureDetected();
+            ToolInstallation det = detectedTools.get(key);
+            if (det != null) {
+                LOG.log(System.Logger.Level.WARNING,
+                        "Registered tool ''{0}'' executable at ''{1}'' no longer exists; falling back to detected ''{2}''.",
+                        key, reg.executable(), det.executable());
+                return Optional.of(det);
+            }
+            LOG.log(System.Logger.Level.WARNING,
+                    "Registered tool ''{0}'' executable at ''{1}'' no longer exists.",
+                    key, reg.executable());
+            return Optional.of(reg);
         }
-        if (ensureDetected()) {
-            return find(toolId);
+        ensureDetected();
+        ToolInstallation det = detectedTools.get(key);
+        if (det != null) {
+            return Optional.of(det);
         }
         return Optional.empty();
     }
@@ -84,26 +108,84 @@ public final class DefaultToolRegistry implements ToolRegistry {
     @Override
     public Map<String, ToolInstallation> all() {
         ensureDetected();
-        var all = new java.util.HashMap<>(tools);
+        var all = new LinkedHashMap<String, ToolInstallation>(detectedTools);
+        for (var entry : registeredTools.entrySet()) {
+            ToolInstallation reg = entry.getValue();
+            if (Files.isRegularFile(reg.executable())) {
+                all.put(entry.getKey(), reg);
+            } else {
+                ToolInstallation det = detectedTools.get(entry.getKey());
+                if (det != null) {
+                    LOG.log(System.Logger.Level.WARNING,
+                            "Registered tool ''{0}'' executable at ''{1}'' no longer exists; falling back to detected ''{2}''.",
+                            entry.getKey(), reg.executable(), det.executable());
+                    all.put(entry.getKey(), det);
+                } else {
+                    LOG.log(System.Logger.Level.WARNING,
+                            "Registered tool ''{0}'' executable at ''{1}'' no longer exists.",
+                            entry.getKey(), reg.executable());
+                    all.put(entry.getKey(), reg);
+                }
+            }
+        }
         automaticDosBox().ifPresent(dosbox -> all.put(DosBoxDialects.AUTO, dosbox));
         return Map.copyOf(all);
     }
 
     private Optional<ToolInstallation> automaticDosBox() {
         for (String dialect : DosBoxDialects.PREFERENCE) {
-            ToolInstallation tool = tools.get(dialect);
+            ToolInstallation tool = getActiveTool(dialect);
             if (tool != null) {
                 return Optional.of(tool);
             }
         }
         // Older registries used these role names.
         for (String alias : List.of("dosboxx", "staging", DosBoxDialects.AUTO)) {
-            ToolInstallation tool = tools.get(alias);
+            ToolInstallation tool = getActiveTool(alias);
             if (tool != null) {
                 return Optional.of(tool);
             }
         }
         return Optional.empty();
+    }
+
+    private ToolInstallation getActiveTool(String role) {
+        String key = role.toLowerCase(Locale.ROOT);
+        ToolInstallation reg = registeredTools.get(key);
+        if (reg != null) {
+            if (Files.isRegularFile(reg.executable())) {
+                return reg;
+            }
+            ToolInstallation det = detectedTools.get(key);
+            if (det != null) {
+                return det;
+            }
+            return reg;
+        }
+        return detectedTools.get(key);
+    }
+
+    /**
+     * Clears cached detection results, reloads registered configuration, and rescans for available tools.
+     */
+    @Override
+    public synchronized void refresh() {
+        detectedTools.clear();
+        detected = false;
+        loadFromGlobalConfig();
+        if (autoDetect) {
+            ensureDetected();
+        }
+    }
+
+    /**
+     * Warms up tool detection asynchronously on a background thread.
+     */
+    @Override
+    public void warmUp() {
+        if (autoDetect && !detected) {
+            java.util.concurrent.CompletableFuture.runAsync(this::ensureDetected);
+        }
     }
 
     /**
@@ -149,7 +231,7 @@ public final class DefaultToolRegistry implements ToolRegistry {
             }
             for (var entry : ToolDetector.detectAll().entrySet()) {
                 if (!entry.getValue().isEmpty()) {
-                    tools.putIfAbsent(entry.getKey().toLowerCase(Locale.ROOT), entry.getValue().getFirst());
+                    detectedTools.put(entry.getKey().toLowerCase(Locale.ROOT), entry.getValue().getFirst());
                 }
             }
             detected = true;
@@ -181,6 +263,7 @@ public final class DefaultToolRegistry implements ToolRegistry {
 
         JsonNode toolsNode = root.get("tools");
         if (toolsNode == null || !toolsNode.isArray()) return;
+        registeredTools.clear();
         for (JsonNode item : toolsNode) {
             String id = item.path("id").asText("");
             String role = item.path("role").asText(id);
@@ -212,7 +295,7 @@ public final class DefaultToolRegistry implements ToolRegistry {
         ObjectNode root = mapper.createObjectNode();
         ArrayNode toolsArray = root.putArray("tools");
 
-        var roles = new TreeMap<>(tools);
+        var roles = new TreeMap<>(registeredTools);
         for (var entry : roles.entrySet()) {
             ToolInstallation tool = entry.getValue();
             if (SOURCE_DETECTED.equals(tool.source())) {

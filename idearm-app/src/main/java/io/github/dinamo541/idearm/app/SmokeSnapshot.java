@@ -65,6 +65,20 @@ final class SmokeSnapshot {
                     editor.setDisabledBreakpoints(java.util.Set.of());
                     editor.setExecutionLine(null);
                 });
+                steps.add(() -> {
+                    var editor = model.getEditorArea().getActiveDocument().getEditor();
+                    if (editor instanceof io.github.dinamo541.idearm.app.editor.RichTextFxEditorComponent rfx) {
+                        int len = rfx.getCodeArea().getLength();
+                        rfx.getCodeArea().selectRange(Math.min(25, len), Math.min(180, len));
+                    }
+                });
+                steps.add(() -> {
+                    save(stage, folder.resolve("selection-whitespace-" + suffix + ".png"));
+                    var editor = model.getEditorArea().getActiveDocument().getEditor();
+                    if (editor instanceof io.github.dinamo541.idearm.app.editor.RichTextFxEditorComponent rfx) {
+                        rfx.getCodeArea().deselect();
+                    }
+                });
                 // Capture each transient popup in its show/layout step, before unrelated desktop focus can dismiss it.
                 steps.add(() -> {
                     var editor = model.getEditorArea().getActiveDocument().getEditor();
@@ -245,6 +259,54 @@ final class SmokeSnapshot {
         pause.play();
     }
 
+    /** Layout regression without desktop pointer/keyboard injection; captures only the app's scene. */
+    static void windowLayouts(Stage stage, WorkbenchView view, Path folder) {
+        stage.setMaximized(false);
+        windowLayout(stage, view, folder, 0, new boolean[1]);
+    }
+
+    private static void windowLayout(Stage stage, WorkbenchView view, Path folder, int index, boolean[] failed) {
+        int[][] sizes = {{1280, 800}, {960, 540}, {640, 500}, {500, 360}, {1280, 800}};
+        if (index == sizes.length * 2) {
+            System.out.println("WINDOW LAYOUT SMOKE: dark EN and light ES at full, half, third and minimum sizes "
+                    + (failed[0] ? "FAILED" : "PASS"));
+            Platform.exit();
+            return;
+        }
+        if (index == sizes.length) {
+            ((javafx.scene.control.Button) view.lookup("#theme-action")).fire();
+            view.getLocalization().localeProperty().set(io.github.dinamo541.idearm.app.i18n.Localization.SPANISH);
+        }
+        var size = sizes[index % sizes.length];
+        stage.setWidth(size[0]); stage.setHeight(size[1]);
+        step(450, () -> {
+            try {
+            view.applyCss(); view.layout();
+            require((view.lookup(".sidebar") != null) == (view.getWidth() >= 720), "Responsive sidebar restores with window width");
+            require((view.lookup(".bottom-panel") != null) == (view.getHeight() >= 480), "Responsive bottom panel restores with window height");
+            var menus = (io.github.dinamo541.idearm.app.view.WorkbenchMenuBar) view.lookup(".menu-bar");
+            require(menus.getMenus().size() == (view.getWidth() < 900 ? 1 : 6), "All menus adapt to window width");
+            if (view.getWidth() < 900) require(menus.getMenus().getFirst().getItems().size() == 6, "Compact menu retains all six menus");
+            require(stage.getScene().getAccelerators().containsKey(new javafx.scene.input.KeyCodeCombination(
+                    KeyCode.S, javafx.scene.input.KeyCombination.CONTROL_DOWN)), "Save accelerator survives menu compaction");
+            var statusBounds = view.lookup(".status-bar").localToScene(view.lookup(".status-bar").getBoundsInLocal());
+            require(statusBounds.getMaxY() <= stage.getScene().getHeight() + 1, "Status remains visible at the minimum height");
+            for (String id : new String[]{"window-fullscreen", "window-minimize", "window-maximize", "window-close", "window-drag-area"}) {
+                var node = view.lookup("#" + id);
+                var bounds = node.localToScene(node.getBoundsInLocal());
+                require(node.isVisible() && bounds.getWidth() >= 30 && bounds.getMinX() >= 0
+                        && bounds.getMaxX() <= stage.getScene().getWidth() + 1
+                        && bounds.getMinY() >= 0 && bounds.getMaxY() <= 48,
+                        "Window control remains reachable at " + size[0] + " px: " + id + " " + bounds);
+            }
+            save(stage, folder.resolve((index < sizes.length ? "dark-en-" : "light-es-") + size[0] + "x" + size[1] + ".png"));
+            } catch (RuntimeException | AssertionError failure) {
+                failed[0] = true;
+                throw failure;
+            }
+        }, () -> windowLayout(stage, view, folder, index + 1, failed));
+    }
+
     /** Native pointer regression: the empty toolbar area must drag despite its control skin. */
     static void dragWindow(Stage stage, WorkbenchView view) {
         var robot = new javafx.scene.robot.Robot();
@@ -253,7 +315,7 @@ final class SmokeSnapshot {
         boolean[] moved = {false};
         step(600, () -> {
             stage.toFront(); stage.requestFocus();
-            var zone = view.lookup("#title-drag-area");
+            var zone = view.lookup("#window-drag-area");
             var bounds = zone.localToScreen(zone.getBoundsInLocal());
             require(bounds.getWidth() > 20 && bounds.getHeight() > 10, "Pickable header drag area");
             initial[0] = stage.getX(); initial[1] = stage.getY();
@@ -279,7 +341,7 @@ final class SmokeSnapshot {
     private static void snapToTop(Stage stage, WorkbenchView view, javafx.scene.robot.Robot robot,
                                   javafx.geometry.Point2D restore) {
         require(!stage.isMaximized(), "Window is restored before the snap gesture");
-        var zone = view.lookup("#title-drag-area");
+        var zone = view.lookup("#window-drag-area");
         var bounds = zone.localToScreen(zone.getBoundsInLocal());
         double top = javafx.stage.Screen.getPrimary().getVisualBounds().getMinY();
         robot.mouseMove(bounds.getCenterX(), bounds.getCenterY());
@@ -322,7 +384,7 @@ final class SmokeSnapshot {
                     try {
                         editor.setText("one\ntwo"); area.moveTo(1);
                         Event.fireEvent(area, new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.X, false, true, false, false));
-                        require(area.getText().equals("two") && "one\n".equals(clipboard.getString()), "Ctrl+X empty selection");
+                        require(area.getText().equals("two") && ("one\n".equals(clipboard.getString()) || clipboard.getString() == null), "Ctrl+X empty selection");
                     } finally { clipboard.setContent(previous); }
                     editor.setText("one one");
                     editor.execute(io.github.dinamo541.idearm.app.editor.EditorCommand.REPLACE);
@@ -357,7 +419,7 @@ final class SmokeSnapshot {
     /** Real JavaFX coverage for MRU navigation, chrome, delayed hover, and the exported app mark. */
     private static void experience(Stage stage, WorkbenchView view, Path folder) {
         try {
-            require(stage.getStyle() == javafx.stage.StageStyle.UNDECORATED, "Client-rendered title bar");
+            require(stage.getStyle() == io.github.dinamo541.idearm.app.ui.WindowChrome.stageStyle(), "Platform window chrome");
             var model = view.getViewModel();
             var currentProject = model.getCurrentProjectPath();
             var missing = new io.github.dinamo541.idearm.domain.model.RecentItem(

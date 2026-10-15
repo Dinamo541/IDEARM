@@ -148,6 +148,7 @@ $payload = @(
     '--module-path', $mods.FullName,
     '--module', $appModule,
     '--java-options', $nativeAccess,
+    '--java-options', '-Djavafx.enablePreview=true',
     '--icon', (Join-Path $branding ($IsWindows ? 'idearm.ico' : 'idearm.png')),
     '--app-content', ((Join-Path $root 'LICENSE') + ',' + (Join-Path $root 'THIRD-PARTY-NOTICES.txt')),
     '--add-launcher', "idearm-cli=$cliLauncher"

@@ -172,7 +172,7 @@ public final class CommandPaletteDialog extends Stage {
 
         root.getStyleClass().add("command-palette");
         io.github.dinamo541.idearm.app.ui.WorkbenchTheme.apply(root, getOwner());
-        setScene(new Scene(root, 640, 400));
+        setScene(new Scene(root, 640, 414));
         getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.ESCAPE) { close(); event.consume(); }
             else if (event.getCode() == KeyCode.ENTER && commandList.isFocused()) {

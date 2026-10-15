@@ -101,6 +101,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <reuseForks>false</reuseForks>
+                    <argLine>--enable-native-access=javafx.graphics,io.github.dinamo541.idearm.app</argLine>
+                    <systemPropertyVariables>
+                        <javafx.enablePreview>true</javafx.enablePreview>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
@@ -128,6 +132,7 @@
                     <launcher>idearm</launcher>
                     <jlinkImageName>idearm</jlinkImageName>
                     <options>
+                        <option>-Djavafx.enablePreview=true</option>
                         <!-- JavaFX loads native libraries; without this JDK 25 prints a restricted-access warning -->
                         <option>--enable-native-access=javafx.graphics,io.github.dinamo541.idearm.infrastructure</option>
                     </options>

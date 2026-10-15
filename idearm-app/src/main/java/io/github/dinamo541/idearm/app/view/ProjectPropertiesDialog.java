@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -161,7 +163,7 @@ public final class ProjectPropertiesDialog extends Stage {
         var root = new VBox(DialogWindow.heading(localization, "dialog.properties.title",
                 "dialog.properties.description", io.github.dinamo541.idearm.app.ui.WorkbenchIcons.SETTINGS), content, buttonBar);
         DialogWindow.theme(root, getOwner());
-        DialogWindow.fitToContent(this, root, 640);
+        DialogWindow.fitToContent(this, root, 720);
     }
 
     /**
@@ -314,16 +316,8 @@ public final class ProjectPropertiesDialog extends Stage {
      * {@code [run] environment}. Picking one saves it to {@code idearm.toml} immediately.
      */
     private ComboBox<String> buildRunEnvironmentCombo(Project project) {
-        var installed = viewModel.getToolRegistry().all().keySet();
-        var items = FXCollections.<String>observableArrayList("dosbox");
-        for (String dialect : io.github.dinamo541.idearm.domain.execution.DosBoxDialects.PREFERENCE) {
-            if (installed.contains(dialect)) {
-                items.add(dialect);
-            }
-        }
-        // The saved choice is always offered, even if this machine cannot honour it right now: Run, Build and
-        // Debug fall back to Auto gracefully, and dropping it here would look like the setting was lost.
         String current = project.run().environment();
+        var items = FXCollections.<String>observableArrayList("dosbox");
         if (!items.contains(current)) {
             items.add(current);
         }
@@ -349,6 +343,22 @@ public final class ProjectPropertiesDialog extends Stage {
                 viewModel.updateRunEnvironment(newVal);
             }
         });
+
+        // Load installed dialects asynchronously off the UI thread so the dialog opens instantly
+        CompletableFuture.supplyAsync(() -> viewModel.getToolRegistry().all().keySet())
+                .whenComplete((installed, failure) -> {
+                    if (failure == null && installed != null) {
+                        Platform.runLater(() -> {
+                            for (String dialect : io.github.dinamo541.idearm.domain.execution.DosBoxDialects.PREFERENCE) {
+                                if (installed.contains(dialect) && !items.contains(dialect)) {
+                                    items.add(dialect);
+                                }
+                            }
+                            combo.setValue(current);
+                        });
+                    }
+                });
+
         return combo;
     }
 

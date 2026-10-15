@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Alert;
 import javafx.scene.control.SplitPane;
@@ -51,6 +52,10 @@ public final class WorkbenchView extends BorderPane {
     private double sidebarPosition = 0.20;
     private double panelPosition = 0.73;
     private MnemonicsDictionaryDialog activeDictionaryDialog;
+    private boolean narrowWindow;
+    private boolean shortWindow;
+    private boolean sidebarAutoHidden;
+    private boolean panelAutoHidden;
 
     public WorkbenchView(WorkbenchViewModel viewModel, Localization localization) {
         this.viewModel = viewModel;
@@ -64,6 +69,20 @@ public final class WorkbenchView extends BorderPane {
         this.bottomPanelView = new BottomPanelView(viewModel.getBottomPanel(), localization);
         viewModel.setProblemFormatter(localization::describe);
         this.statusBarView = new StatusBarView(viewModel.getStatusBar(), localization);
+        statusBarView.setOnReopenWithEncoding(cs -> {
+            try {
+                viewModel.reopenActiveDocumentWithEncoding(cs);
+            } catch (IOException ex) {
+                showError(localization.get("menu.file.reopenEncoding"), ex.getMessage());
+            }
+        });
+        statusBarView.setOnSaveWithEncoding(cs -> {
+            try {
+                viewModel.saveActiveDocumentWithEncoding(cs);
+            } catch (IOException ex) {
+                showError(localization.get("dialog.error.save"), ex.getMessage());
+            }
+        });
 
         menuBar.setOnCommandPaletteRequested(this::openCommandPalette);
         menuBar.setOnDictionaryRequested(this::openDictionary);
@@ -106,6 +125,7 @@ public final class WorkbenchView extends BorderPane {
         logoBox.getStyleClass().add("title-logo");
         logoBox.setMinWidth(41);
         logoBox.setPrefWidth(41);
+        io.github.dinamo541.idearm.app.ui.WindowChrome.draggable(logoBox);
         var header = new javafx.scene.layout.HBox(logoBox, menuBar, toolBar);
         windowHeader = header;
         // Keep menu names readable at the minimum window size; ToolBar already has an overflow menu.
@@ -113,7 +133,7 @@ public final class WorkbenchView extends BorderPane {
         toolBar.setMinWidth(90);
         header.getStyleClass().add("workbench-header");
         javafx.scene.layout.HBox.setHgrow(toolBar, javafx.scene.layout.Priority.ALWAYS);
-        setTop(header);
+        setTop(io.github.dinamo541.idearm.app.ui.WindowChrome.header(header));
 
         // Center: Horizontal SplitPane ([Explorer / Outline] | [Editor / BottomPanel])
         centerVerticalSplit = new SplitPane(editorAreaView, bottomPanelView);
@@ -125,13 +145,23 @@ public final class WorkbenchView extends BorderPane {
 
         sidebarVerticalSplit = new SplitPane(explorerView, outlineView);
         sidebarVerticalSplit.getStyleClass().add("sidebar");
-        sidebarVerticalSplit.setMinWidth(180);
+        sidebarVerticalSplit.setMinWidth(200);
+        sidebarVerticalSplit.setPrefWidth(240);
         sidebarVerticalSplit.setOrientation(Orientation.VERTICAL);
         sidebarVerticalSplit.setDividerPositions(0.78);
 
         mainHorizontalSplit = new SplitPane(sidebarVerticalSplit, centerVerticalSplit);
         mainHorizontalSplit.setOrientation(Orientation.HORIZONTAL);
         mainHorizontalSplit.setDividerPositions(sidebarPosition);
+        mainHorizontalSplit.widthProperty().addListener((obs, oldW, newW) -> {
+            if (oldW.doubleValue() <= 0 && newW.doubleValue() > 0) {
+                Platform.runLater(() -> {
+                    if (isSidebarVisible() && !mainHorizontalSplit.getDividers().isEmpty()) {
+                        mainHorizontalSplit.setDividerPositions(sidebarPosition);
+                    }
+                });
+            }
+        });
         SplitPane.setResizableWithParent(sidebarVerticalSplit, false);
 
         setCenter(mainHorizontalSplit);
@@ -140,6 +170,8 @@ public final class WorkbenchView extends BorderPane {
 
         // Bottom: Status Bar
         setBottom(statusBarView);
+        widthProperty().addListener((o, before, after) -> adaptToWindow());
+        heightProperty().addListener((o, before, after) -> adaptToWindow());
 
         // Wiring interactions
         setupInteractions();
@@ -171,6 +203,12 @@ public final class WorkbenchView extends BorderPane {
 
     public void installWindowChrome(javafx.stage.Stage stage) {
         menuBar.bindWindow(stage);
+        var dragArea = new javafx.scene.layout.Region();
+        dragArea.setId("window-drag-area");
+        dragArea.setMinWidth(36);
+        dragArea.setPickOnBounds(true);
+        io.github.dinamo541.idearm.app.ui.WindowChrome.draggable(dragArea);
+        windowHeader.getChildren().add(dragArea);
         windowHeader.getChildren().add(io.github.dinamo541.idearm.app.ui.WindowChrome.controls(stage, localization));
         io.github.dinamo541.idearm.app.ui.WindowChrome.install(stage, windowHeader, localization);
         stage.setOnCloseRequest(event -> { if (!confirmClose()) event.consume(); });
@@ -240,16 +278,28 @@ public final class WorkbenchView extends BorderPane {
         button.setOnAction(e -> action.run()); return button;
     }
     public void openDictionary() {
-        openDictionary(null);
+        String word = null;
+        var activeDoc = viewModel.getEditorArea().getActiveDocument();
+        if (activeDoc != null && activeDoc.getEditor() != null) {
+            String candidate = activeDoc.getEditor().getWordAtCaret();
+            if (candidate != null && !candidate.isBlank()) {
+                word = candidate.trim();
+            }
+        }
+        openDictionary(word);
     }
 
-    public void openDictionary(String mnemonic) {
+    public void openDictionary(String entityName) {
+        var activeBitness = viewModel.getActiveProjectBitness();
         if (activeDictionaryDialog != null && activeDictionaryDialog.isShowing()) {
             activeDictionaryDialog.setIconified(false);
             activeDictionaryDialog.toFront();
             activeDictionaryDialog.requestFocus();
-            if (mnemonic != null && !mnemonic.isBlank()) {
-                activeDictionaryDialog.selectMnemonic(mnemonic);
+            if (activeBitness != null && activeBitness != io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness.ALL) {
+                activeDictionaryDialog.setTargetBitness(activeBitness);
+            }
+            if (entityName != null && !entityName.isBlank()) {
+                activeDictionaryDialog.selectEntity(entityName);
             }
             return;
         }
@@ -257,38 +307,167 @@ public final class WorkbenchView extends BorderPane {
         activeDictionaryDialog = new MnemonicsDictionaryDialog(window, localization);
         // The view model reports a failure in the status bar and the Build Log.
         activeDictionaryDialog.setExampleProjectOpener(viewModel::instantiateExampleProject);
-        if (mnemonic != null && !mnemonic.isBlank()) {
-            activeDictionaryDialog.selectMnemonic(mnemonic);
+        if (activeBitness != null && activeBitness != io.github.dinamo541.idearm.language.knowledge.ArchitectureBitness.ALL) {
+            activeDictionaryDialog.setTargetBitness(activeBitness);
+        }
+        if (entityName != null && !entityName.isBlank()) {
+            activeDictionaryDialog.selectEntity(entityName);
         }
         activeDictionaryDialog.addEventHandler(WindowEvent.WINDOW_HIDDEN, e -> activeDictionaryDialog = null);
         activeDictionaryDialog.show();
     }
-    private void toggleTheme() {
-        lightTheme = !lightTheme;
+    public boolean isLightTheme() {
+        return lightTheme;
+    }
+
+    public void setLightTheme(boolean light) {
+        this.lightTheme = light;
         getStyleClass().remove("light");
         if (lightTheme) getStyleClass().add("light");
         Application.setUserAgentStylesheet(lightTheme ? new PrimerLight().getUserAgentStylesheet() : new PrimerDark().getUserAgentStylesheet());
     }
+
+    private void toggleTheme() {
+        setLightTheme(!lightTheme);
+    }
+
+    public boolean isSidebarVisible() {
+        return mainHorizontalSplit.getItems().contains(sidebarVerticalSplit);
+    }
+
+    public void setSidebarVisible(boolean visible) {
+        if (isSidebarVisible() == visible) return;
+        toggleSidebar();
+    }
+
+    public double getSidebarPosition() {
+        if (isSidebarVisible() && mainHorizontalSplit.getDividerPositions().length > 0) {
+            double pos = mainHorizontalSplit.getDividerPositions()[0];
+            if (pos >= 0.08 && pos <= 0.50) {
+                return pos;
+            }
+        }
+        return sidebarPosition;
+    }
+
+    public void setSidebarPosition(double position) {
+        if (Double.isFinite(position) && position >= 0.08 && position <= 0.50) {
+            this.sidebarPosition = position;
+            if (isSidebarVisible() && !mainHorizontalSplit.getDividers().isEmpty()) {
+                mainHorizontalSplit.setDividerPositions(position);
+            }
+        }
+    }
+
+    public boolean isBottomPanelVisible() {
+        return centerVerticalSplit.getItems().contains(bottomPanelView);
+    }
+
+    public void setBottomPanelVisible(boolean visible) {
+        if (isBottomPanelVisible() == visible) return;
+        if (visible) showPanel();
+        else togglePanel();
+    }
+
+    public double getBottomPanelPosition() {
+        if (isBottomPanelVisible() && centerVerticalSplit.getDividerPositions().length > 0) {
+            double pos = centerVerticalSplit.getDividerPositions()[0];
+            if (pos >= 0.15 && pos <= 0.85) {
+                return pos;
+            }
+        }
+        return panelPosition;
+    }
+
+    public void setBottomPanelPosition(double position) {
+        if (Double.isFinite(position) && position >= 0.15 && position <= 0.85) {
+            this.panelPosition = position;
+            if (isBottomPanelVisible() && !centerVerticalSplit.getDividers().isEmpty()) {
+                centerVerticalSplit.setDividerPositions(position);
+            }
+        }
+    }
+
+    public boolean isMinimapVisible() {
+        return editorAreaView.minimapVisibleProperty().get();
+    }
+
+    public void setMinimapVisible(boolean visible) {
+        editorAreaView.minimapVisibleProperty().set(visible);
+    }
+
+    public void selectBottomTab(String tabName) {
+        if (tabName == null || tabName.isBlank()) return;
+        try {
+            var tab = io.github.dinamo541.idearm.app.viewmodel.BottomPanelViewModel.BottomTab.valueOf(tabName);
+            selectPanel(tab);
+        } catch (IllegalArgumentException ignored) {}
+    }
+
     private void toggleSidebar() {
+        sidebarAutoHidden = false;
         if (mainHorizontalSplit.getItems().contains(sidebarVerticalSplit)) {
-            sidebarPosition = mainHorizontalSplit.getDividerPositions()[0];
+            if (mainHorizontalSplit.getDividerPositions().length > 0) {
+                double pos = mainHorizontalSplit.getDividerPositions()[0];
+                if (pos >= 0.08 && pos <= 0.50) {
+                    sidebarPosition = pos;
+                }
+            }
             mainHorizontalSplit.getItems().remove(sidebarVerticalSplit);
         } else {
             mainHorizontalSplit.getItems().addFirst(sidebarVerticalSplit);
-            mainHorizontalSplit.setDividerPositions(sidebarPosition);
+            Platform.runLater(() -> {
+                if (!mainHorizontalSplit.getDividers().isEmpty()) {
+                    mainHorizontalSplit.setDividerPositions(sidebarPosition);
+                }
+            });
         }
     }
     private void showPanel() {
+        panelAutoHidden = false;
         if (!centerVerticalSplit.getItems().contains(bottomPanelView)) {
             centerVerticalSplit.getItems().add(bottomPanelView);
-            centerVerticalSplit.setDividerPositions(panelPosition);
+            Platform.runLater(() -> {
+                if (!centerVerticalSplit.getDividers().isEmpty()) {
+                    centerVerticalSplit.setDividerPositions(panelPosition);
+                }
+            });
         }
     }
     private void togglePanel() {
+        panelAutoHidden = false;
         if (centerVerticalSplit.getItems().contains(bottomPanelView)) {
-            panelPosition = centerVerticalSplit.getDividerPositions()[0];
+            if (centerVerticalSplit.getDividerPositions().length > 0) {
+                double pos = centerVerticalSplit.getDividerPositions()[0];
+                if (pos >= 0.15 && pos <= 0.85) {
+                    panelPosition = pos;
+                }
+            }
             centerVerticalSplit.getItems().remove(bottomPanelView);
         } else showPanel();
+    }
+
+    /** Give narrow snap zones usable editor space and restore panels when room returns. */
+    private void adaptToWindow() {
+        if (getWidth() <= 0 || getHeight() <= 0) {
+            return;
+        }
+        menuBar.setCompact(getWidth() < 900);
+        boolean narrow = getWidth() < 720;
+        boolean shortHeight = getHeight() < 480;
+        pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("compact-height"), shortHeight);
+        if (narrow != narrowWindow) {
+            narrowWindow = narrow;
+            if (narrow && mainHorizontalSplit.getItems().contains(sidebarVerticalSplit)) {
+                toggleSidebar(); sidebarAutoHidden = true;
+            } else if (!narrow && sidebarAutoHidden) toggleSidebar();
+        }
+        if (shortHeight != shortWindow) {
+            shortWindow = shortHeight;
+            if (shortHeight && centerVerticalSplit.getItems().contains(bottomPanelView)) {
+                togglePanel(); panelAutoHidden = true;
+            } else if (!shortHeight && panelAutoHidden) showPanel();
+        }
     }
     private void selectPanel(io.github.dinamo541.idearm.app.viewmodel.BottomPanelViewModel.BottomTab tab) {
         showPanel(); viewModel.getBottomPanel().setActiveTab(tab);
@@ -349,6 +528,7 @@ public final class WorkbenchView extends BorderPane {
                         .map(info -> io.github.dinamo541.idearm.app.editor.HoverText.localize(info, localization));
             });
             component.setCompletionProvider(viewModel::getCompletions);
+            component.setOnAcademicCenterRequested(this::openDictionary);
         });
 
         // Explorer file double-click -> open in editor
@@ -384,6 +564,7 @@ public final class WorkbenchView extends BorderPane {
                 }
             }
         });
+        bottomPanelView.setOnAcademicCenterRequested(this::openDictionary);
 
         // Call-stack double-click -> open the source line that frame stands on
         bottomPanelView.getDebuggerView().setOnCallFrameSelected(frame -> openAt(frame.getFile(), frame.getLine()));
@@ -491,7 +672,7 @@ public final class WorkbenchView extends BorderPane {
         String catHelp = localization.get("menu.help");
 
         List<CommandPaletteDialog.CommandEntry> commands = new java.util.ArrayList<>(List.of(
-                new CommandPaletteDialog.CommandEntry(localization.get("recent.title"), "Ctrl+R", menuBar::openRecentDialog),
+                new CommandPaletteDialog.CommandEntry(catFile, localization.get("recent.title"), "Ctrl+R", menuBar::openRecentDialog),
                 // F5 starts a session or continues a paused one, as the menu and the toolbar button do.
                 new CommandPaletteDialog.CommandEntry(catDebug, localization.get("action.debug"), "F5", this::debugOrResume),
                 new CommandPaletteDialog.CommandEntry(catDebug, localization.get("menu.run.restartDebug"), "Ctrl+Shift+F5", () -> viewModel.restartDebug()),
@@ -500,7 +681,7 @@ public final class WorkbenchView extends BorderPane {
                 new CommandPaletteDialog.CommandEntry(catDebug, localization.get("action.stepOver"), "F10", () -> viewModel.stepOver()),
                 new CommandPaletteDialog.CommandEntry(catDebug, localization.get("action.stepInto"), "F11", () -> viewModel.stepInto()),
                 new CommandPaletteDialog.CommandEntry(catDebug, localization.get("action.stepOut"), "Shift+F11", () -> viewModel.stepOut()),
-                new CommandPaletteDialog.CommandEntry(catDebug, localization.get("action.run"), "Ctrl+F5", () -> viewModel.run(false)),
+                new CommandPaletteDialog.CommandEntry(catDebug, localization.get("action.run"), "Ctrl+F5", viewModel::run),
                 new CommandPaletteDialog.CommandEntry(catDebug, localization.get("menu.run.runKeepOpen"), "", () -> viewModel.run(true)),
                 new CommandPaletteDialog.CommandEntry(catDebug, localization.get("action.toggleBreakpoint"), "F9", () -> viewModel.toggleBreakpointAtCaret()),
                 new CommandPaletteDialog.CommandEntry(catDebug, localization.get("action.clearBreakpoints"), "", () -> viewModel.clearAllBreakpoints()),
@@ -561,7 +742,35 @@ public final class WorkbenchView extends BorderPane {
         commands.add(new CommandPaletteDialog.CommandEntry(catView, localization.get("workbench.panel"), "Ctrl+J", this::togglePanel));
         commands.add(new CommandPaletteDialog.CommandEntry(catView, localization.get("menu.view.fullScreen"), "Ctrl+Alt+F11",
                 () -> io.github.dinamo541.idearm.app.ui.WindowChrome.toggleFullScreen((javafx.stage.Stage) window)));
+        for (var cs : io.github.dinamo541.idearm.domain.files.TextDecoding.COMMON_ENCODINGS) {
+            String encName = io.github.dinamo541.idearm.domain.files.TextDecoding.displayName(cs);
+            commands.add(new CommandPaletteDialog.CommandEntry(catFile,
+                    localization.get("menu.file.reopenEncoding") + ": " + encName, "", () -> {
+                try {
+                    viewModel.reopenActiveDocumentWithEncoding(cs);
+                } catch (IOException ex) {
+                    showError(localization.get("menu.file.reopenEncoding"), ex.getMessage());
+                }
+            }));
+            commands.add(new CommandPaletteDialog.CommandEntry(catFile,
+                    localization.get("menu.file.saveEncoding") + ": " + encName, "", () -> {
+                try {
+                    viewModel.saveActiveDocumentWithEncoding(cs);
+                } catch (IOException ex) {
+                    showError(localization.get("dialog.error.save"), ex.getMessage());
+                }
+            }));
+        }
         new CommandPaletteDialog(window, localization, commands).show();
+    }
+
+    private void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.initOwner(getScene() != null ? getScene().getWindow() : null);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public ProjectExplorerView getExplorerView() {

@@ -7,6 +7,7 @@ import io.github.dinamo541.idearm.application.editor.HoverInfo;
 import io.github.dinamo541.idearm.application.editor.HoverKind;
 import io.github.dinamo541.idearm.domain.diagnostic.Diagnostic;
 import io.github.dinamo541.idearm.domain.diagnostic.Location;
+import io.github.dinamo541.idearm.app.ui.WorkbenchIcons;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -14,8 +15,13 @@ import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -72,6 +78,7 @@ public final class RichTextFxEditorComponent implements EditorComponent {
 
     private final HoverCardPopup hoverPopup = new HoverCardPopup();
     private final CompletionPopup completionPopup = new CompletionPopup();
+    private final WhitespaceSelectionRenderer whitespaceRenderer;
     private Localization localization = new Localization();
 
     /**
@@ -83,6 +90,7 @@ public final class RichTextFxEditorComponent implements EditorComponent {
 
     private Consumer<String> onDefinitionRequested;
     private Consumer<String> onReferencesRequested;
+    private Consumer<String> onAcademicCenterRequested;
     private Function<String, Optional<HoverInfo>> hoverProvider;
     private Function<String, List<CompletionItem>> completionProvider;
 
@@ -103,6 +111,7 @@ public final class RichTextFxEditorComponent implements EditorComponent {
         this.scrollPane = new VirtualizedScrollPane<>(codeArea);
         this.actions = new EditorActions(codeArea, () -> this.localization);
         this.editorRoot = new javafx.scene.layout.BorderPane(scrollPane);
+        this.editorRoot.getStyleClass().add("editor-root");
         this.minimap = new CodeMinimap(codeArea);
         this.minimap.setLocalization(localization);
         this.minimap.managedProperty().bind(minimap.visibleProperty());
@@ -153,6 +162,13 @@ public final class RichTextFxEditorComponent implements EditorComponent {
         setupKeyboardShortcuts();
         setupHoverListener();
         setupDismissalListeners();
+        setupContextMenu();
+
+        this.whitespaceRenderer = new WhitespaceSelectionRenderer(codeArea);
+    }
+
+    public WhitespaceSelectionRenderer getWhitespaceRenderer() {
+        return whitespaceRenderer;
     }
 
     public void setLocalization(Localization localization) {
@@ -180,6 +196,76 @@ public final class RichTextFxEditorComponent implements EditorComponent {
             if (hoverPopup.isShowing()) {
                 hoverPopup.hide();
             }
+        });
+    }
+
+    private void setupContextMenu() {
+        this.codeArea.setOnContextMenuRequested(event -> {
+            if (hoverPopup.isShowing()) {
+                hoverPopup.hide();
+            }
+            if (completionPopup.isShowing()) {
+                completionPopup.hide();
+            }
+            var hit = codeArea.hit(event.getX(), event.getY());
+            int charIndex = hit.getCharacterIndex().orElse(codeArea.getCaretPosition());
+            String word = getWordAt(charIndex);
+            if (word == null || word.isBlank()) {
+                word = getWordAtCaret();
+            }
+            final String targetWord = (word != null) ? word.trim() : "";
+
+            ContextMenu menu = new ContextMenu();
+            if (!targetWord.isEmpty()) {
+                var showAcademic = new MenuItem();
+                showAcademic.textProperty().bind(localization.text("editor.context.showInAcademicCenter"));
+                showAcademic.setGraphic(WorkbenchIcons.BOOK.create());
+                showAcademic.setAccelerator(new KeyCodeCombination(KeyCode.F1, KeyCombination.SHIFT_DOWN));
+                showAcademic.setOnAction(e -> {
+                    if (onAcademicCenterRequested != null) {
+                        onAcademicCenterRequested.accept(targetWord);
+                    }
+                });
+
+                var goToDef = new MenuItem();
+                goToDef.textProperty().bind(localization.text("editor.context.goToDefinition"));
+                goToDef.setAccelerator(new KeyCodeCombination(KeyCode.F12));
+                goToDef.setOnAction(e -> {
+                    if (onDefinitionRequested != null) {
+                        onDefinitionRequested.accept(targetWord);
+                    }
+                });
+
+                var findRefs = new MenuItem();
+                findRefs.textProperty().bind(localization.text("editor.context.findReferences"));
+                findRefs.setAccelerator(new KeyCodeCombination(KeyCode.F12, KeyCombination.SHIFT_DOWN));
+                findRefs.setOnAction(e -> {
+                    if (onReferencesRequested != null) {
+                        onReferencesRequested.accept(targetWord);
+                    }
+                });
+
+                menu.getItems().addAll(showAcademic, goToDef, findRefs, new SeparatorMenuItem());
+            }
+
+            var cutItem = new MenuItem();
+            cutItem.textProperty().bind(localization.text("editor.command.cut"));
+            cutItem.setAccelerator(new KeyCodeCombination(KeyCode.X, KeyCombination.SHORTCUT_DOWN));
+            cutItem.setOnAction(e -> actions.execute(EditorCommand.CUT));
+
+            var copyItem = new MenuItem();
+            copyItem.textProperty().bind(localization.text("editor.command.copy"));
+            copyItem.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.SHORTCUT_DOWN));
+            copyItem.setOnAction(e -> actions.execute(EditorCommand.COPY));
+
+            var pasteItem = new MenuItem();
+            pasteItem.textProperty().bind(localization.text("editor.command.paste"));
+            pasteItem.setAccelerator(new KeyCodeCombination(KeyCode.V, KeyCombination.SHORTCUT_DOWN));
+            pasteItem.setOnAction(e -> actions.execute(EditorCommand.PASTE));
+
+            menu.getItems().addAll(cutItem, copyItem, pasteItem);
+            menu.show(codeArea, event.getScreenX(), event.getScreenY());
+            event.consume();
         });
     }
 
@@ -230,6 +316,16 @@ public final class RichTextFxEditorComponent implements EditorComponent {
                 String word = getWordAtCaret();
                 if (word != null && !word.isBlank() && onReferencesRequested != null) {
                     onReferencesRequested.accept(word);
+                    event.consume();
+                }
+                return;
+            }
+
+            // 3b. Shift+F1 -> Academic Center
+            if (event.getCode() == KeyCode.F1 && event.isShiftDown()) {
+                String word = getWordAtCaret();
+                if (onAcademicCenterRequested != null) {
+                    onAcademicCenterRequested.accept(word != null ? word : "");
                     event.consume();
                 }
                 return;
@@ -500,6 +596,11 @@ public final class RichTextFxEditorComponent implements EditorComponent {
     @Override
     public void setOnReferencesRequested(Consumer<String> handler) {
         this.onReferencesRequested = handler;
+    }
+
+    @Override
+    public void setOnAcademicCenterRequested(Consumer<String> handler) {
+        this.onAcademicCenterRequested = handler;
     }
 
     @Override

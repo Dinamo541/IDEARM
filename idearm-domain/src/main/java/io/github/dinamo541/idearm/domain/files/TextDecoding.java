@@ -22,6 +22,15 @@ public final class TextDecoding {
 
     /** What a non-UTF-8 source is read as. */
     public static final Charset FALLBACK = Charset.forName("windows-1252");
+    public static final Charset WINDOWS_1252 = FALLBACK;
+    public static final Charset CP437 = Charset.forName("IBM437");
+    public static final Charset CP850 = Charset.forName("IBM850");
+    public static final java.util.List<Charset> COMMON_ENCODINGS = java.util.List.of(
+            StandardCharsets.UTF_8,
+            WINDOWS_1252,
+            CP437,
+            CP850
+    );
 
     private static final byte[] UTF8_BOM = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
     private static final byte[] UTF16LE_BOM = {(byte) 0xFF, (byte) 0xFE};
@@ -84,6 +93,38 @@ public final class TextDecoding {
         }
         String raw = new String(bytes, skip, bytes.length - skip, charset);
         return new DecodedText(normalizeLineEndings(raw), new TextFormat(charset, bom, lineSeparatorOf(raw)));
+    }
+
+    /**
+     * Decodes text using the specified explicit charset, skipping a byte order mark only when matching.
+     */
+    public static DecodedText decode(byte[] bytes, Charset explicitCharset) {
+        Objects.requireNonNull(bytes, "bytes");
+        Objects.requireNonNull(explicitCharset, "explicitCharset");
+        boolean bom = false;
+        int skip = 0;
+        if (explicitCharset.equals(StandardCharsets.UTF_8) && startsWith(bytes, UTF8_BOM)) {
+            bom = true;
+            skip = UTF8_BOM.length;
+        } else if (explicitCharset.equals(StandardCharsets.UTF_16LE) && startsWith(bytes, UTF16LE_BOM)) {
+            bom = true;
+            skip = UTF16LE_BOM.length;
+        } else if (explicitCharset.equals(StandardCharsets.UTF_16BE) && startsWith(bytes, UTF16BE_BOM)) {
+            bom = true;
+            skip = UTF16BE_BOM.length;
+        }
+        String raw = new String(bytes, skip, bytes.length - skip, explicitCharset);
+        return new DecodedText(normalizeLineEndings(raw), new TextFormat(explicitCharset, bom, lineSeparatorOf(raw)));
+    }
+
+    /** User-facing display name for common encodings, e.g. "CP437" instead of "IBM437". */
+    public static String displayName(Charset charset) {
+        if (charset == null) return "";
+        if (charset.equals(StandardCharsets.UTF_8)) return "UTF-8";
+        if (charset.name().equalsIgnoreCase("windows-1252")) return "Windows-1252";
+        if (charset.name().equalsIgnoreCase("IBM437") || charset.name().equalsIgnoreCase("CP437")) return "CP437";
+        if (charset.name().equalsIgnoreCase("IBM850") || charset.name().equalsIgnoreCase("CP850")) return "CP850";
+        return charset.displayName();
     }
 
     /**

@@ -304,11 +304,24 @@ Open **Project -> Properties...** to change it. **Main file** lists every `.asm`
 | Your sources are | Leave the box | Because |
 |---|---|---|
 | One program split across files, one of them with the entry point and the others exporting procedures with `PUBLIC` / `EXTRN` | **unchecked** | all of them have to be assembled and linked together |
-| Separate programs, one per exercise | **checked** | otherwise every executable also carries the code of the other exercises, the program starts in whichever module came first, and the link fails outright as soon as two of them export the same name: *Error: MAIN defined in module EJERCIC2.ASM is duplicated in module EJERCIC1.ASM* |
+| Separate programs, one per exercise | **checked** | only the main file is built. Unchecked works too, because a pattern leaves out every other program (see below), but each one is then listed as a note on every build |
 
 Checking the box empties `modules`; unchecking it brings back the pattern of the main file's folder. IDEARM asks
 before it drops modules you had listed. Either way the choice is saved to `idearm.toml` straight away, and the
 next Run rebuilds, because the project file counts as a source of the build.
+
+A pattern such as `src/*.asm` gathers the **modules** of the main program, never other programs. A module of a
+multi-file program ends with a bare `END`; a file that ends with its own `END label`, or uses `.STARTUP` /
+`STARTUPCODE`, is a program of its own (a test, an older exercise). When the main file declares its start too,
+IDEARM leaves such a file out of the build and says so in **Problems** with an *Info* note on that `END` line:
+*src/Extras.asm was not built into src/main.asm: it declares its own start (END MAIN)...* To build that program,
+choose it as **Main file**; the old main file is then the one left out. Without this, an include written for the
+code segment of `main.asm` but pulled into the `.DATA` of the other file fails with *CS unreachable from current
+segment*, and even a clean link would put both programs and both stacks in one executable that starts in the first.
+
+A file listed **by name** in `modules` is always built, because you asked for exactly that file. Two programs
+linked together start in whichever came first, and the link fails outright as soon as both export the same name:
+*Error: MAIN defined in module EJERCIC2.ASM is duplicated in module EJERCIC1.ASM*.
 
 #### Include files
 
@@ -545,9 +558,12 @@ The step, pause and register controls follow what the chosen debugger can actual
 is a control that works.
 
 The built-in emulator covers the 8086 instruction set and the console services student programs use: `INT 21h`
-character and string input/output and program exit, `INT 10h` teletype output and video mode calls, and `INT 16h`
-keyboard input. Programs that open files, draw graphics, or depend on timers or sound are better debugged with
-the external backend.
+character and string input/output, file handles 0 (stdin), 1 (stdout) and 2 (stderr) via functions `3Fh` and `40h`,
+system date (`2Ah`) and time (`2Ch`), and program exit; `INT 10h` teletype output (`0Eh`), cursor positioning
+(`02h`/`03h`), repeated character write (`09h`/`0Ah`), string output (`13h`), and video mode queries (`0Fh`);
+`INT 16h` keyboard input with BIOS scan codes (including Enter, Esc, and arrow keys); and `INT 1Ah` system timer ticks
+(`00h`). Programs that open disk files, draw graphics, or depend on sound or hardware interrupts are better debugged
+with the external backend.
 
 ### 6.2 Breakpoints
 

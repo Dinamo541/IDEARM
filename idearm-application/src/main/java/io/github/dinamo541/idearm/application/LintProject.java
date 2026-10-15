@@ -72,8 +72,9 @@ public final class LintProject {
                         || Files.size(file) > MAX_SOURCE_BYTES) {
                     continue;
                 }
-                String text = TextDecoding.decode(Files.readAllBytes(file)).text();
-                warnings.addAll(linter.lint(text, relative.replace('\\', '/'), project.target().cpu(), index));
+                var decoded = TextDecoding.decode(Files.readAllBytes(file));
+                String text = decoded.text();
+                warnings.addAll(linter.lint(text, relative.replace('\\', '/'), project.target().cpu(), index, decoded.format().charset()));
             } catch (IOException | RuntimeException unreadable) {
                 // A file that cannot be read or parsed simply gets no warnings.
             }

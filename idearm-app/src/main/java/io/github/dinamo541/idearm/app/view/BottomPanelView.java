@@ -6,12 +6,16 @@ import io.github.dinamo541.idearm.app.i18n.Problem;
 import io.github.dinamo541.idearm.app.viewmodel.BottomPanelViewModel;
 import io.github.dinamo541.idearm.app.viewmodel.DiagnosticItemViewModel;
 import io.github.dinamo541.idearm.app.viewmodel.ReferenceItemViewModel;
+import io.github.dinamo541.idearm.app.ui.WorkbenchIcons;
+import io.github.dinamo541.idearm.domain.diagnostic.Diagnostic;
 import io.github.dinamo541.idearm.domain.diagnostic.Severity;
 import java.util.function.Consumer;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Side;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -36,6 +40,7 @@ public final class BottomPanelView extends TabPane {
     private final TextArea outputArea;
     private Consumer<DiagnosticItemViewModel> onProblemSelected;
     private Consumer<ReferenceItemViewModel> onReferenceSelected;
+    private Consumer<String> onAcademicCenterRequested;
 
     public BottomPanelView(BottomPanelViewModel viewModel, Localization localization) {
         this.viewModel = viewModel;
@@ -150,13 +155,52 @@ public final class BottomPanelView extends TabPane {
         });
     }
 
+    private java.util.function.Supplier<String> clipboardSupplier;
+
+    private String getClipboardText() {
+        if (clipboardSupplier != null) {
+            String supplied = clipboardSupplier.get();
+            if (supplied != null) {
+                return supplied;
+            }
+        }
+        try {
+            var cb = javafx.scene.input.Clipboard.getSystemClipboard();
+            return cb.hasString() ? cb.getString() : null;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    void setClipboardSupplier(java.util.function.Supplier<String> supplier) {
+        this.clipboardSupplier = supplier;
+    }
+
     /**
      * The keyboard of the running program. In the built-in emulator every key goes to the program at once, as on a
      * real PC, and the program decides what to echo; for a program reading a pipe the line is sent on Enter and
      * shown here. The row only appears while a program can read it.
      */
     private javafx.scene.Node createProgramInput() {
-        var field = new javafx.scene.control.TextField();
+        var field = new javafx.scene.control.TextField() {
+            @Override
+            public void paste() {
+                String text = getClipboardText();
+                if (viewModel.programInputProperty().get() == BottomPanelViewModel.ProgramInput.KEYS) {
+                    if (text != null) {
+                        // DOS keyboard input uses CR. A Windows line ending must produce only one Enter.
+                        viewModel.sendProgramInput(text.replace("\r\n", "\r").replace('\n', '\r'));
+                    }
+                } else {
+                    if (text != null) {
+                        replaceSelection(text);
+                    } else {
+                        super.paste();
+                    }
+                }
+            }
+        };
+        field.setId("program-input");
         field.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 12px;");
         field.promptTextProperty().bind(Bindings.createStringBinding(() ->
                         viewModel.programInputProperty().get() == BottomPanelViewModel.ProgramInput.LINE
@@ -253,6 +297,10 @@ public final class BottomPanelView extends TabPane {
         this.onReferenceSelected = listener;
     }
 
+    public void setOnAcademicCenterRequested(Consumer<String> listener) {
+        this.onAcademicCenterRequested = listener;
+    }
+
     private void setupProblemsTable() {
         problemsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
@@ -263,17 +311,17 @@ public final class BottomPanelView extends TabPane {
             @Override
             protected void updateItem(Severity item, boolean empty) {
                 super.updateItem(item, empty);
+                getStyleClass().removeAll("diag-error", "diag-warning", "diag-info");
                 if (empty || item == null) {
                     setText(null);
-                    setStyle("");
                 } else {
                     setText(localization.get("severity." + item.name().toLowerCase(java.util.Locale.ROOT)));
                     if (item == Severity.ERROR) {
-                        setStyle("-fx-text-fill: -color-danger-fg; -fx-font-weight: bold;");
+                        getStyleClass().add("diag-error");
                     } else if (item == Severity.WARNING) {
-                        setStyle("-fx-text-fill: -color-warning-fg;");
+                        getStyleClass().add("diag-warning");
                     } else {
-                        setStyle("-fx-text-fill: -color-accent-fg;");
+                        getStyleClass().add("diag-info");
                     }
                 }
             }
@@ -316,7 +364,7 @@ public final class BottomPanelView extends TabPane {
         problemsTable.getColumns().add(codeCol);
         problemsTable.getColumns().add(msgCol);
 
-        // Row double click
+        // Row double click and context menu
         problemsTable.setRowFactory(tv -> {
             TableRow<DiagnosticItemViewModel> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -327,8 +375,44 @@ public final class BottomPanelView extends TabPane {
                     }
                 }
             });
+
+            var menu = new ContextMenu();
+            var showInAcademic = new MenuItem();
+            showInAcademic.textProperty().bind(localization.text("editor.context.showInAcademicCenter"));
+            showInAcademic.setGraphic(WorkbenchIcons.BOOK.create());
+            showInAcademic.setOnAction(e -> {
+                DiagnosticItemViewModel item = row.getItem();
+                if (item != null && onAcademicCenterRequested != null) {
+                    String target = extractEntityFromDiagnostic(item.getDiagnostic());
+                    if (target != null && !target.isBlank()) {
+                        onAcademicCenterRequested.accept(target);
+                    }
+                }
+            });
+            menu.getItems().add(showInAcademic);
+            row.contextMenuProperty().bind(
+                    Bindings.when(row.emptyProperty())
+                            .then((ContextMenu) null)
+                            .otherwise(menu)
+            );
             return row;
         });
+    }
+
+    static String extractEntityFromDiagnostic(Diagnostic d) {
+        if (d == null) return null;
+        if (!d.arguments().isEmpty()) {
+            String arg = d.arguments().getFirst();
+            if (arg != null && !arg.isBlank()) {
+                int space = arg.indexOf(' ');
+                return space > 0 ? arg.substring(0, space).trim() : arg.trim();
+            }
+        }
+        if (d.rawLine() != null && !d.rawLine().isBlank()) {
+            String[] parts = d.rawLine().trim().split("\\s+");
+            if (parts.length > 0) return parts[0];
+        }
+        return null;
     }
 
     private void setupReferencesTable() {

@@ -14,7 +14,7 @@ final class ExplorerIcons {
 
     static Node folder(boolean open) {
         var icon = (open ? WorkbenchIcons.FOLDER_OPEN : WorkbenchIcons.FOLDER).create();
-        icon.getStyleClass().add("file-icon-folder");
+        icon.getStyleClass().add(open ? "file-icon-folder-open" : "file-icon-folder");
         return icon;
     }
 

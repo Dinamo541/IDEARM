@@ -29,4 +29,14 @@ public interface ToolRegistry {
     default List<ToolInstallation> registerFolder(Path folder) {
         throw new DomainException("tools.register.unsupported", "This tool registry cannot register folders.");
     }
+
+    /**
+     * Clears cached detection results and rescans for available tools.
+     */
+    default void refresh() {}
+
+    /**
+     * Warms up tool detection in the background if supported by the registry.
+     */
+    default void warmUp() {}
 }

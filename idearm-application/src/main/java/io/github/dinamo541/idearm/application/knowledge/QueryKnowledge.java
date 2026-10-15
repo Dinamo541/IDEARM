@@ -35,6 +35,13 @@ public final class QueryKnowledge {
      * @return grouped results by entity kind, ordered by relevance
      */
     public List<SearchResultGroup> search(String rawQuery, String language) {
+        return search(rawQuery, language, ArchitectureBitness.ALL, Dialect.COMMON);
+    }
+
+    /**
+     * Executes transversal search filtered by architecture bitness and assembler dialect.
+     */
+    public List<SearchResultGroup> search(String rawQuery, String language, ArchitectureBitness bitness, Dialect dialect) {
         if (rawQuery == null || rawQuery.trim().isEmpty()) {
             return List.of();
         }
@@ -46,16 +53,16 @@ public final class QueryKnowledge {
         Map<KnowledgeEntityKind, List<KnowledgeSearchResult>> grouped = new EnumMap<>(KnowledgeEntityKind.class);
 
         // 1. Search Syntax Items (Preserves punctuation like ':' and '[')
-        searchSyntaxItems(query, normalizedQuery, isSpanish, grouped);
+        searchSyntaxItems(query, normalizedQuery, isSpanish, grouped, bitness, dialect);
 
         // 2. Search Registers and Flags
-        searchRegisters(query, normalizedQuery, isSpanish, grouped);
+        searchRegisters(query, normalizedQuery, isSpanish, grouped, bitness);
 
         // 3. Search Instructions and Aliases
-        searchInstructions(query, normalizedQuery, isSpanish, grouped);
+        searchInstructions(query, normalizedQuery, isSpanish, grouped, bitness, dialect);
 
         // 4. Search Interrupt Services
-        searchServices(query, normalizedQuery, isSpanish, grouped);
+        searchServices(query, normalizedQuery, isSpanish, grouped, bitness);
 
         // 5. Search Concepts
         searchConcepts(query, normalizedQuery, isSpanish, grouped);
@@ -84,7 +91,11 @@ public final class QueryKnowledge {
      * Returns a flat list of all matching results ordered by score.
      */
     public List<KnowledgeSearchResult> searchFlat(String query, String language) {
-        List<SearchResultGroup> groups = search(query, language);
+        return searchFlat(query, language, ArchitectureBitness.ALL, Dialect.COMMON);
+    }
+
+    public List<KnowledgeSearchResult> searchFlat(String query, String language, ArchitectureBitness bitness, Dialect dialect) {
+        List<SearchResultGroup> groups = search(query, language, bitness, dialect);
         List<KnowledgeSearchResult> flat = new ArrayList<>();
         for (SearchResultGroup group : groups) {
             flat.addAll(group.items());
@@ -94,12 +105,19 @@ public final class QueryKnowledge {
     }
 
     private void searchSyntaxItems(String query, String norm, boolean isSpanish,
-                                   Map<KnowledgeEntityKind, List<KnowledgeSearchResult>> grouped) {
+                                   Map<KnowledgeEntityKind, List<KnowledgeSearchResult>> grouped,
+                                   ArchitectureBitness bitness, Dialect dialect) {
         boolean matchColon = query.equals(":") || norm.equals("dos puntos") || norm.equals("dospuntos") || norm.equals("colon");
         boolean matchBrackets = query.equals("[") || query.equals("]") || query.equals("[]") ||
                 norm.equals("corchetes") || norm.equals("corchete") || norm.equals("brackets") || norm.equals("bracket");
 
         for (SyntaxItem item : corpus.getAllSyntaxItems()) {
+            if (bitness != null && !bitness.supportsSyntaxItem(item)) {
+                continue;
+            }
+            if (dialect != null && dialect != Dialect.COMMON && !item.supportsDialect(dialect)) {
+                continue;
+            }
             int score = 0;
             String token = item.token();
             String normToken = normalize(token);
@@ -131,12 +149,16 @@ public final class QueryKnowledge {
     }
 
     private void searchRegisters(String query, String norm, boolean isSpanish,
-                                 Map<KnowledgeEntityKind, List<KnowledgeSearchResult>> grouped) {
+                                 Map<KnowledgeEntityKind, List<KnowledgeSearchResult>> grouped,
+                                 ArchitectureBitness bitness) {
         boolean matchCarry = norm.equals("acarreo") || norm.equals("carry");
         boolean matchExtraSeg = norm.equals("segmento extra") || norm.equals("extra segment");
         boolean matchStack = norm.equals("stack") || norm.equals("pila");
 
         for (RegisterEntry reg : corpus.getAllRegisters()) {
+            if (bitness != null && !bitness.supportsRegister(reg)) {
+                continue;
+            }
             int score = 0;
             String name = reg.name();
             Locale textLocale = isSpanish ? Locale.forLanguageTag("es") : Locale.ENGLISH;
@@ -197,11 +219,18 @@ public final class QueryKnowledge {
     }
 
     private void searchInstructions(String query, String norm, boolean isSpanish,
-                                    Map<KnowledgeEntityKind, List<KnowledgeSearchResult>> grouped) {
+                                    Map<KnowledgeEntityKind, List<KnowledgeSearchResult>> grouped,
+                                    ArchitectureBitness bitness, Dialect dialect) {
         boolean matchCarry = norm.equals("acarreo") || norm.equals("carry");
         boolean matchStack = norm.equals("stack") || norm.equals("pila");
 
         for (InstructionEntry instr : corpus.getAllInstructions()) {
+            if (bitness != null && !bitness.supportsInstruction(instr)) {
+                continue;
+            }
+            if (dialect != null && dialect != Dialect.COMMON && !instr.recognizedBy().isEmpty() && !instr.recognizedBy().contains(dialect)) {
+                continue;
+            }
             int score = 0;
             String mnemonic = instr.mnemonic();
             String summary = isSpanish ? instr.summaryEs() : instr.summaryEn();
@@ -258,7 +287,12 @@ public final class QueryKnowledge {
     }
 
     private void searchServices(String query, String norm, boolean isSpanish,
-                                Map<KnowledgeEntityKind, List<KnowledgeSearchResult>> grouped) {
+                                Map<KnowledgeEntityKind, List<KnowledgeSearchResult>> grouped,
+                                ArchitectureBitness bitness) {
+        if (bitness == ArchitectureBitness.BITS_64) {
+            // Real-mode DOS/BIOS interrupt services are invalid in 64-bit Long Mode
+            return;
+        }
         boolean matchInt21 = norm.contains("21h") || norm.contains("int 21") || norm.contains("int21")
                 || (norm.contains("interrupcion") && norm.contains("21"))
                 || (norm.contains("interrupt") && norm.contains("21"));

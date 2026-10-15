@@ -69,6 +69,9 @@ Cut/copy/paste shortcuts in text fields and the terminal retain those controls' 
 | Ctrl+O | Open a file |
 | Ctrl+R | Open recent projects, folders and files |
 | Alt+Space | Window controls menu |
+| Win+Z (Windows 11) | Windows Snap Layout picker |
+| Win+Left / Win+Right (Windows) | Snap to the side of the current screen |
+| Win+Up / Win+Down (Windows) | Windows maximize, restore and snap transitions |
 | Alt+F4 | Close window, with unsaved-file confirmation |
 | Ctrl+S / Ctrl+Shift+S | Save / Save As |
 | Ctrl+K, then S | Save all modified documents |
@@ -91,6 +94,16 @@ Full screen is also available from **View → Full Screen**, the command palette
 beside Minimize. In full screen the Restore button exits full screen; the prior maximized state is preserved.
 Double-click empty title space to maximize/restore, drag it to move the window, or drag it to a monitor's top
 edge to maximize. Right-click empty title space or press Alt+Space for the window menu.
+
+On Windows the title bar participates in the native window manager. Drag it to the sides/corners to snap,
+or toward the top to use the Windows 11 layout bar. Hover over Maximize/Restore for Windows 11 Snap Layouts.
+The available choices follow your Windows multitasking settings and display configuration. Resize from any
+edge or corner, and drag a maximized or snapped window by its title to restore and move it.
+
+The window can shrink to 500 × 360 logical pixels. At narrow widths the six menus move into the **☰** menu
+and the command search becomes an icon; additional toolbar actions remain in its overflow menu. The sidebar
+collapses below 720 pixels and the bottom panel below 480 pixels high, then returns when room is available.
+Explicit panel/sidebar actions and Ctrl+B / Ctrl+J remain available in compact windows.
 
 IDEARM remembers normal position, size and maximization in `window.properties` in the user data directory
 (`%APPDATA%/IDEARM` on Windows, `~/.idearm` otherwise; `IDEARM_USER_DATA_DIR` overrides it). On restart, it
@@ -115,6 +128,9 @@ Reference: [VS Code's Windows shortcut sheet](https://code.visualstudio.com/shor
 - Recents: `RecentItem` / `RecentItemsStore` (domain), `ManageRecentItems` (application),
   `FileRecentItemsStore` (infrastructure), `RecentItemsViewModel` / `OpenRecentDialog` (presentation).
 - Shared UI helpers: `app.ui.WindowChrome`, `WorkbenchIcons`, `HoverHelp`, `BrandLogo`.
+- Windows uses JavaFX 25 `HeaderBar` / `StageStyle.EXTENDED` with `-Djavafx.enablePreview=true`, configured
+  in Maven and the packaged launcher. Direct Java launches must pass that property; otherwise the portable
+  fallback chrome is used. See [ADR-015](adr/ADR-015-native-windows-window-management.md).
 - Decisions and limitations: [ADR-009](adr/ADR-009-workbench-history-and-window-chrome.md).
 - Test totals for the whole repository are kept in `PLAN.md`.
 - `IDEARM_VISUAL_SMOKE=<output folder>` starts the existing desktop entry point in verification mode.
@@ -130,6 +146,11 @@ Reference: [VS Code's Windows shortcut sheet](https://code.visualstudio.com/shor
 - The visual-system conventions and theme propagation are recorded in
   [ADR-012](adr/ADR-012-workbench-visual-system.md).
 - Local verification artifacts are in the ignored `scratch/workbench-review/` folder.
+- `IDEARM_WINDOW_SMOKE=<output folder>` checks the window controls, compact menus and automatic panel
+  restoration at 1280 × 800, 960 × 540, 640 × 500 and 500 × 360 in dark English and light Spanish. It captures
+  only IDEARM's scene and injects no desktop input. Use isolated `IDEARM_USER_DATA_DIR`; expect `WINDOW LAYOUT
+  SMOKE: ... PASS` with no `FAILED` lines. `NativeWindowChromeTest` queries the test window's actual Win32
+  hit tests for caption, maximize and all eight resizing directions, and exercises native close cancellation.
 
 Next useful refinements: configurable keybindings, a project-wide Ctrl+P picker, regex search, and multi-cursor
 support. Do not expose commands for these until their behavior exists.

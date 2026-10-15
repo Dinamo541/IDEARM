@@ -142,4 +142,45 @@ public final class EditorDocumentViewModel {
             editor.setText(decoded.text());
         }
     }
+
+    /** Reopens the file from disk using the specified explicit charset. */
+    public void reopenWithEncoding(java.nio.charset.Charset charset) throws IOException {
+        Objects.requireNonNull(charset, "charset cannot be null");
+        Path path = filePath.get();
+        if (path != null && Files.exists(path)) {
+            var decoded = TextDecoding.decode(Files.readAllBytes(path), charset);
+            format.set(decoded.format());
+            editor.setText(decoded.text());
+            editor.modifiedProperty().set(false);
+        }
+    }
+
+    /** Saves the editor buffer with the specified explicit charset. */
+    public void saveWithEncoding(java.nio.charset.Charset charset) throws IOException {
+        Objects.requireNonNull(charset, "charset cannot be null");
+        Path path = filePath.get();
+        if (path == null) {
+            return;
+        }
+        Path folder = path.toAbsolutePath().getParent();
+        if (folder != null) {
+            Files.createDirectories(folder);
+        }
+        String text = editor.getText();
+        TextFormat target = format.get().withCharset(charset);
+        byte[] bytes = TextDecoding.encode(text, target);
+        Path temporary = Files.createTempFile(folder, "." + path.getFileName() + "-", ".tmp");
+        try {
+            Files.write(temporary, bytes);
+            try {
+                Files.move(temporary, path, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException notAtomic) {
+                Files.move(temporary, path, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
+        format.set(target);
+        editor.modifiedProperty().set(false);
+    }
 }

@@ -20,8 +20,8 @@ public final class WindowSession {
         var placement = read(file).fit(Screen.getScreens().stream().map(Screen::getVisualBounds).toList());
         var screen = Screen.getScreensForRectangle(placement.x(), placement.y(), placement.width(), placement.height())
                 .stream().findFirst().orElse(Screen.getPrimary()).getVisualBounds();
-        stage.setMinWidth(Math.min(800, screen.getWidth()));
-        stage.setMinHeight(Math.min(500, screen.getHeight()));
+        stage.setMinWidth(Math.min(WindowPlacement.MIN_WIDTH, screen.getWidth()));
+        stage.setMinHeight(Math.min(WindowPlacement.MIN_HEIGHT, screen.getHeight()));
         stage.setX(placement.x()); stage.setY(placement.y());
         stage.setWidth(placement.width()); stage.setHeight(placement.height());
         WindowPlacement[] normal = { placement };

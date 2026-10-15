@@ -103,17 +103,63 @@ public final class CreateProject {
         }
 
         Path projectRoot = parent.resolve(name).normalize();
+        return createAt(projectRoot, name, targetProfile, cpu, toolchainId, toolchainVersion, debugBackend);
+    }
+
+    public Project createInDirectory(Path directory) {
+        return createInDirectory(directory, null, null, null, null, null, null);
+    }
+
+    public Project createInDirectory(
+            Path directory,
+            String projectName,
+            String targetProfile,
+            String cpu,
+            String toolchainId,
+            String toolchainVersion) {
+        return createInDirectory(directory, projectName, targetProfile, cpu, toolchainId, toolchainVersion, null);
+    }
+
+    public Project createInDirectory(
+            Path directory,
+            String projectName,
+            String targetProfile,
+            String cpu,
+            String toolchainId,
+            String toolchainVersion,
+            String debugBackend) {
+
+        Objects.requireNonNull(directory, "directory cannot be null");
+        Path projectRoot = directory.toAbsolutePath().normalize();
+        String name = (projectName == null || projectName.isBlank())
+                ? (projectRoot.getFileName() != null ? projectRoot.getFileName().toString() : "unnamed")
+                : projectName.trim();
+        name = requireValidName(name);
+
+        return createAt(projectRoot, name, targetProfile, cpu, toolchainId, toolchainVersion, debugBackend);
+    }
+
+    private Project createAt(
+            Path projectRoot,
+            String name,
+            String targetProfile,
+            String cpu,
+            String toolchainId,
+            String toolchainVersion,
+            String debugBackend) {
+
         if (Files.exists(projectRoot.resolve("idearm.toml"))) {
             throw new DomainException("project.already.exists",
                     "Project already exists at: " + projectRoot, projectRoot);
         }
 
         String profile = (targetProfile == null || targetProfile.isBlank()) ? "dos-exe-16" : targetProfile.trim();
-        String targetCpu = (cpu == null || cpu.isBlank()) ? "8086" : cpu.trim();
-        String toolchain = (toolchainId == null || toolchainId.isBlank()) ? "borland-tasm" : toolchainId.trim();
+        TargetProfile target = TargetProfileCatalog.require(profile);
+        String targetCpu = (cpu == null || cpu.isBlank()) ? target.cpuBaseline() : cpu.trim();
+        String defaultToolchain = target.isDos() ? "borland-tasm" : "nasm";
+        String toolchain = (toolchainId == null || toolchainId.isBlank()) ? defaultToolchain : toolchainId.trim();
         String version = (toolchainVersion == null || toolchainVersion.isBlank())
                 ? defaultVersion(toolchain) : toolchainVersion.trim();
-        TargetProfile target = TargetProfileCatalog.require(profile);
         String debugger = (debugBackend == null || debugBackend.isBlank())
                 ? (target.isDos() ? DebugConfiguration.EMULATOR : DebugConfiguration.GDB)
                 : debugBackend.trim();

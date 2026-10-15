@@ -108,4 +108,53 @@ class DefaultToolRegistryTest {
         assertEquals(List.of(), new DefaultToolRegistry(false, config).registerFolder(temp.resolve("empty")));
         assertFalse(Files.exists(config));
     }
+
+    @Test
+    void fallsBackToDetectionWhenRegisteredExecutableNoLongerExists() throws IOException {
+        Path existingExe = Files.createFile(temp.resolve("detected-tasm.exe"));
+        Path missingExe = temp.resolve("old-tasm.exe"); // does not exist
+
+        var registry = new DefaultToolRegistry(false, null);
+        var registeredTool = new ToolInstallation("tasm", "4.1", missingExe, HostKind.DOS_REAL, Map.of(), null, DefaultToolRegistry.SOURCE_REGISTERED);
+        var detectedTool = new ToolInstallation("tasm", "3.2", existingExe, HostKind.DOS_REAL, Map.of(), null, DefaultToolRegistry.SOURCE_DETECTED);
+
+        registry.register("tasm", registeredTool);
+        registry.register("tasm", detectedTool);
+
+        // find("tasm") falls back to detected tool
+        ToolInstallation found = registry.find("tasm").orElseThrow();
+        assertEquals(detectedTool, found, "Must fall back to detected tool when registered executable is missing");
+        assertEquals(existingExe, found.executable());
+
+        // all() also prefers the detected tool
+        assertEquals(detectedTool, registry.all().get("tasm"));
+    }
+
+    @Test
+    void refreshClearsDetectedCacheAndReloadsConfig() throws IOException {
+        Path config = temp.resolve("tools.toml");
+        Path exe1 = Files.createFile(temp.resolve("tasm1.exe"));
+        Path exe2 = Files.createFile(temp.resolve("tasm2.exe"));
+
+        // Save config with tasm1
+        var reg1 = new DefaultToolRegistry(false, config);
+        reg1.register(new ToolInstallation("tasm", "4.1", exe1, HostKind.DOS_REAL, Map.of()));
+        reg1.saveToGlobalConfig();
+
+        var registry = new DefaultToolRegistry(false, config);
+        registry.loadFromGlobalConfig();
+        assertEquals(exe1, registry.find("tasm").orElseThrow().executable());
+
+        // Now update config externally with tasm2
+        var reg2 = new DefaultToolRegistry(false, config);
+        reg2.register(new ToolInstallation("tasm", "4.1", exe2, HostKind.DOS_REAL, Map.of()));
+        reg2.saveToGlobalConfig();
+
+        // Before refresh, still has old
+        assertEquals(exe1, registry.find("tasm").orElseThrow().executable());
+
+        // After refresh, reloads new config
+        registry.refresh();
+        assertEquals(exe2, registry.find("tasm").orElseThrow().executable());
+    }
 }

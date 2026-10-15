@@ -33,9 +33,13 @@ final class WelcomeView extends VBox {
         var discover = new VBox(2, label(text, "welcome.discover", "welcome-section-title"),
                 entry(text, "welcome.commands", "Ctrl+Shift+P", WorkbenchIcons.SEARCH, () -> action.accept(Action.COMMANDS)),
                 entry(text, "welcome.dictionary", "Shift+F1", WorkbenchIcons.BOOK, () -> action.accept(Action.DICTIONARY)));
+        var columns = new HBox(20, start, discover);
+        columns.setAlignment(Pos.TOP_LEFT);
+        HBox.setHgrow(start, Priority.ALWAYS);
+        HBox.setHgrow(discover, Priority.ALWAYS);
         var footer = label(text, "welcome.footer", "welcome-footer");
         footer.setWrapText(true);
-        getChildren().addAll(brand, start, discover, footer);
+        getChildren().addAll(brand, columns, footer);
     }
 
     private static Label label(Localization text, String key, String style) {
@@ -51,6 +55,7 @@ final class WelcomeView extends VBox {
         HBox.setHgrow(space, Priority.ALWAYS);
         var keys = new Label(shortcut);
         keys.getStyleClass().add("keycap");
+        keys.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
         var row = new HBox(12, icon.create(18), name, space, keys);
         row.setAlignment(Pos.CENTER_LEFT);
         var button = new Button();

@@ -149,7 +149,7 @@ class Emu8086FaultsAndInputTest {
 
     @Test
     void anUnsetInterruptVectorIsExplainedInsteadOfRunningGarbage() {
-        writeCode(0xCD, 0x1A); // INT 1Ah
+        writeCode(0xCD, 0x33); // INT 33h (Mouse services, unset vector)
         cpu.step();
         assertEquals(Cpu8086.State.FAULTED, cpu.state());
         assertEquals("emu.interrupt.unsupported", cpu.fault().code());
@@ -172,8 +172,8 @@ class Emu8086FaultsAndInputTest {
 
     @Test
     void anUnsupportedDosFunctionIsReportedOnceAndTheProgramGoesOn() throws Exception {
-        // MOV AH, 2Ch (get time) / INT 21h / INT 21h / HLT
-        writeCode(0xB4, 0x2C, 0xCD, 0x21, 0xCD, 0x21, 0xF4);
+        // MOV AH, 3Dh (open file - unsupported in emu8086) / INT 21h / INT 21h / HLT
+        writeCode(0xB4, 0x3D, 0xCD, 0x21, 0xCD, 0x21, 0xF4);
         try (var session = session()) {
             session.resume();
             session.exit().get(3, TimeUnit.SECONDS);

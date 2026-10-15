@@ -2,6 +2,10 @@
 
 Date: 2026-09-17. Status: accepted.
 
+Amended on 2026-10-02 by [ADR-015](ADR-015-native-windows-window-management.md): supported Windows runtimes
+now use native extended window management and Snap Layouts. The undecorated implementation below is retained
+as the fallback for other platforms or launches without the JavaFX preview option.
+
 ## Context
 
 The user requested a VS Code-like Open Recent picker, delayed button explanations, an integrated title bar
@@ -36,7 +40,7 @@ with window controls, and an original logo. The JavaFX app preserves its existin
 
 History does not restore sessions or dirty buffers. Separate simultaneous IDE instances currently use
 last-writer-wins persistence. Externally moved locations can be removed and reopened; their new path is not
-automatically discovered. The Windows Snap Layout hover flyout is not emulated.
+automatically discovered. Windows Snap Layouts are supplied by the OS through the native integration in ADR-015.
 
 Unit tests cover MRU, persistence, corruption, write ordering, stale targets and existing tabs. The opt-in
 JavaFX smoke walkthrough covers recent search/Enter, window controls, real pointer hover and close cancellation.

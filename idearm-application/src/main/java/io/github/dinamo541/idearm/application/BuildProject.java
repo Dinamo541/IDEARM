@@ -45,7 +45,10 @@ public final class BuildProject {
         String output = "";
         try (var lock = workspace.lock(root)) {
             cancellation.throwIfCancelled();
-            var project = SourceSet.expand(projects.load(root), root);
+            var expansion = SourceSet.expansion(projects.load(root), root);
+            var project = expansion.project();
+            // A file left out of the build is said in Problems, or its edits would seem to have no effect.
+            diagnostics.addAll(expansion.otherPrograms());
             var matching = providers.stream().filter(p -> p.id().equals(project.toolchain().id())).toList();
             if (matching.size() != 1) {
                 throw new DomainException("toolchain.provider.unavailable",

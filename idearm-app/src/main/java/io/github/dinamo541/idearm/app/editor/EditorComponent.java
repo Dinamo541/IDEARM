@@ -65,6 +65,9 @@ public interface EditorComponent {
     /** Registers a handler invoked when the user requests "Find References" (Shift+F12). */
     void setOnReferencesRequested(java.util.function.Consumer<String> handler);
 
+    /** Registers a handler invoked when the user requests "Show in Academic Center" (Shift+F1). */
+    void setOnAcademicCenterRequested(java.util.function.Consumer<String> handler);
+
     /** Registers a provider invoked to retrieve hover information for a word under the mouse. */
     void setHoverProvider(java.util.function.Function<String, java.util.Optional<io.github.dinamo541.idearm.application.editor.HoverInfo>> provider);
 

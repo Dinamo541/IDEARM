@@ -282,6 +282,20 @@ public final class AssemblyParser {
             }
         }
 
+        // 6b. Anonymous data definition: "DB|DW|DD|DQ|DT value"
+        if (isDataDirective(first)) {
+            String dir = first.normalized();
+            StringBuilder val = new StringBuilder();
+            for (int v = idx + 1; v < line.size(); v++) {
+                if (!val.isEmpty()) val.append(" ");
+                val.append(line.get(v).text());
+            }
+            DataNode d = new DataNode("", dir, val.toString(), lineNum, first.column());
+            dataDefinitions.add(d);
+            statements.add(d);
+            return;
+        }
+
         // 7. Instruction: "MNEMONIC [operands]"
         if (first.is(TokenType.INSTRUCTION)) {
             String mnemonic = first.normalized();

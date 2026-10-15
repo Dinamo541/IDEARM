@@ -71,14 +71,14 @@ class InterruptServicesTest {
         assertTrue(s0E.isPresent(), "INT 10h AH=0Eh (Teletype Output) must exist");
         assertTrue(s13.isPresent(), "INT 10h AH=13h (Write String) must exist");
 
-        // AH=13h is unsupported in emu8086
+        // AH=13h is available in emu8086
         BackendAvailability emuAvail13 = s13.get().availability().stream()
                 .filter(a -> "emu8086".equalsIgnoreCase(a.backend()))
                 .findFirst()
                 .orElse(null);
         assertNotNull(emuAvail13);
-        assertEquals(BackendAvailability.AvailabilityStatus.UNAVAILABLE, emuAvail13.status());
-        assertEquals("diagnostic.emu.bios.unsupported", emuAvail13.caveat());
+        assertEquals(BackendAvailability.AvailabilityStatus.AVAILABLE, emuAvail13.status());
+        assertNull(emuAvail13.caveat());
     }
 
     @Test

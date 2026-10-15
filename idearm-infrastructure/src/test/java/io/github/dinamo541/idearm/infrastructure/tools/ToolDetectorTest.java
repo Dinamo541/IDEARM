@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -119,5 +120,55 @@ class ToolDetectorTest {
         assertEquals(tempDir, folders.getFirst());
         assertFalse(folders.contains(tempDir.resolve("a/b/c/d")));
         assertTrue(ToolDetector.foldersUnder(tempDir.resolve("missing"), 2).isEmpty());
+    }
+
+    @Test
+    void peLinkerIsIgnoredFor16BitLinkRole(@TempDir Path tempDir) throws IOException {
+        Path link = tempDir.resolve("LINK.EXE");
+        byte[] pe = new byte[128];
+        pe[0] = 'M'; pe[1] = 'Z';
+        pe[0x3C] = 64; // lfanew = 64
+        pe[64] = 'P'; pe[65] = 'E'; pe[66] = 0; pe[67] = 0;
+        pe[68] = 0x4C; pe[69] = 0x01; // i386 WIN32_CONSOLE
+        Files.write(link, pe);
+
+        Map<String, List<ToolInstallation>> detected = ToolDetector.detectInDirectory(tempDir);
+        assertFalse(detected.containsKey("link"), "PE LINK.EXE (e.g. Visual Studio) must be ignored for 16-bit DOS link role");
+    }
+
+    @Test
+    void modernVisualStudioMasmIsIgnoredFor16BitRole(@TempDir Path tempDir) throws IOException {
+        Path ml64 = tempDir.resolve("ML.EXE");
+        byte[] pe64 = new byte[256];
+        pe64[0] = 'M'; pe64[1] = 'Z';
+        pe64[0x3C] = 64;
+        pe64[64] = 'P'; pe64[65] = 'E'; pe64[66] = 0; pe64[67] = 0;
+        pe64[68] = 0x64; pe64[69] = (byte) 0x86; // x64 WIN64
+        byte[] banner = "Macro Assembler Version 14.34.31937".getBytes(StandardCharsets.US_ASCII);
+        System.arraycopy(banner, 0, pe64, 80, banner.length);
+        Files.write(ml64, pe64);
+
+        Map<String, List<ToolInstallation>> detected = ToolDetector.detectInDirectory(tempDir);
+        assertFalse(detected.containsKey("ml"), "64-bit / modern Visual Studio ML.EXE must be ignored for 16-bit DOS role");
+    }
+
+    @Test
+    void dosLinkAndMasm611AreDetected(@TempDir Path tempDir) throws IOException {
+        Path link = tempDir.resolve("LINK.EXE");
+        Files.writeString(link, "MZ Linker Version 5.31");
+
+        Path ml = tempDir.resolve("ML.EXE");
+        byte[] pe32 = new byte[256];
+        pe32[0] = 'M'; pe32[1] = 'Z';
+        pe32[0x3C] = 64;
+        pe32[64] = 'P'; pe32[65] = 'E'; pe32[66] = 0; pe32[67] = 0;
+        pe32[68] = 0x4C; pe32[69] = 0x01; // i386 WIN32_CONSOLE
+        byte[] banner = "Macro Assembler Version 6.11".getBytes(StandardCharsets.US_ASCII);
+        System.arraycopy(banner, 0, pe32, 80, banner.length);
+        Files.write(ml, pe32);
+
+        Map<String, List<ToolInstallation>> detected = ToolDetector.detectInDirectory(tempDir);
+        assertTrue(detected.containsKey("link"), "16-bit DOS LINK.EXE must be detected");
+        assertTrue(detected.containsKey("ml"), "MASM 6.11 ML.EXE must be detected");
     }
 }

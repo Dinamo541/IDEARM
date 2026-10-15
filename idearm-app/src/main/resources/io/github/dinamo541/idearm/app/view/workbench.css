@@ -1,6 +1,6 @@
-/* IDEARM workbench. VS Code-inspired neutral surfaces with one shared palette for every window. */
-.workbench {
-    -fx-font-family: "Segoe UI";
+/* IDEARM workbench. VS Code Dark Modern / Dark+ ultra-fidelity surfaces and shared design system. */
+:root, .workbench {
+    -fx-font-family: "Segoe UI", "Segoe UI Variable Text", system-ui, sans-serif;
     -fx-font-size: 13px;
     -color-bg-default: #1f1f1f;
     -color-bg-subtle: #181818;
@@ -13,7 +13,8 @@
     -color-border-muted: #2b2b2b;
     -color-accent-emphasis: #0078d4;
     -color-accent-fg: #75beff;
-    -color-accent-subtle: #203c54;
+    -color-accent-subtle: #04395e;
+    -color-chart-6: #9cdcfe;
     -color-success-fg: #89d185;
     -color-success-emphasis: #388a34;
     -color-success-subtle: #233d25;
@@ -26,30 +27,39 @@
     -wb-editor: #1f1f1f;
     -wb-sidebar: #181818;
     -wb-rail: #181818;
-    -wb-input: #313131;
+    -wb-input: #282828;
     -wb-hover: #2a2d2e;
-    -wb-selection: #264f78;
+    -wb-selection: #04395e;
     -wb-current-line: #282828;
-    -wb-status: #181818;
+    -wb-status: #007acc;
+    -wb-status-fg: #ffffff;
+    -wb-status-debug: #cc6633;
     -wb-token-keyword: #569cd6;
     -wb-token-register: #9cdcfe;
     -wb-token-directive: #c586c0;
     -wb-token-number: #b5cea8;
     -wb-token-string: #ce9178;
-    -wb-token-comment: #7ca668;
+    -wb-token-comment: #6a9955;
     -wb-token-label: #dcdcaa;
-    -wb-icon-folder: #d7a64a;
+    -wb-icon-folder: #dcb67a;
+    -wb-icon-folder-open: #e5a00d;
     -fx-background-color: -wb-editor;
     -fx-text-fill: -color-fg-default;
+    -fx-base: #1f1f1f;
+    -fx-background: #1f1f1f;
+    -fx-control-inner-background: #1f1f1f;
 }
-.workbench.light {
+:root.light, .workbench.light {
+    -fx-base: #ffffff;
+    -fx-background: #ffffff;
+    -fx-control-inner-background: #ffffff;
     -color-bg-default: #ffffff;
     -color-bg-subtle: #f8f8f8;
     -color-bg-inset: #f0f0f0;
     -color-fg-default: #3b3b3b;
     -color-fg-muted: #616161;
     -color-fg-subtle: #727272;
-    -color-fg-emphasis: #ffffff;
+    -color-fg-emphasis: #181818;
     -color-border-default: #cecece;
     -color-border-muted: #e5e5e5;
     -color-accent-emphasis: #0078d4;
@@ -71,7 +81,9 @@
     -wb-hover: #e8e8e8;
     -wb-selection: #d6e8fa;
     -wb-current-line: #f4f4f4;
-    -wb-status: #f8f8f8;
+    -wb-status: #007acc;
+    -wb-status-fg: #ffffff;
+    -wb-status-debug: #cc6633;
     -wb-token-keyword: #0000ff;
     -wb-token-register: #0451a5;
     -wb-token-directive: #af00db;
@@ -80,6 +92,7 @@
     -wb-token-comment: #427a32;
     -wb-token-label: #795e26;
     -wb-icon-folder: #856300;
+    -wb-icon-folder-open: #b28500;
 }
 .workbench-shell { -fx-border-color: -color-border-default; -fx-border-width: 1; }
 
@@ -135,32 +148,119 @@
 .run-action .workbench-icon { -wb-icon-color: -color-success-fg; }
 .stop-action .workbench-icon { -wb-icon-color: -color-danger-fg; }
 
-/* Title bar: a quiet command center, then grouped execution and window actions. */
-.workbench-header { -fx-alignment: center-left; -fx-background-color: -wb-rail; -fx-border-color: transparent transparent -color-border-muted transparent; }
-.workbench .menu-bar, .workbench-toolbar { -fx-background-color: transparent; -fx-padding: 3 6; -fx-min-height: 40; -fx-pref-height: 40; }
-.workbench .menu-bar .menu { -fx-padding: 5 8; }
-.workbench .menu-bar .menu:hover, .workbench .menu-bar .menu:showing { -fx-background-color: -wb-hover; -fx-background-radius: 4; }
-.workbench-toolbar .button { -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 4 6; -fx-min-height: 27; }
-.workbench-toolbar .command-center { -fx-border-color: -color-border-default; -fx-background-color: -wb-input; -fx-text-fill: -color-fg-muted; -fx-pref-width: 290; -fx-min-width: 135; -fx-font-size: 12px; }
-.workbench-toolbar .command-center:hover { -fx-border-color: -color-fg-muted; }
+/* Title bar: a quiet centered command center, sleek menu bar and window actions. */
+.workbench-header {
+    -fx-alignment: center-left;
+    -fx-background-color: -wb-rail;
+    -fx-border-color: transparent transparent -color-border-muted transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-min-height: 38;
+    -fx-pref-height: 38;
+}
+.workbench .menu-bar, .workbench-toolbar {
+    -fx-background-color: transparent;
+    -fx-padding: 2 4;
+    -fx-min-height: 38;
+    -fx-pref-height: 38;
+}
+.workbench .menu-bar .menu {
+    -fx-padding: 4 8;
+}
+.workbench .menu-bar .menu:hover, .workbench .menu-bar .menu:showing {
+    -fx-background-color: -wb-hover;
+    -fx-background-radius: 4;
+}
+.workbench-toolbar .button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 4 6;
+    -fx-min-height: 26;
+    -fx-pref-height: 26;
+}
+.workbench-toolbar .button:hover {
+    -fx-background-color: -wb-hover;
+}
+.workbench-toolbar .command-center {
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-background-color: -wb-input;
+    -fx-text-fill: -color-fg-muted;
+    -fx-pref-width: 380;
+    -fx-min-width: 140;
+    -fx-font-size: 12px;
+    -fx-padding: 4 12;
+    -fx-alignment: center;
+    -fx-graphic-text-gap: 8;
+}
+.workbench-toolbar .command-center:hover {
+    -fx-background-color: -wb-hover;
+    -fx-border-color: #4a4a4a;
+    -fx-text-fill: -color-fg-default;
+}
+.workbench-toolbar .command-center:focused {
+    -fx-border-color: -color-accent-emphasis;
+}
 .workbench-toolbar .separator { -fx-padding: 0 3; }
-.workbench-toolbar .language-button { -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 6; }
-.title-logo { -fx-padding: 0 10; -fx-min-width: 44; }
+.workbench-toolbar .language-button { -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 4 6; }
+.title-logo { -fx-padding: 0 8 0 10; -fx-min-width: 40; }
 .window-controls { -fx-alignment: center-right; -fx-min-width: 176; }
-.workbench .window-button { -fx-background-color: transparent; -fx-border-color: transparent; -fx-background-radius: 0; -fx-border-radius: 0; -fx-min-width: 44; -fx-pref-width: 44; -fx-max-width: 44; -fx-min-height: 40; -fx-pref-height: 40; -fx-padding: 10 14; }
+.workbench .window-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-min-width: 46;
+    -fx-pref-width: 46;
+    -fx-max-width: 46;
+    -fx-min-height: 38;
+    -fx-pref-height: 38;
+    -fx-padding: 9 14;
+}
 .workbench .window-button:hover { -fx-background-color: -wb-hover; }
-.workbench .window-close:hover, .workbench .window-close:pressed { -fx-background-color: #c42b1c; }
+.workbench .window-close:hover, .workbench .window-close:pressed { -fx-background-color: #e81123; }
 .window-close:hover .workbench-icon { -wb-icon-color: white; }
-.workbench-header .window-button:focused { -fx-border-color: -color-accent-emphasis; -fx-border-insets: 3; }
+.workbench-header .window-button:focused { -fx-border-color: -color-accent-emphasis; -fx-border-insets: 2; }
 
 /* Navigation: full-height active markers and compact, readable tree rows. */
-.activity-bar { -fx-min-width: 48; -fx-pref-width: 48; -fx-max-width: 48; -fx-padding: 0; -fx-spacing: 2; -fx-background-color: -wb-rail; -fx-border-color: transparent -color-border-muted transparent transparent; }
-.workbench .activity-button { -fx-background-color: transparent; -fx-background-radius: 0; -fx-border-radius: 0; -fx-border-color: transparent; -fx-border-width: 0 0 0 2; -fx-min-width: 47; -fx-max-width: 47; -fx-pref-height: 48; -fx-min-height: 48; -fx-padding: 12 11; }
-.activity-button .workbench-icon { -wb-icon-color: -color-fg-muted; }
-.workbench .activity-button:hover { -fx-background-color: -wb-hover; }
-.workbench .activity-button:selected { -fx-border-color: -color-accent-emphasis; }
-.activity-button:selected .workbench-icon { -wb-icon-color: -color-fg-default; }
+.activity-bar {
+    -fx-min-width: 48;
+    -fx-pref-width: 48;
+    -fx-max-width: 48;
+    -fx-padding: 0;
+    -fx-spacing: 0;
+    -fx-background-color: -wb-rail;
+    -fx-border-color: transparent -color-border-muted transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+.workbench .activity-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 2;
+    -fx-min-width: 48;
+    -fx-max-width: 48;
+    -fx-pref-height: 48;
+    -fx-min-height: 48;
+    -fx-padding: 12 11;
+}
+.activity-button .workbench-icon { -wb-icon-color: rgba(255, 255, 255, 0.45); }
+.workbench.light .activity-button .workbench-icon { -wb-icon-color: #616161; }
+.workbench .activity-button:hover { -fx-background-color: transparent; }
+.workbench .activity-button:hover .workbench-icon { -wb-icon-color: rgba(255, 255, 255, 0.85); }
+.workbench.light .activity-button:hover .workbench-icon { -wb-icon-color: #1f1f1f; }
+.workbench .activity-button:selected {
+    -fx-border-color: -color-accent-emphasis;
+    -fx-border-width: 0 0 0 2;
+    -fx-background-color: transparent;
+}
+.activity-button:selected .workbench-icon { -wb-icon-color: #ffffff; }
+.workbench.light .activity-button:selected .workbench-icon { -wb-icon-color: -color-fg-default; }
 .workbench .activity-button:focused { -fx-background-color: -wb-hover; }
+.workbench-shell:compact-height .activity-button { -fx-min-height: 40; -fx-pref-height: 40; -fx-padding: 8 11; }
 .workbench .split-pane { -fx-background-color: -wb-editor; -fx-padding: 0; }
 .workbench .split-pane-divider { -fx-background-color: -color-border-muted; -fx-padding: 0 1; }
 .workbench .split-pane:vertical > .split-pane-divider { -fx-padding: 1 0; }
@@ -168,17 +268,34 @@
 .workbench .split-pane-divider .horizontal-grabber, .workbench .split-pane-divider .vertical-grabber { -fx-background-color: transparent; -fx-padding: 0; }
 .sidebar, .project-explorer, .document-outline { -fx-background-color: -wb-sidebar; }
 .sidebar .tree-view, .sidebar .list-view { -fx-background-color: -wb-sidebar; -fx-border-width: 0; -fx-padding: 0; }
-.sidebar .tree-cell, .sidebar .list-cell { -fx-background-color: transparent; -fx-padding: 4 10; -fx-text-fill: -color-fg-default; }
+.sidebar .tree-cell, .sidebar .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 3 8;
+    -fx-text-fill: -color-fg-default;
+    -fx-min-height: 24;
+    -fx-pref-height: 24;
+    -fx-background-radius: 4;
+    -fx-background-insets: 1 4;
+}
 .sidebar .tree-cell:filled:hover, .sidebar .list-cell:filled:hover { -fx-background-color: -wb-hover; }
-.sidebar .tree-cell:filled:selected, .sidebar .list-cell:filled:selected { -fx-background-color: -wb-selection; }
-.workbench .sidebar-heading { -fx-text-fill: -color-fg-muted; -fx-font-size: 11px; -fx-font-weight: normal; -fx-graphic-text-gap: 8; }
-.explorer-header { -fx-padding: 10 8 6 14; -fx-spacing: 8; }
-.document-outline > .sidebar-heading { -fx-padding: 9 12; }
-.file-icon-assembly .workbench-icon { -wb-icon-color: -color-accent-fg; }
+.sidebar .tree-cell:filled:selected, .sidebar .list-cell:filled:selected {
+    -fx-background-color: -wb-selection;
+    -fx-text-fill: #ffffff;
+}
+.workbench .sidebar-heading {
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-graphic-text-gap: 6;
+}
+.explorer-header { -fx-padding: 8 8 4 12; -fx-spacing: 6; }
+.document-outline > .sidebar-heading { -fx-padding: 8 12; }
+.file-icon-assembly .workbench-icon { -wb-icon-color: #4fc1ff; }
 .file-icon-include .workbench-icon { -wb-icon-color: -wb-token-directive; }
-.file-icon-config .workbench-icon { -wb-icon-color: -wb-token-label; }
+.file-icon-config .workbench-icon { -wb-icon-color: -wb-icon-folder-open; }
 .file-icon-chip .workbench-icon { -wb-icon-color: -wb-token-register; }
 .file-icon-folder .workbench-icon { -wb-icon-color: -wb-icon-folder; }
+.file-icon-folder-open .workbench-icon { -wb-icon-color: -wb-icon-folder-open; }
 .file-icon-file .workbench-icon { -wb-icon-color: -color-fg-muted; }
 .outline-badge { -fx-font-family: "Consolas"; -fx-font-size: 10px; -fx-padding: 1 4; -fx-background-radius: 2; -fx-background-color: -wb-hover; }
 .workbench .outline-procedure { -fx-text-fill: -wb-token-label; }
@@ -187,25 +304,87 @@
 
 /* Editors and nested panel tabs keep different levels of emphasis. */
 .workbench .tab-pane > .tab-header-area { -fx-padding: 0; }
-.workbench .tab-pane > .tab-header-area > .tab-header-background { -fx-background-color: -wb-sidebar; }
-.workbench .tab-pane > .tab-header-area > .headers-region > .tab { -fx-background-color: transparent; -fx-background-radius: 0; -fx-padding: 7 12; -fx-border-color: transparent; -fx-border-width: 0 0 1 0; }
-.workbench .tab-pane > .tab-header-area > .headers-region > .tab:selected { -fx-border-color: transparent transparent -color-accent-emphasis transparent; }
+.workbench .tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: -wb-sidebar;
+    -fx-border-color: transparent transparent -color-border-muted transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.workbench .tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-padding: 6 12;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2 0;
+}
+.workbench .tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-border-color: transparent transparent -color-accent-emphasis transparent;
+}
 .workbench .tab-pane > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-hover; }
-.workbench .editor-tabs > .tab-header-area > .headers-region > .tab { -fx-background-color: -wb-sidebar; -fx-border-color: transparent -color-border-muted -color-border-muted transparent; -fx-border-width: 2 1 1 0; -fx-padding: 8 15; }
-.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:selected { -fx-background-color: -wb-editor; -fx-border-color: -color-accent-emphasis -color-border-muted transparent transparent; }
-.workbench .tab .tab-label { -fx-font-size: 12px; -fx-text-fill: -color-fg-muted; }
-.workbench .tab:selected .tab-label { -fx-text-fill: -color-fg-default; }
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: -wb-sidebar;
+    -fx-border-color: transparent -color-border-muted -color-border-muted transparent;
+    -fx-border-width: 2 1 1 0;
+    -fx-padding: 7 14;
+}
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: -wb-editor;
+    -fx-border-color: -color-accent-emphasis -color-border-muted transparent transparent;
+    -fx-border-width: 2 1 0 0;
+}
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-hover; }
+.workbench .editor-tabs > .tab-header-area > .headers-region > .tab:selected:hover { -fx-background-color: -wb-editor; }
+.workbench .tab .tab-label { -fx-font-size: 12.5px; -fx-text-fill: -color-fg-muted; }
+.workbench .tab:selected .tab-label { -fx-text-fill: -color-fg-emphasis; }
 .workbench .tab .focus-indicator { -fx-border-width: 0; }
-.workbench .tab:focused .focus-indicator { -fx-border-width: 1; -fx-border-color: -color-accent-fg; -fx-border-insets: -3; }
-.workbench .breadcrumbs { -fx-padding: 0; -fx-font-size: 12px; -fx-text-fill: -color-fg-muted; }
-.editor-breadcrumb-bar { -fx-padding: 1 10 1 18; -fx-background-color: -wb-editor; }
+.workbench .tab:focused .focus-indicator { -fx-border-width: 1; -fx-border-color: -color-accent-fg; -fx-border-insets: -2; }
+.workbench .breadcrumbs { -fx-padding: 1 5; -fx-font-size: 11.5px; -fx-text-fill: -color-fg-muted; -fx-background-radius: 3; }
+.workbench .breadcrumbs:hover { -fx-background-color: -wb-hover; -fx-text-fill: -color-fg-default; }
+.editor-breadcrumb-bar {
+    -fx-padding: 2 14;
+    -fx-background-color: -wb-editor;
+    -fx-border-color: transparent transparent -color-border-muted transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-min-height: 24;
+    -fx-pref-height: 24;
+}
 .workbench .minimap-toggle { -fx-padding: 3 6; }
 .workbench .minimap-toggle:selected { -fx-background-color: -wb-hover; }
 .minimap-toggle:selected .workbench-icon { -wb-icon-color: -color-accent-fg; }
 .editor-area { -fx-background-color: -wb-editor; }
+
+/* Bottom Panel: Uppercase aesthetic, 2px bottom accent indicator, muted headers */
 .bottom-panel { -fx-background-color: -wb-editor; }
+.bottom-panel > .tab-header-area { -fx-padding: 0; }
+.bottom-panel > .tab-header-area > .tab-header-background {
+    -fx-background-color: -wb-sidebar;
+    -fx-border-color: transparent transparent -color-border-muted transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.bottom-panel > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-padding: 5 10;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2 0;
+}
+.bottom-panel > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -color-accent-emphasis transparent;
+    -fx-border-width: 0 0 2 0;
+}
+.bottom-panel > .tab-header-area > .headers-region > .tab:hover {
+    -fx-background-color: -wb-hover;
+}
+.bottom-panel .tab .tab-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-fg-muted;
+}
+.bottom-panel .tab:selected .tab-label {
+    -fx-text-fill: -color-fg-emphasis;
+}
 .bottom-panel .tab .workbench-icon { -wb-icon-color: -color-fg-muted; }
-.bottom-panel .tab:selected .workbench-icon { -wb-icon-color: -color-fg-default; }
+.bottom-panel .tab:selected .workbench-icon { -wb-icon-color: -color-fg-emphasis; }
 .workbench .text-area, .workbench .text-area .content { -fx-background-color: -wb-editor; -fx-background-radius: 0; }
 .bottom-panel .text-area { -fx-border-width: 0; }
 .bottom-panel .text-area .content { -fx-padding: 10 14; }
@@ -230,67 +409,206 @@
 .panel-empty .workbench-icon { -wb-icon-color: -color-fg-muted; }
 .workbench .empty-description { -fx-font-size: 12px; -fx-text-fill: -color-fg-muted; -fx-text-alignment: center; }
 .debugger-panel { -fx-background-color: -wb-editor; }
-.debug-section { -fx-padding: 10; -fx-spacing: 7; }
+.debugger-split-pane { -fx-background-color: -wb-editor; -fx-padding: 0; }
+.debugger-split-pane > .split-pane-divider { -fx-background-color: -color-border-muted; -fx-padding: 0 1; }
+.debugger-split-pane > .split-pane-divider:hover { -fx-background-color: -color-accent-emphasis; }
+.debugger-panel .debug-section { -fx-padding: 6 8; -fx-spacing: 5; }
 .workbench .debug-heading { -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; -fx-font-weight: bold; }
-.debug-controls { -fx-hgap: 3; -fx-vgap: 3; }
-.workbench .debug-controls .button { -fx-padding: 5 7; }
+.debug-controls { -fx-hgap: 2; -fx-vgap: 2; }
+.workbench .debug-controls .button { -fx-padding: 4 6; -fx-min-height: 26; -fx-pref-height: 26; }
 .workbench .debug-controls .success .workbench-icon { -wb-icon-color: -color-success-fg; }
 .workbench .debug-controls .danger .workbench-icon { -wb-icon-color: -color-danger-fg; }
 .debug-flags { -fx-hgap: 3; -fx-vgap: 3; }
-.workbench .debug-flag { -fx-font-family: "Consolas"; -fx-font-size: 11px; -fx-padding: 2 4; }
+.debug-flag {
+    -fx-font-family: "Consolas";
+    -fx-font-size: 11px;
+    -fx-padding: 2 6;
+    -fx-background-color: -color-bg-subtle;
+    -fx-text-fill: -color-fg-muted;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-border-width: 1.5;
+    -fx-border-color: transparent;
+    -fx-alignment: center;
+}
+.debug-flag.active {
+    -fx-background-color: -color-accent-emphasis;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+.debug-flag.changed {
+    -fx-border-color: -color-danger-emphasis;
+}
+.debugger-tab-pane { -fx-background-color: -wb-editor; }
+.debugger-tab-pane > .tab-header-area { -fx-padding: 0; }
+.debugger-tab-pane > .tab-header-area > .tab-header-background { -fx-background-color: -wb-sidebar; }
+.debugger-tab-pane > .tab-header-area > .headers-region > .tab { -fx-background-color: transparent; -fx-background-radius: 0; -fx-padding: 3 4; -fx-graphic-text-gap: 4; -fx-border-color: transparent; -fx-border-width: 0 0 2 0; }
+.debugger-tab-pane > .tab-header-area > .headers-region > .tab:selected { -fx-background-color: -wb-editor; -fx-border-color: transparent transparent -color-accent-emphasis transparent; }
+.debugger-tab-pane > .tab-header-area > .headers-region > .tab:hover { -fx-background-color: -wb-hover; }
+.debugger-tab-pane .tab .tab-label { -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; }
+.debugger-tab-pane .tab:selected .tab-label { -fx-text-fill: -color-fg-emphasis; -fx-font-weight: bold; }
+.debug-register-table .column-header-background { -fx-background-color: -wb-sidebar; }
+.debug-register-table .column-header { -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-muted transparent; -fx-padding: 4 6; }
+.debug-register-table .column-header .label { -fx-alignment: center-left; -fx-font-size: 11px; -fx-font-weight: normal; -fx-text-fill: -color-fg-muted; }
+.debug-register-table .table-cell { -fx-padding: 3 6; -fx-font-family: "Consolas"; -fx-font-size: 11.5px; }
 .panel-toolbar { -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-muted transparent; -fx-padding: 5 12; }
 .console-input { -fx-padding: 8 12; -fx-background-color: -wb-editor; -fx-border-color: -color-border-muted transparent transparent transparent; }
-.workbench .console-input .text-field { -fx-background-color: -wb-editor; }
-.workbench .terminal-badge { -fx-font-size: 10px; -fx-background-radius: 3; }
+.terminal-badge {
+    -fx-font-size: 10px;
+    -fx-background-radius: 3;
+    -fx-padding: 2 6;
+    -fx-background-color: -color-bg-subtle;
+    -fx-text-fill: -color-fg-muted;
+}
+.terminal-badge.running {
+    -fx-background-color: -color-success-subtle;
+    -fx-text-fill: -color-success-fg;
+}
 
-/* Status remains visually separate from code, without competing with syntax colors. */
-.workbench .status-bar { -fx-background-color: -wb-status; -fx-border-color: -color-border-muted transparent transparent transparent; -fx-padding: 2 10; -fx-min-height: 25; -fx-pref-height: 25; }
-.workbench .status-bar .label { -fx-text-fill: -color-fg-muted; -fx-font-size: 11px; -fx-graphic-text-gap: 6; -fx-alignment: center-left; }
-.workbench .status-bar .workbench-icon { -wb-icon-color: -color-fg-muted; }
-.workbench .status-bar:debugging { -wb-status: -color-warning-subtle; }
-.workbench .status-bar .status-message { -fx-text-fill: -color-fg-default; }
-.workbench .scroll-bar { -fx-background-color: transparent; -fx-pref-width: 12; -fx-pref-height: 12; }
-.workbench .scroll-bar .thumb { -fx-background-color: -color-fg-muted; -fx-opacity: 0.32; -fx-background-radius: 0; -fx-background-insets: 2; }
-.workbench .scroll-bar .thumb:hover, .workbench .scroll-bar .thumb:pressed { -fx-opacity: 0.6; }
+/* Status Bar: The iconic VS Code signature surface with white typography and interactive pills. */
+.workbench .status-bar {
+    -fx-background-color: -wb-status;
+    -fx-border-color: transparent;
+    -fx-padding: 1 8;
+    -fx-min-height: 24;
+    -fx-pref-height: 24;
+}
+.workbench .status-bar .label {
+    -fx-text-fill: -wb-status-fg;
+    -fx-font-size: 11.5px;
+    -fx-graphic-text-gap: 5;
+    -fx-alignment: center-left;
+}
+.workbench .status-bar .workbench-icon {
+    -wb-icon-color: -wb-status-fg;
+}
+.workbench .status-bar:debugging {
+    -wb-status: -wb-status-debug;
+}
+.workbench .status-bar .status-message {
+    -fx-text-fill: -wb-status-fg;
+    -fx-font-size: 11.5px;
+}
+.workbench .status-bar .status-item-pill {
+    -fx-padding: 2 7;
+    -fx-background-radius: 3;
+    -fx-cursor: hand;
+}
+.workbench .status-bar .status-item-pill:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.18);
+}
+.workbench .status-bar .separator .line {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+/* Scrollbars: slim, floating, unobtrusive overlay scrollbars like VS Code Monaco. */
+.workbench .scroll-bar {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10;
+    -fx-pref-height: 10;
+}
+.workbench .scroll-bar .thumb {
+    -fx-background-color: -color-fg-muted;
+    -fx-opacity: 0.25;
+    -fx-background-radius: 3;
+    -fx-background-insets: 1;
+}
+.workbench .scroll-bar .thumb:hover, .workbench .scroll-bar .thumb:pressed {
+    -fx-opacity: 0.65;
+}
 .workbench .scroll-bar .increment-button, .workbench .scroll-bar .decrement-button { -fx-padding: 0; }
 .workbench .scroll-bar .increment-arrow, .workbench .scroll-bar .decrement-arrow { -fx-padding: 0; -fx-shape: ""; }
 .workbench .scroll-pane, .workbench .scroll-pane > .viewport { -fx-background-color: -wb-editor; -fx-border-width: 0; }
 
 /* Welcome screen: useful entry points with visible keyboard shortcuts. */
-.editor-welcome { -fx-padding: 40 44; -fx-spacing: 24; -fx-max-width: 720; }
-.welcome-brand { -fx-spacing: 16; -fx-alignment: center-left; }
-.workbench .welcome-title { -fx-font-size: 34px; -fx-font-weight: normal; -fx-text-fill: -color-fg-default; }
-.workbench .welcome-hint { -fx-text-fill: -color-fg-muted; -fx-font-size: 15px; }
-.workbench .welcome-section-title { -fx-font-size: 17px; -fx-text-fill: -color-fg-default; -fx-padding: 5 0; }
-.workbench .welcome-action { -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 10 12; -fx-alignment: center-left; }
+.editor-welcome { -fx-padding: 32 24; -fx-spacing: 22; -fx-max-width: 780; }
+.welcome-brand { -fx-spacing: 18; -fx-alignment: center-left; }
+.workbench .welcome-title { -fx-font-size: 32px; -fx-font-weight: normal; -fx-text-fill: -color-fg-emphasis; }
+.workbench .welcome-hint { -fx-text-fill: -color-fg-muted; -fx-font-size: 14px; }
+.workbench .welcome-section-title { -fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: -color-fg-default; -fx-padding: 6 0 4 0; }
+.workbench .welcome-action {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 7 10;
+    -fx-alignment: center-left;
+    -fx-background-radius: 4;
+}
 .workbench .welcome-action:hover { -fx-background-color: -wb-hover; }
 .workbench .welcome-action:focused { -fx-border-color: -color-accent-emphasis; }
-.workbench .welcome-action .label { -fx-text-fill: -color-accent-fg; -fx-font-size: 14px; }
+.workbench .welcome-action .label { -fx-text-fill: -color-accent-fg; -fx-font-size: 13.5px; }
 .welcome-action .workbench-icon { -wb-icon-color: -color-accent-fg; }
-.workbench .keycap { -fx-text-fill: -color-fg-muted; -fx-font-size: 11px; -fx-font-family: "Segoe UI"; -fx-background-color: -wb-sidebar; -fx-border-color: -color-border-default; -fx-border-radius: 3; -fx-background-radius: 3; -fx-padding: 2 6; }
+.workbench .keycap {
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 11px;
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: -wb-sidebar;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-padding: 2 6;
+}
 .workbench .welcome-footer { -fx-text-fill: -color-fg-muted; -fx-font-size: 12px; -fx-padding: 12 0 0 0; }
 
 /* Form windows and overlays have a shared title, content and footer rhythm. */
 .workbench-dialog { -fx-background-color: -wb-editor; }
-.dialog-heading { -fx-padding: 20 24 16 24; -fx-alignment: center-left; -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-muted transparent; }
+.dialog-heading { -fx-padding: 18 24 14 24; -fx-alignment: center-left; -fx-background-color: -wb-sidebar; -fx-border-color: transparent transparent -color-border-muted transparent; }
 .dialog-heading .workbench-icon { -wb-icon-color: -color-accent-fg; }
-.workbench .dialog-title { -fx-font-size: 20px; -fx-font-weight: normal; }
+.workbench .dialog-title { -fx-font-size: 19px; -fx-font-weight: normal; }
 .workbench .dialog-description { -fx-text-fill: -color-fg-muted; -fx-font-size: 12px; }
 .form-grid { -fx-padding: 20 24; -fx-hgap: 20; -fx-vgap: 12; }
 .workbench .form-label { -fx-font-weight: normal; -fx-text-fill: -color-fg-muted; }
 .dialog-footer { -fx-background-color: -wb-sidebar; -fx-border-color: -color-border-muted transparent transparent transparent; -fx-padding: 12 24; -fx-spacing: 8; }
 .workbench .dialog-footer .button { -fx-min-width: 90; }
 .dialog-body { -fx-padding: 20 24; -fx-spacing: 12; }
-.command-palette, .recent-picker { -fx-border-color: -color-border-default; -fx-border-width: 1; -fx-background-color: -wb-editor; -fx-padding: 20 24; -fx-spacing: 12; }
-.command-palette .text-field, .recent-picker .text-field { -fx-padding: 9 10; -fx-font-size: 13px; }
-.command-palette .list-view, .recent-picker .list-view { -fx-border-width: 0; }
-.command-palette .list-cell { -fx-padding: 4 10; }
-.workbench .command-category { -fx-text-fill: -color-fg-muted; -fx-font-size: 11px; -fx-padding: 2 5; }
+
+/* Command palette & Quick Pick: Floating elevated card with subtle border and deep shadow. */
+.command-palette, .recent-picker {
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-background-color: -wb-sidebar;
+    -fx-padding: 12 16 16 16;
+    -fx-spacing: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.65), 24, 0.25, 0, 8);
+}
+.command-palette .text-field, .recent-picker .text-field {
+    -fx-background-color: -wb-input;
+    -fx-border-color: -color-border-default;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 7 10;
+    -fx-font-size: 13px;
+    -fx-text-fill: -color-fg-default;
+}
+.command-palette .text-field:focused, .recent-picker .text-field:focused {
+    -fx-border-color: -color-accent-emphasis;
+}
+.command-palette .list-view, .recent-picker .list-view { -fx-border-width: 0; -fx-background-color: transparent; }
+.command-palette .list-cell, .recent-picker .list-cell {
+    -fx-padding: 5 10;
+    -fx-background-radius: 4;
+    -fx-background-color: transparent;
+}
+.command-palette .list-cell:filled:hover, .recent-picker .list-cell:filled:hover {
+    -fx-background-color: -wb-hover;
+}
+.command-palette .list-cell:filled:selected, .recent-picker .list-cell:filled:selected {
+    -fx-background-color: -wb-selection;
+    -fx-text-fill: #ffffff;
+}
+.workbench .command-category {
+    -fx-text-fill: -color-fg-muted;
+    -fx-font-size: 11px;
+    -fx-padding: 1 5;
+    -fx-background-color: -wb-hover;
+    -fx-background-radius: 3;
+}
 .workbench .picker-hint { -fx-text-fill: -color-fg-muted; -fx-font-size: 11px; -fx-padding: 6 4 0 4; }
 .workbench .recent-heading { -fx-font-size: 16px; -fx-font-weight: normal; }
 .workbench .recent-filter { -fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 4 10; -fx-font-size: 12px; }
 .workbench .recent-filter:selected { -fx-background-color: -wb-selection; -fx-text-fill: -color-accent-fg; }
-.recent-picker .list-cell { -fx-padding: 8 10; }
 .workbench .recent-name { -fx-font-size: 13px; -fx-font-weight: normal; }
 .workbench .recent-path { -fx-font-size: 11px; -fx-text-fill: -color-fg-muted; }
 .workbench .recent-kind { -fx-font-size: 10px; -fx-text-fill: -color-fg-muted; -fx-padding: 2 5; -fx-background-radius: 3; -fx-background-color: -wb-sidebar; }
@@ -340,3 +658,57 @@
 .workbench .list-view:focused .list-cell:filled:focused, .workbench .tree-view:focused .tree-cell:filled:focused, .workbench .table-view:focused .table-row-cell:filled:focused { -fx-border-color: -color-accent-fg; }
 
 .terminal-prompt .workbench-icon { -wb-icon-color: -color-accent-fg; }
+
+/* Doctor dialog status cell styles */
+.workbench .table-cell.tool-ready {
+    -fx-text-fill: -color-success-fg;
+}
+.workbench .table-cell.tool-unusable {
+    -fx-text-fill: -color-danger-fg;
+    -fx-font-weight: bold;
+}
+
+/* Diagnostic severity table cell styles */
+.workbench .table-cell.diag-error {
+    -fx-text-fill: -color-danger-fg;
+    -fx-font-weight: bold;
+}
+.workbench .table-cell.diag-warning {
+    -fx-text-fill: -color-warning-fg;
+}
+.workbench .table-cell.diag-info {
+    -fx-text-fill: -color-accent-fg;
+}
+
+/* Debugger register and disassembly row styles */
+.workbench .table-cell.reg-changed,
+.debug-register-table .table-cell.reg-changed {
+    -fx-text-fill: -color-warning-fg;
+    -fx-font-weight: bold;
+}
+.workbench .list-cell.disasm-current,
+.debug-section .list-cell.disasm-current {
+    -fx-background-color: -color-warning-subtle;
+    -fx-font-weight: bold;
+}
+
+/* Academic Center flag pill styles */
+.academic-flag-pill {
+    -fx-background-color: -color-bg-subtle;
+    -fx-background-radius: 4px;
+    -fx-padding: 4px 8px;
+    -fx-min-width: 32px;
+}
+.academic-flag-name {
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+.academic-flag-eff {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+.academic-flag-eff.eff-modified { -fx-text-fill: -color-warning-fg; }
+.academic-flag-eff.eff-set { -fx-text-fill: -color-success-fg; }
+.academic-flag-eff.eff-cleared { -fx-text-fill: -color-accent-fg; }
+.academic-flag-eff.eff-undefined { -fx-text-fill: -color-danger-fg; }
+.academic-flag-eff.eff-unaffected { -fx-text-fill: -color-fg-muted; }
